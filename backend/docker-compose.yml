@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres
+    container_name: postgres-meuatelie
+    environment:
+      POSTGRES_DB: "meu_atelie"
+      POSTGRES_PASSWORD: "root"
+    ports:
+      - "5432:5432"
+    volumes:
+      - meuatelie_data:/var/lib/postgres
+
+volumes:
+  meuatelie_data:
