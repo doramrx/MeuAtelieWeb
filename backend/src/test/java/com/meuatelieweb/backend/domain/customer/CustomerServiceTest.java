@@ -1,10 +1,12 @@
 package com.meuatelieweb.backend.domain.customer;
 
 import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,6 +17,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static com.meuatelieweb.backend.domain.customer.CustomerCreator.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,22 +34,22 @@ class CustomerServiceTest {
     private CustomerService customerService;
 
     @Mock
-    private CustomerRepository customerRepository;
+    private CustomerRepository customerRepositoryMock;
 
     @Mock
-    private CustomerConverter customerConverter;
+    private CustomerConverter customerConverterMock;
+
+    private void mockConverterToCustomerDTO(CustomerDTO customerDTO) {
+        when(customerConverterMock.toCustomerDTO(any(Customer.class))).thenReturn(customerDTO);
+    }
 
     @DisplayName("Test findAll method")
     @Nested
     class FindAllTests {
 
         private void mockRepositoryFindAll(PageImpl<Customer> pageable) {
-            when(customerRepository.findAll(any(Specification.class), any(PageRequest.class)))
+            when(customerRepositoryMock.findAll(any(Specification.class), any(PageRequest.class)))
                     .thenReturn(pageable);
-        }
-
-        private void mockConverterToCustomerDTO(CustomerDTO customerDTO, Customer validCustomers) {
-            when(customerConverter.toCustomerDTO(validCustomers)).thenReturn(customerDTO);
         }
 
         @Test
@@ -58,7 +62,7 @@ class CustomerServiceTest {
 
             CustomerDTO customerDTO = createValidCustomerDTO(validCustomers.get(0).getId());
 
-            this.mockConverterToCustomerDTO(customerDTO, validCustomers.get(0));
+            mockConverterToCustomerDTO(customerDTO);
 
             List<CustomerDTO> customerList = customerService.findAll(
                     pageable.getPageable(), null, null, null, null
@@ -83,6 +87,51 @@ class CustomerServiceTest {
 
             assertNotNull(customerList);
             assertTrue(customerList.isEmpty());
+        }
+    }
+
+    @DisplayName("Test findById method")
+    @Nested
+    class FindByIdTests {
+        
+        private void mockRepositoryFindById(){
+            BDDMockito.when(customerRepositoryMock.findById(any(UUID.class)))
+                    .thenReturn(Optional.of(createValidCustomer()));
+        }
+
+        @Test
+        @DisplayName("findById returns customer when successful")
+        void findById_ReturnsCustomer_WhenSuccessful() {
+            CustomerDTO customerDTO = createValidCustomerDTO(UUID.randomUUID());
+
+            this.mockRepositoryFindById();
+
+            mockConverterToCustomerDTO(customerDTO);
+
+            CustomerDTO customerFound = customerService.findById(UUID.randomUUID());
+
+            assertNotNull(customerFound);
+            assertEquals(customerDTO, customerFound);
+        }
+
+        @Test
+        @DisplayName("findById throws EntityNotFoundException when customer is not found")
+        void findById_ThrowsEntityNotFoundException_WhenCustomerIsNotFound() {
+            BDDMockito.when(customerRepositoryMock.findById(any(UUID.class)))
+                    .thenReturn(Optional.empty());
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> customerService.findById(UUID.randomUUID()));
+        }
+
+        @Test
+        @DisplayName("findById throws EntityNotFoundException when id customer is null")
+        void findById_ThrowsEntityNotFoundException_WhenIdCustomerIsNull() {
+            BDDMockito.when(customerRepositoryMock.findById(null))
+                    .thenReturn(Optional.empty());
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> customerService.findById(null));
         }
     }
 }
