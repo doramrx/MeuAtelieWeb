@@ -17,7 +17,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Tests for Customer Service")
 class CustomerServiceTest {
@@ -128,12 +126,9 @@ class CustomerServiceTest {
         }
 
         @Test
-        @DisplayName("findById throws EntityNotFoundException when id customer is null")
-        void findById_ThrowsEntityNotFoundException_WhenIdCustomerIsNull() {
-            BDDMockito.when(customerRepositoryMock.findById(null))
-                    .thenReturn(Optional.empty());
-
-            assertThrows(EntityNotFoundException.class,
+        @DisplayName("findById throws IllegalArgumentException when id customer is null")
+        void findById_ThrowsIllegalArgumentException_WhenIdCustomerIsNull() {
+            assertThrows(IllegalArgumentException.class,
                     () -> customerService.findById(null));
         }
     }
@@ -251,15 +246,14 @@ class CustomerServiceTest {
         @Test
         @DisplayName("updateCustomer throws IllegalArgumentException when customer is null")
         void updateCustomer_ThrowsIllegalArgumentException_WhenCustomerIsNull() {
-
             assertThrows(IllegalArgumentException.class,
                     () -> customerService.updateCustomer(UUID.randomUUID(), null));
         }
 
         @Test
-        @DisplayName("updateCustomer throws EntityNotFoundException when customer id is null")
-        void updateCustomer_ThrowsEntityNotFoundException_WhenCustomerIdIsNull() {
-            assertThrows(EntityNotFoundException.class,
+        @DisplayName("updateCustomer throws IllegalArgumentException when customer id is null")
+        void updateCustomer_ThrowsIllegalArgumentException_WhenCustomerIdIsNull() {
+            assertThrows(IllegalArgumentException.class,
                     () -> customerService.updateCustomer(null, createValidUpdateCustomerDTO()));
         }
 

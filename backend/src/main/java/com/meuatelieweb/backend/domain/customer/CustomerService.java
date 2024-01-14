@@ -4,6 +4,7 @@ import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.UpdateCustomerDTO;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
@@ -28,19 +29,17 @@ public class CustomerService {
         return repository.findAll(specification, pageable).map(converter::toCustomerDTO);
     }
 
-    public CustomerDTO findById(UUID id) {
+    public CustomerDTO findById(@NonNull UUID id) {
         return repository.findById(id)
                 .map(converter::toCustomerDTO)
                 .orElseThrow(() -> new EntityNotFoundException("The given user does not exist"));
     }
 
     @Transactional
-    public CustomerDTO addCustomer(SaveCustomerDTO saveCustomerDTO) {
-
-        if (saveCustomerDTO == null) {
-            throw new IllegalArgumentException("Customer cannot be null");
-        }
-
+    public CustomerDTO addCustomer(
+            @NonNull
+            SaveCustomerDTO saveCustomerDTO
+    ) {
         this.validateSavingCustomerDTO(saveCustomerDTO);
 
         Customer customer = Customer.builder()
@@ -76,11 +75,11 @@ public class CustomerService {
     }
 
     @Transactional
-    public CustomerDTO updateCustomer(UUID id, UpdateCustomerDTO updateCustomerDTO) {
-
-        if (updateCustomerDTO == null) {
-            throw new IllegalArgumentException("Customer cannot be null");
-        }
+    public CustomerDTO updateCustomer(
+            @NonNull
+            UUID id,
+            @NonNull
+            UpdateCustomerDTO updateCustomerDTO) {
 
         Customer customer = repository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new EntityNotFoundException("The given user does not exist or is already inactive"));
@@ -107,12 +106,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public void deleteCustomer(UUID id) {
-
-        if (id == null) {
-            throw new IllegalArgumentException("The id cannot be null for delete operation");
-        }
-
+    public void deleteCustomer(@NonNull UUID id) {
         if (!repository.existsByIdAndIsActiveTrue(id)) {
             throw new EntityNotFoundException("The given customer does not exist or is already inactive");
         }
