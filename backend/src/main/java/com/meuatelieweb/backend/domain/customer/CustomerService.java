@@ -78,6 +78,10 @@ public class CustomerService {
     @Transactional
     public CustomerDTO updateCustomer(UUID id, UpdateCustomerDTO updateCustomerDTO) {
 
+        if (updateCustomerDTO == null) {
+            throw new IllegalArgumentException("Customer cannot be null");
+        }
+
         Customer customer = repository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new EntityNotFoundException("The given user does not exist or is already inactive"));
 

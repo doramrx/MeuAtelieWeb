@@ -2,6 +2,7 @@ package com.meuatelieweb.backend.domain.customer;
 
 import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
+import com.meuatelieweb.backend.domain.customer.dto.UpdateCustomerDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -215,6 +216,88 @@ class CustomerServiceTest {
 
             assertThrows(DuplicateKeyException.class,
                     () -> customerService.addCustomer(createValidSaveCustomerDTO()));
+        }
+    }
+
+    @DisplayName("Test updateCustomer method")
+    @Nested
+    class UpdateCustomerTests {
+
+        private void mockRepositoryFindByIdAndIsActiveTrue() {
+            BDDMockito.when(customerRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
+                    .thenReturn(Optional.of(createValidCustomer()));
+        }
+
+        private void mockRepositorySave(){
+            BDDMockito.when(customerRepositoryMock.save(any(Customer.class)))
+                    .thenReturn(createValidCustomer());
+        }
+
+        @Test
+        @DisplayName("updateCustomer returns customer when successful")
+        void updateCustomer_ReturnsCustomer_WhenSuccessful() {
+            CustomerDTO customerDTO = createValidCustomerDTO(createValidCustomer().getId());
+
+            this.mockRepositoryFindByIdAndIsActiveTrue();
+            this.mockRepositorySave();
+
+            mockConverterToCustomerDTO(customerDTO);
+
+            CustomerDTO customerUpdated = customerService.updateCustomer(UUID.randomUUID(), createValidUpdateCustomerDTO());
+
+            assertNotNull(customerUpdated);
+            assertEquals(customerDTO, customerUpdated);
+        }
+
+        @Test
+        @DisplayName("updateCustomer throws IllegalArgumentException when customer is null")
+        void updateCustomer_ThrowsIllegalArgumentException_WhenCustomerIsNull() {
+
+            assertThrows(IllegalArgumentException.class,
+                    () -> customerService.updateCustomer(UUID.randomUUID(), null));
+        }
+
+        @Test
+        @DisplayName("updateCustomer throws EntityNotFoundException when customer id is null")
+        void updateCustomer_ThrowsEntityNotFoundException_WhenCustomerIdIsNull() {
+            assertThrows(EntityNotFoundException.class,
+                    () -> customerService.updateCustomer(null, createValidUpdateCustomerDTO()));
+        }
+
+        @Test
+        @DisplayName("updateCustomer throws EntityNotFoundException when customer does not exist")
+        void updateCustomer_ThrowsEntityNotFoundException_WhenCustomerDoesNotExist() {
+            BDDMockito.when(customerRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
+                    .thenReturn(Optional.empty());
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> customerService.updateCustomer(UUID.randomUUID(), createValidUpdateCustomerDTO()));
+        }
+
+        @Test
+        @DisplayName("updateCustomer throws DuplicateKeyException when phone already exists")
+        void updateCustomer_ThrowsDuplicateKeyException_WhenPhoneAlreadyExists() {
+
+            this.mockRepositoryFindByIdAndIsActiveTrue();
+
+            BDDMockito.when(customerRepositoryMock.existsByPhoneAndIdNot(anyString(), any(UUID.class)))
+                    .thenReturn(true);
+
+            assertThrows(DuplicateKeyException.class,
+                    () -> customerService.updateCustomer(UUID.randomUUID(), createValidUpdateCustomerDTO()));
+        }
+
+        @Test
+        @DisplayName("updateCustomer throws IllegalArgumentException when phone is not valid")
+        void updateCustomer_ThrowsIllegalArgumentException_WhenPhoneIsNotValid() {
+
+            this.mockRepositoryFindByIdAndIsActiveTrue();
+
+            UpdateCustomerDTO updateCustomerDTO = createValidUpdateCustomerDTO();
+            updateCustomerDTO.setPhone("abc123");
+
+            assertThrows(IllegalArgumentException.class,
+                    () -> customerService.updateCustomer(UUID.randomUUID(), updateCustomerDTO));
         }
     }
 }
