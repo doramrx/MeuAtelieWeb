@@ -1,12 +1,13 @@
 package com.meuatelieweb.backend.domain.customer;
 
 import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
+import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CustomerConverter {
 
-    public CustomerDTO toCustomerDTO(Customer customer) {
+    public CustomerDTO toCustomerDTO(@NonNull Customer customer) {
         return new CustomerDTO()
                 .builder()
                 .id(customer.getId())
