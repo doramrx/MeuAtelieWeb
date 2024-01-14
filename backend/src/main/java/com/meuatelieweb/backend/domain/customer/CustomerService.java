@@ -37,6 +37,10 @@ public class CustomerService {
     @Transactional
     public CustomerDTO addCustomer(SaveCustomerDTO saveCustomerDTO) {
 
+        if (saveCustomerDTO == null) {
+            throw new IllegalArgumentException("Customer cannot be null");
+        }
+
         this.validateSavingCustomerDTO(saveCustomerDTO);
 
         Customer customer = Customer.builder()

@@ -1,6 +1,7 @@
 package com.meuatelieweb.backend.domain.customer;
 
 import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
+import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -10,6 +11,7 @@ import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.meuatelieweb.backend.domain.customer.CustomerCreator.*;
+import static com.meuatelieweb.backend.domain.customer.CustomerCreator.createValidSaveCustomerDTO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -132,6 +135,86 @@ class CustomerServiceTest {
 
             assertThrows(EntityNotFoundException.class,
                     () -> customerService.findById(null));
+        }
+    }
+
+    @DisplayName("Test addCustomer method")
+    @Nested
+    class AddCustomerTests {
+
+        private void mockRepositorySave(){
+            BDDMockito.when(customerRepositoryMock.save(any(Customer.class)))
+                    .thenReturn(createValidCustomer());
+        }
+
+        @Test
+        @DisplayName("addCustomer returns customer when successful")
+        void addCustomer_ReturnsCustomer_WhenSuccessful() {
+            CustomerDTO customerDTO = createValidCustomerDTO(createValidCustomer().getId());
+
+            this.mockRepositorySave();
+
+            mockConverterToCustomerDTO(customerDTO);
+
+            CustomerDTO customerSaved = customerService.addCustomer(createValidSaveCustomerDTO());
+
+            assertNotNull(customerSaved);
+            assertEquals(customerDTO, customerSaved);
+        }
+
+        @Test
+        @DisplayName("addCustomer throws IllegalArgumentException when customer is null")
+        void addCustomer_ThrowsIllegalArgumentException_WhenCustomerIsNull() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> customerService.addCustomer(null));
+        }
+
+        @Test
+        @DisplayName("addCustomer throws IllegalArgumentException when customer name is null")
+        void addCustomer_ThrowsIllegalArgumentException_WhenCustomerNameIsNull() {
+            SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
+            saveCustomerDTO.setName(null);
+
+            assertThrows(IllegalArgumentException.class,
+                    () -> customerService.addCustomer(saveCustomerDTO));
+        }
+
+        @Test
+        @DisplayName("addCustomer throws IllegalArgumentException when customer email is null")
+        void addCustomer_ThrowsIllegalArgumentException_WhenCustomerEmailIsNull() {
+            SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
+            saveCustomerDTO.setEmail(null);
+
+            assertThrows(IllegalArgumentException.class,
+                    () -> customerService.addCustomer(saveCustomerDTO));
+        }
+
+        @Test
+        @DisplayName("addCustomer throws DuplicateKeyException when customer email already exists")
+        void addCustomer_ThrowsDuplicateKeyException_WhenCustomerEmailAlreadyExists() {
+            BDDMockito.when(customerRepositoryMock.existsByEmail(anyString())).thenReturn(true);
+
+            assertThrows(DuplicateKeyException.class,
+                    () -> customerService.addCustomer(createValidSaveCustomerDTO()));
+        }
+
+        @Test
+        @DisplayName("addCustomer throws IllegalArgumentException when customer phone is not valid")
+        void addCustomer_ThrowsIllegalArgumentException_WhenCustomerPhoneIsNotValid() {
+            SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
+            saveCustomerDTO.setPhone("abc123");
+
+            assertThrows(IllegalArgumentException.class,
+                    () -> customerService.addCustomer(saveCustomerDTO));
+        }
+
+        @Test
+        @DisplayName("addCustomer throws DuplicateKeyException when customer phone already exists")
+        void addCustomer_ThrowsDuplicateKeyException_WhenCustomerPhoneAlreadyExists() {
+            BDDMockito.when(customerRepositoryMock.existsByPhone(anyString())).thenReturn(true);
+
+            assertThrows(DuplicateKeyException.class,
+                    () -> customerService.addCustomer(createValidSaveCustomerDTO()));
         }
     }
 }
