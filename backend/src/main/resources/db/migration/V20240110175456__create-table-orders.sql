@@ -1,5 +1,5 @@
 create table orders (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid primary key,
     cost double precision not null,
     type varchar(20) check (type in('Adjust', 'Tailored')),
     due_date timestamp not null,

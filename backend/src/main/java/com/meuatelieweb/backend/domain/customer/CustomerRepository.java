@@ -31,7 +31,7 @@ interface CustomerRepository extends JpaRepository<Customer, UUID> {
             SET isActive = false
             WHERE id = :uuid
             """)
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     void inactivateCustomerById(UUID uuid);
 
 }
