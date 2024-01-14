@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.meuatelieweb.backend.domain.customer.CustomerCreator.*;
-import static com.meuatelieweb.backend.domain.customer.CustomerCreator.createValidSaveCustomerDTO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -234,8 +233,8 @@ class CustomerServiceTest {
         }
 
         @Test
-        @DisplayName("updateCustomer returns customer when successful")
-        void updateCustomer_ReturnsCustomer_WhenSuccessful() {
+        @DisplayName("updateCustomer updates customer when successful")
+        void updateCustomer_UpdatesCustomer_WhenSuccessful() {
             CustomerDTO customerDTO = createValidCustomerDTO(createValidCustomer().getId());
 
             this.mockRepositoryFindByIdAndIsActiveTrue();
@@ -299,5 +298,43 @@ class CustomerServiceTest {
             assertThrows(IllegalArgumentException.class,
                     () -> customerService.updateCustomer(UUID.randomUUID(), updateCustomerDTO));
         }
+    }
+
+    @DisplayName("Test deleteCustomer method")
+    @Nested
+    class DeleteCustomerTest {
+
+        private void mockRepositoryExistsByIdAndIsActiveTrue(Boolean existsOrIsActive) {
+            BDDMockito.when(customerRepositoryMock.existsByIdAndIsActiveTrue(any(UUID.class)))
+                    .thenReturn(existsOrIsActive);
+        }
+
+        @Test
+        @DisplayName("deleteCustomer inactivates customer when successful")
+        void deleteCustomer_InactivatesCustomer_WhenSuccessful() {
+
+            this.mockRepositoryExistsByIdAndIsActiveTrue(true);
+
+            assertDoesNotThrow(() -> customerService.deleteCustomer(UUID.randomUUID()));
+        }
+
+        @Test
+        @DisplayName("deleteCustomer throws EntityNotFoundException when customer does not exist or is already inactive")
+        void deleteCustomer_ThrowsEntityNotFoundException_WhenCustomerDoesNotExistOrIsAlreadyInactive() {
+
+            this.mockRepositoryExistsByIdAndIsActiveTrue(false);
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> customerService.deleteCustomer(UUID.randomUUID()));
+        }
+
+        @Test
+        @DisplayName("deleteCustomer throws IllegalArgumentException when customer id is null")
+        void deleteCustomer_ThrowsIllegalArgumentException_WhenCustomerIdIsNull() {
+
+            assertThrows(IllegalArgumentException.class,
+                    () -> customerService.deleteCustomer(null));
+        }
+
     }
 }

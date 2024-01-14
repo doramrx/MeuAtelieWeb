@@ -108,8 +108,13 @@ public class CustomerService {
 
     @Transactional
     public void deleteCustomer(UUID id) {
+
+        if (id == null) {
+            throw new IllegalArgumentException("The id cannot be null for delete operation");
+        }
+
         if (!repository.existsByIdAndIsActiveTrue(id)) {
-            throw new EntityNotFoundException("The given user does not exist or is already inactive");
+            throw new EntityNotFoundException("The given customer does not exist or is already inactive");
         }
         repository.inactivateCustomerById(id);
     }
