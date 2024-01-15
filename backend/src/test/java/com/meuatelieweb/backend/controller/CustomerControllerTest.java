@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meuatelieweb.backend.controllers.CustomerController;
 import com.meuatelieweb.backend.domain.customer.CustomerService;
 import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
+import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
+import jakarta.persistence.EntityNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,6 +33,7 @@ import java.util.UUID;
 
 import static com.meuatelieweb.backend.domain.customer.CustomerCreator.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 
 
 @WebMvcTest(controllers = {CustomerController.class})
@@ -49,8 +52,6 @@ class CustomerControllerTest {
 
     @MockBean
     private CustomerService customerServiceMock;
-
-    private static final UUID ID = UUID.fromString("320d780e-ef58-457e-9011-0afa0ef57665");
 
     @DisplayName("Test findAll method")
     @Nested
@@ -127,5 +128,81 @@ class CustomerControllerTest {
                     .andDo(MockMvcResultHandlers.print());
         }
     }
+
+    @DisplayName("Test findById method")
+    @Nested
+    class FindByIdTests {
+
+        @Test
+        @DisplayName("findById returns STATUS CODE 200 and a customer when successful")
+        void findById_ReturnsStatusCode200AndCustomer_WhenSuccessful() throws Exception {
+
+            CustomerDTO customerDTO = createValidCustomerDTO(UUID.randomUUID());
+
+            BDDMockito.when(customerServiceMock.findById(Mockito.any(UUID.class)))
+                    .thenReturn(customerDTO);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/customers/{id}", customerDTO.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isOk(),
+                            result -> {
+                                CustomerDTO customerDTOFound = objectMapper.readValue(
+                                        result.getResponse().getContentAsString(),
+                                        CustomerDTO.class
+                                );
+
+                                assertEquals(customerDTO.getId(), customerDTOFound.getId());
+                                assertEquals(customerDTO.getName(), customerDTOFound.getName());
+                                assertEquals(customerDTO.getEmail(), customerDTOFound.getEmail());
+                                assertEquals(customerDTO.getPhone(), customerDTOFound.getPhone());
+                                assertEquals(customerDTO.getIsActive(), customerDTOFound.getIsActive());
+                            }
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("findById returns STATUS CODE 404 when customer is not found")
+        void findById_ReturnsStatusCode404_WhenCustomerIsNotFound() throws Exception {
+
+            BDDMockito.when(customerServiceMock.findById(any(UUID.class)))
+                    .thenThrow(new EntityNotFoundException("The given user does not exist"));
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/customers/{id}", UUID.randomUUID())
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isNotFound(),
+                            MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("findById returns STATUS CODE 400 when id customer is null")
+        void findById_ReturnsStatusCode400_WhenIdCustomerIsNull() throws Exception {
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/customers/null")
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isBadRequest(),
+                            MockMvcResultMatchers.jsonPath("$.details", CoreMatchers.is("Invalid UUID string: null"))
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+    }
+
 
 }
