@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.UUID;
@@ -46,10 +46,13 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomerDTO> addCustomer(@RequestBody @Valid SaveCustomerDTO saveCustomerDTO) {
+    public ResponseEntity<CustomerDTO> addCustomer(
+            @RequestBody @Valid SaveCustomerDTO saveCustomerDTO,
+            UriComponentsBuilder uriComponentsBuilder
+    ) {
         CustomerDTO savedCustomer = service.addCustomer(saveCustomerDTO);
 
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+        URI uri = uriComponentsBuilder
                 .path("/{id}")
                 .buildAndExpand(savedCustomer.getId())
                 .toUri();
