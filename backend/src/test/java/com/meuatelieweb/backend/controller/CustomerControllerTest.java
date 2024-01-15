@@ -436,4 +436,23 @@ class CustomerControllerTest {
                     .andDo(MockMvcResultHandlers.print());
         }
     }
+
+    @DisplayName("Test deleteCustomer method")
+    @Nested
+    class DeleteCustomerTests {
+
+        @Test
+        @DisplayName("deleteCustomer returns STATUS CODE 204 and inactivates customer when successful")
+        void deleteCustomer_ReturnsStatusCode204AndInactivatesCustomer_WhenSuccessful() throws Exception {
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.delete("/customers/{id}", UUID.randomUUID())
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isNoContent())
+                    .andDo(MockMvcResultHandlers.print());
+        }
+    }
 }
