@@ -53,7 +53,7 @@ public class CustomerController {
         CustomerDTO savedCustomer = service.addCustomer(saveCustomerDTO);
 
         URI uri = uriComponentsBuilder
-                .path("/{id}")
+                .path("/customers/{id}")
                 .buildAndExpand(savedCustomer.getId())
                 .toUri();
 

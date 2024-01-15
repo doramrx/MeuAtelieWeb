@@ -3,7 +3,6 @@ package com.meuatelieweb.backend.domain.customer.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +21,6 @@ public class SaveCustomerDTO {
     @Email(message = "The given email is not valid")
     private String email;
 
-    @Size(min = 11, max = 11, message = "The given phone number is not valid (invalid size)")
-    @Pattern(regexp = "\\d{11}", message = "The given phone number is not valid (invalid format)")
+    @Pattern(regexp = "\\d{11}", message = "The given phone is not valid")
     private String phone;
 }

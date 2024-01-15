@@ -204,5 +204,143 @@ class CustomerControllerTest {
         }
     }
 
+    @DisplayName("Test addCustomer method")
+    @Nested
+    class AddCustomerTests {
 
+        @Test
+        @DisplayName("addCustomer returns STATUS CODE 201 and customer when successful")
+        void addCustomer_ReturnsStatusCode201AndCustomer_WhenSuccessful() throws Exception {
+            SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
+            CustomerDTO customerDTO = createValidCustomerDTO(UUID.randomUUID());
+
+            BDDMockito.when(customerServiceMock.addCustomer(Mockito.any(SaveCustomerDTO.class)))
+                    .thenReturn(customerDTO);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/customers")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(saveCustomerDTO))
+            );
+
+            String expectedLocation = String.format("http://localhost/customers/%s", customerDTO.getId());
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isCreated(),
+                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(customerDTO.getId())), UUID.class),
+                            MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(customerDTO.getName()), String.class),
+                            MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is(customerDTO.getEmail()), String.class),
+                            MockMvcResultMatchers.jsonPath("$.phone", CoreMatchers.is(customerDTO.getPhone()), String.class),
+                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(String.valueOf(customerDTO.getIsActive())), String.class),
+
+                            result -> {
+                                String redirectedUrl = result.getResponse().getRedirectedUrl();
+                                assertNotNull(redirectedUrl);
+                                assertEquals(expectedLocation, redirectedUrl);
+                                assertEquals(expectedLocation, result.getResponse().getHeader("Location"));
+                            }
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("addCustomer returns STATUS CODE 400 when customer is null")
+        void addCustomer_ReturnsStatusCode400_WhenCustomerIsNull() throws Exception {
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/customers")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(null))
+            );
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("addCustomer returns STATUS CODE 400 when customer name is null")
+        void addCustomer_ReturnsStatusCode400_WhenCustomerNameIsNull() throws Exception {
+            SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
+            saveCustomerDTO.setName(null);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/customers")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(saveCustomerDTO))
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isBadRequest(),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("name")),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given name cannot be empty"))
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("addCustomer returns STATUS CODE 400 when customer email is null")
+        void addCustomer_ReturnsStatusCode400_WhenCustomerEmailIsNull() throws Exception {
+            SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
+            saveCustomerDTO.setEmail(null);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/customers")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(saveCustomerDTO))
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isBadRequest(),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("email")),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given email cannot be empty"))
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("addCustomer returns STATUS CODE 400 when customer email is not valid")
+        void addCustomer_ReturnsStatusCode400_WhenCustomerEmailIsNotValid() throws Exception {
+            SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
+            saveCustomerDTO.setEmail("abc123");
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/customers")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(saveCustomerDTO))
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isBadRequest(),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("email")),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given email is not valid"))
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("addCustomer returns STATUS CODE 400 when customer phone is not valid")
+        void addCustomer_ReturnsStatusCode400_WhenCustomerPhoneIsNotValid() throws Exception {
+            SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
+            saveCustomerDTO.setPhone("000110i");
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/customers")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(saveCustomerDTO))
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isBadRequest(),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("phone")),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given phone is not valid"))
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+    }
 }
