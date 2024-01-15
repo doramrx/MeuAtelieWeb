@@ -70,7 +70,7 @@ public class CustomerController {
     ) {
         CustomerDTO updatedCustomer = service.updateCustomer(id, updateCustomerDTO);
 
-        return ResponseEntity.status(HttpStatus.OK).body(updatedCustomer);
+        return ResponseEntity.ok().body(updatedCustomer);
     }
 
     @DeleteMapping("/{id}")
