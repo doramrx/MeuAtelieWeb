@@ -170,7 +170,7 @@ class CustomerControllerTest {
         void findById_ReturnsStatusCode404_WhenCustomerIsNotFound() throws Exception {
 
             BDDMockito.when(customerServiceMock.findById(Mockito.any(UUID.class)))
-                    .thenThrow(new EntityNotFoundException("The given user does not exist"));
+                    .thenThrow(new EntityNotFoundException("The given customer does not exist"));
 
             ResultActions response = mockMvc.perform(
                     MockMvcRequestBuilders.get("/customers/{id}", UUID.randomUUID())
