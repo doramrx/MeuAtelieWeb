@@ -112,7 +112,11 @@ class CustomerServiceTest {
             CustomerDTO customerFound = customerService.findById(UUID.randomUUID());
 
             assertNotNull(customerFound);
-            assertEquals(customerDTO, customerFound);
+            assertEquals(customerDTO.getId(), customerFound.getId());
+            assertEquals(customerDTO.getName(), customerFound.getName());
+            assertEquals(customerDTO.getEmail(), customerFound.getEmail());
+            assertEquals(customerDTO.getPhone(), customerFound.getPhone());
+            assertEquals(customerDTO.getIsActive(), customerFound.getIsActive());
         }
 
         @Test
