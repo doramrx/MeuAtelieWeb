@@ -252,4 +252,41 @@ class MeasureServiceTest {
                     () -> measureService.updateMeasure(UUID.randomUUID(), createValidSaveUpdateMeasureDTO()));
         }
     }
+
+    @DisplayName("Test deleteMeasure method")
+    @Nested
+    class DeleteMeasureTest {
+
+        private void mockRepositoryExistsByIdAndIsActiveTrue(Boolean existsOrIsActive) {
+            BDDMockito.when(measureRepositoryMock.existsByIdAndIsActiveTrue(any(UUID.class)))
+                    .thenReturn(existsOrIsActive);
+        }
+
+        @Test
+        @DisplayName("deleteMeasure inactivates measure when successful")
+        void deleteMeasure_InactivatesMeasure_WhenSuccessful() {
+
+            this.mockRepositoryExistsByIdAndIsActiveTrue(true);
+
+            assertDoesNotThrow(() -> measureService.deleteMeasure(UUID.randomUUID()));
+        }
+
+        @Test
+        @DisplayName("deleteMeasure throws EntityNotFoundException when measure does not exist or is already inactive")
+        void deleteMeasure_ThrowsEntityNotFoundException_WhenMeasureDoesNotExistOrIsAlreadyInactive() {
+
+            this.mockRepositoryExistsByIdAndIsActiveTrue(false);
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> measureService.deleteMeasure(UUID.randomUUID()));
+        }
+
+        @Test
+        @DisplayName("deleteMeasure throws EntityNotFoundException when measure id is null")
+        void deleteMeasure_ThrowsEntityNotFoundException_WhenMeasureIdIsNull() {
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> measureService.deleteMeasure(null));
+        }
+    }
 }
