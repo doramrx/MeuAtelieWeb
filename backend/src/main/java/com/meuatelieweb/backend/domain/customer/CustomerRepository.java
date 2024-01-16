@@ -14,7 +14,7 @@ import java.util.UUID;
 @Repository
 interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
-    Optional<Customer> findByIdAndIsActiveTrue(UUID uuid);
+    Optional<Customer> findByIdAndIsActiveTrue(UUID id);
 
     Page<Customer> findAll(Specification<Customer> specification, Pageable pageable);
 
@@ -24,14 +24,14 @@ interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     boolean existsByPhone(String phone);
 
-    boolean existsByPhoneAndIdNot(String phone, UUID uuid);
+    boolean existsByPhoneAndIdNot(String phone, UUID id);
 
     @Query("""
             UPDATE Customer
             SET isActive = false
-            WHERE id = :uuid
+            WHERE id = :id
             """)
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    void inactivateCustomerById(UUID uuid);
+    void inactivateCustomerById(UUID id);
 
 }

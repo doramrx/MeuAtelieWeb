@@ -18,9 +18,9 @@ public class CustomerCreator {
                 .build();
     }
 
-    public static CustomerDTO createValidCustomerDTO(UUID uuid) {
+    public static CustomerDTO createValidCustomerDTO(UUID id) {
         return CustomerDTO.builder()
-                .id(uuid)
+                .id(id)
                 .name("Ada Lovelace")
                 .email("ada@lovelace.com")
                 .phone("00100110100")

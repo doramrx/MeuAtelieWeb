@@ -61,14 +61,14 @@ public class CustomerService {
         }
 
         if (repository.existsByEmail(saveCustomerDTO.getEmail())) {
-            throw new DuplicateKeyException("The given email is already being used by another user");
+            throw new DuplicateKeyException("The given email is already being used by another customer");
         }
 
         if (saveCustomerDTO.getPhone() != null) {
             this.validateCustomerPhoneSize(saveCustomerDTO.getPhone());
 
             if (repository.existsByPhone(saveCustomerDTO.getPhone())) {
-                throw new DuplicateKeyException("The given phone is already being used by another user");
+                throw new DuplicateKeyException("The given phone is already being used by another customer");
             }
         }
     }
@@ -81,7 +81,7 @@ public class CustomerService {
             UpdateCustomerDTO updateCustomerDTO) {
 
         Customer customer = repository.findByIdAndIsActiveTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("The given user does not exist or is already inactive"));
+                .orElseThrow(() -> new EntityNotFoundException("The given customer does not exist or is already inactive"));
 
         if (updateCustomerDTO.getName() != null) {
             customer.setName(updateCustomerDTO.getName());
@@ -91,7 +91,7 @@ public class CustomerService {
             this.validateCustomerPhoneSize(updateCustomerDTO.getPhone());
 
             if (repository.existsByPhoneAndIdNot(updateCustomerDTO.getPhone(), customer.getId()) ) {
-                throw new DuplicateKeyException("The given phone is already being used by another user");
+                throw new DuplicateKeyException("The given phone is already being used by another customer");
             }
             customer.setPhone(updateCustomerDTO.getPhone());
         }

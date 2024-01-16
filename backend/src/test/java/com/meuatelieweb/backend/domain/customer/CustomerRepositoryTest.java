@@ -24,8 +24,8 @@ class CustomerRepositoryTest {
 
         customerRepository.inactivateCustomerById(savedCustomer.getId());
 
-        Customer inactivadedCustomer = customerRepository.findById(savedCustomer.getId()).get();
+        Customer inactivatedCustomer = customerRepository.findById(savedCustomer.getId()).get();
 
-        assertFalse(inactivadedCustomer.getIsActive());
+        assertFalse(inactivatedCustomer.getIsActive());
     }
 }
