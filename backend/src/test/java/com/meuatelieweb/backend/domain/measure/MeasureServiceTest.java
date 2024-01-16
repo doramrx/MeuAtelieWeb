@@ -1,8 +1,5 @@
 package com.meuatelieweb.backend.domain.measure;
 
-import com.meuatelieweb.backend.domain.customer.Customer;
-import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
-import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
 import com.meuatelieweb.backend.domain.measure.dto.MeasureDTO;
 import com.meuatelieweb.backend.domain.measure.dto.SaveUpdateMeasureDTO;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,11 +21,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.customer.CustomerCreator.*;
 import static com.meuatelieweb.backend.domain.measure.MeasureCreator.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Tests for Measure Service")
@@ -188,4 +183,73 @@ class MeasureServiceTest {
         }
     }
 
+    @DisplayName("Test updateMeasure method")
+    @Nested
+    class UpdateMeasureTests {
+
+        private void mockRepositoryFindByIdAndIsActiveTrue() {
+            BDDMockito.when(measureRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
+                    .thenReturn(Optional.of(createValidMeasure()));
+        }
+
+        private void mockRepositorySave(){
+            BDDMockito.when(measureRepositoryMock.save(any(Measure.class)))
+                    .thenReturn(createValidMeasure());
+        }
+
+        @Test
+        @DisplayName("updateMeasure updates measure when successful")
+        void updateMeasure_UpdatesMeasure_WhenSuccessful() {
+            MeasureDTO measureDTO = createValidMeasureDTO(createValidMeasure().getId());
+
+            this.mockRepositoryFindByIdAndIsActiveTrue();
+            this.mockRepositorySave();
+
+            mockConverterToMeasureDTO(measureDTO);
+
+            MeasureDTO measureUpdated = measureService.updateMeasure(UUID.randomUUID(), createValidSaveUpdateMeasureDTO());
+
+            assertNotNull(measureUpdated);
+            assertEquals(measureDTO.getId(), measureUpdated.getId());
+            assertEquals(measureDTO.getName(), measureUpdated.getName());
+            assertEquals(measureDTO.getIsActive(), measureUpdated.getIsActive());
+        }
+
+        @Test
+        @DisplayName("updateMeasure throws IllegalArgumentException when measure is null")
+        void updateMeasure_ThrowsIllegalArgumentException_WhenMeasureIsNull() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> measureService.updateMeasure(UUID.randomUUID(), null));
+        }
+
+        @Test
+        @DisplayName("updateMeasure throws IllegalArgumentException when measure id is null")
+        void updateMeasure_ThrowsIllegalArgumentException_WhenMeasureIdIsNull() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> measureService.updateMeasure(null, createValidSaveUpdateMeasureDTO()));
+        }
+
+        @Test
+        @DisplayName("updateMeasure throws EntityNotFoundException when measure does not exist")
+        void updateMeasure_ThrowsEntityNotFoundException_WhenMeasureDoesNotExist() {
+            BDDMockito.when(measureRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
+                    .thenReturn(Optional.empty());
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> measureService.updateMeasure(UUID.randomUUID(), createValidSaveUpdateMeasureDTO()));
+        }
+
+        @Test
+        @DisplayName("updateMeasure throws DuplicateKeyException when measure name already exists")
+        void updateMeasure_ThrowsDuplicateKeyException_WhenMeasureNameAlreadyExists() {
+
+            this.mockRepositoryFindByIdAndIsActiveTrue();
+
+            BDDMockito.when(measureRepositoryMock.existsByNameAndIdNot(anyString(), any(UUID.class)))
+                    .thenReturn(true);
+
+            assertThrows(DuplicateKeyException.class,
+                    () -> measureService.updateMeasure(UUID.randomUUID(), createValidSaveUpdateMeasureDTO()));
+        }
+    }
 }

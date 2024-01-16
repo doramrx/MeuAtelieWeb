@@ -244,7 +244,11 @@ class CustomerServiceTest {
             CustomerDTO customerUpdated = customerService.updateCustomer(UUID.randomUUID(), createValidUpdateCustomerDTO());
 
             assertNotNull(customerUpdated);
-            assertEquals(customerDTO, customerUpdated);
+            assertEquals(customerDTO.getId(), customerUpdated.getId());
+            assertEquals(customerDTO.getName(), customerUpdated.getName());
+            assertEquals(customerDTO.getEmail(), customerUpdated.getEmail());
+            assertEquals(customerDTO.getPhone(), customerUpdated.getPhone());
+            assertEquals(customerDTO.getIsActive(), customerUpdated.getIsActive());
         }
 
         @Test
