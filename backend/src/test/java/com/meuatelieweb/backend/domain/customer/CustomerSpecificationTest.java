@@ -28,8 +28,8 @@ class CustomerSpecificationTest {
 
     public List<Customer> populateDatabase() {
         List<Customer> customers = List.of(
-                Customer.builder().
-                        id(UUID.randomUUID())
+                Customer.builder()
+                        .id(UUID.randomUUID())
                         .name("Ada LoveLace")
                         .email("ada@lovelace.com")
                         .isActive(true)
@@ -49,9 +49,7 @@ class CustomerSpecificationTest {
                         .build()
         );
 
-        for (Customer c : customers) {
-            customerRepository.save(c);
-        }
+        customers.forEach(customerRepository::save);
         return customers;
     }
 
