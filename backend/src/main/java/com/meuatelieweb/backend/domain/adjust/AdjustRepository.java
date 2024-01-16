@@ -1,4 +1,4 @@
-package com.meuatelieweb.backend.domain.measure;
+package com.meuatelieweb.backend.domain.adjust;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,11 +12,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface MeasureRepository extends JpaRepository<Measure, UUID> {
+public interface AdjustRepository extends JpaRepository<Adjust, UUID> {
 
-    Optional<Measure> findByIdAndIsActiveTrue(UUID id);
+    Optional<Adjust> findByIdAndIsActiveTrue(UUID id);
 
-    Page<Measure> findAll(Specification<Measure> specification, Pageable pageable);
+    Page<Adjust> findAll(Specification<Adjust> specification, Pageable pageable);
 
     boolean existsByIdAndIsActiveTrue(UUID id);
 
@@ -25,10 +25,10 @@ public interface MeasureRepository extends JpaRepository<Measure, UUID> {
     boolean existsByNameAndIdNot(String name, UUID id);
 
     @Query("""
-            UPDATE Measure
+            UPDATE Adjust
             SET isActive = false
             WHERE id = :id
             """)
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    void inactivateMeasureById(UUID id);
+    void inactivateAdjustById(UUID id);
 }
