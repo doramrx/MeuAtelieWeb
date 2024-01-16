@@ -32,7 +32,7 @@ public class CustomerService {
     public CustomerDTO findById(@NonNull UUID id) {
         return repository.findById(id)
                 .map(converter::toCustomerDTO)
-                .orElseThrow(() -> new EntityNotFoundException("The given user does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException("The given customer does not exist"));
     }
 
     @Transactional
@@ -46,7 +46,6 @@ public class CustomerService {
                 .name(saveCustomerDTO.getName())
                 .email(saveCustomerDTO.getEmail())
                 .phone(saveCustomerDTO.getPhone())
-                .isActive(true)
                 .build();
 
         return converter.toCustomerDTO(repository.save(customer));

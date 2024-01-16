@@ -1,4 +1,4 @@
-package com.meuatelieweb.backend.domain.customer;
+package com.meuatelieweb.backend.domain.measure;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,16 +12,14 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "customers")
-@Entity(name = "Customer")
-public class Customer {
+@Table(name = "measurements")
+@Entity(name = "Measure")
+public class Measure {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+    @Column(name = "measurement")
     private String name;
-    private String email;
-    private String phone;
     @Builder.Default
     private Boolean isActive = true;
-
 }
