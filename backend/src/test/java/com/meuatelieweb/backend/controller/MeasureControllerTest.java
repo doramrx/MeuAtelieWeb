@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meuatelieweb.backend.controllers.MeasureController;
 import com.meuatelieweb.backend.domain.measure.MeasureService;
 import com.meuatelieweb.backend.domain.measure.dto.MeasureDTO;
+import com.meuatelieweb.backend.domain.measure.dto.SaveUpdateMeasureDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.DisplayName;
@@ -30,8 +31,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.List;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.measure.MeasureCreator.createValidMeasureDTO;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.meuatelieweb.backend.domain.measure.MeasureCreator.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @WebMvcTest(controllers = {MeasureController.class})
 @ExtendWith(MockitoExtension.class)
@@ -174,6 +175,81 @@ class MeasureControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isNotFound(),
                             MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+    }
+
+    @DisplayName("Test addMeasure method")
+    @Nested
+    class AddMeasureTests {
+
+        @Test
+        @DisplayName("addMeasure returns STATUS CODE 201 and measure when successful")
+        void addMeasure_ReturnsStatusCode201AndMeasure_WhenSuccessful() throws Exception {
+            SaveUpdateMeasureDTO saveUpdateMeasureDTO = createValidSaveUpdateMeasureDTO();
+            MeasureDTO measureDTO = createValidMeasureDTO(UUID.randomUUID());
+
+            BDDMockito.when(measureServiceMock.addMeasure(Mockito.any(SaveUpdateMeasureDTO.class)))
+                    .thenReturn(measureDTO);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/measures")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(saveUpdateMeasureDTO))
+            );
+
+            String expectedLocation = String.format("http://localhost/measures/%s", measureDTO.getId());
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isCreated(),
+                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(measureDTO.getId())), UUID.class),
+                            MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(measureDTO.getName()), String.class),
+                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(String.valueOf(measureDTO.getIsActive())), String.class),
+
+                            result -> {
+                                String redirectedUrl = result.getResponse().getRedirectedUrl();
+                                assertNotNull(redirectedUrl);
+                                assertEquals(expectedLocation, redirectedUrl);
+                                assertEquals(expectedLocation, result.getResponse().getHeader("Location"));
+                            }
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("addMeasure returns STATUS CODE 400 when measure is null")
+        void addMeasure_ReturnsStatusCode400_WhenMeasureIsNull() throws Exception {
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/measures")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(null))
+            );
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("addMeasure returns STATUS CODE 400 when measure name is null")
+        void addMeasure_ReturnsStatusCode400_WhenMeasureNameIsNull() throws Exception {
+            SaveUpdateMeasureDTO saveUpdateMeasureDTO = createValidSaveUpdateMeasureDTO();
+            saveUpdateMeasureDTO.setName(null);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/measures")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(saveUpdateMeasureDTO))
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isBadRequest(),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("name")),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given name cannot be empty"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
