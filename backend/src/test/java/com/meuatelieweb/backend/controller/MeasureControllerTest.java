@@ -2,8 +2,6 @@ package com.meuatelieweb.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meuatelieweb.backend.controllers.MeasureController;
-import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
-import com.meuatelieweb.backend.domain.customer.dto.UpdateCustomerDTO;
 import com.meuatelieweb.backend.domain.measure.MeasureService;
 import com.meuatelieweb.backend.domain.measure.dto.MeasureDTO;
 import com.meuatelieweb.backend.domain.measure.dto.SaveUpdateMeasureDTO;
@@ -33,10 +31,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.List;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.customer.CustomerCreator.createValidCustomerDTO;
-import static com.meuatelieweb.backend.domain.customer.CustomerCreator.createValidUpdateCustomerDTO;
-import static com.meuatelieweb.backend.domain.measure.MeasureCreator.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.meuatelieweb.backend.domain.measure.MeasureCreator.createValidMeasureDTO;
+import static com.meuatelieweb.backend.domain.measure.MeasureCreator.createValidSaveUpdateMeasureDTO;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @WebMvcTest(controllers = {MeasureController.class})
 @ExtendWith(MockitoExtension.class)
@@ -126,7 +124,6 @@ class MeasureControllerTest {
 
 
     }
-
 
     @DisplayName("Test findAll method")
     @Nested
@@ -347,4 +344,22 @@ class MeasureControllerTest {
         }
     }
 
+    @DisplayName("Test deleteMeasure method")
+    @Nested
+    class DeleteMeasureTests {
+
+        @Test
+        @DisplayName("deleteMeasure returns STATUS CODE 204 and inactivates measure when successful")
+        void deleteMeasure_ReturnsStatusCode204AndInactivatesMeasure_WhenSuccessful() throws Exception {
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.delete("/measures/{id}", UUID.randomUUID())
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isNoContent())
+                    .andDo(MockMvcResultHandlers.print());
+        }
+    }
 }
