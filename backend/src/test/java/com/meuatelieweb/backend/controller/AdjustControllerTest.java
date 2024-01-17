@@ -2,9 +2,9 @@ package com.meuatelieweb.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meuatelieweb.backend.controllers.AdjustController;
-import com.meuatelieweb.backend.controllers.AdjustController;
 import com.meuatelieweb.backend.domain.adjust.AdjustService;
 import com.meuatelieweb.backend.domain.adjust.dto.AdjustDTO;
+import jakarta.persistence.EntityNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.createValidAdjustDTO;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @WebMvcTest(controllers = {AdjustController.class})
 @ExtendWith(MockitoExtension.class)
@@ -114,6 +115,63 @@ class AdjustControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isOk(),
                             MockMvcResultMatchers.jsonPath("$.content.size()", CoreMatchers.is(0))
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+    }
+
+    @DisplayName("Test findById method")
+    @Nested
+    class FindByIdTests {
+
+        @Test
+        @DisplayName("findById returns STATUS CODE 200 and a adjust when successful")
+        void findById_ReturnsStatusCode200AndAdjust_WhenSuccessful() throws Exception {
+
+            AdjustDTO adjustDTO = createValidAdjustDTO(UUID.randomUUID());
+
+            BDDMockito.when(adjustServiceMock.findById(Mockito.any(UUID.class)))
+                    .thenReturn(adjustDTO);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/adjusts/{id}", adjustDTO.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isOk(),
+                            result -> {
+                                AdjustDTO adjustDTOFound = objectMapper.readValue(
+                                        result.getResponse().getContentAsString(),
+                                        AdjustDTO.class
+                                );
+
+                                assertEquals(adjustDTO.getId(), adjustDTOFound.getId());
+                                assertEquals(adjustDTO.getName(), adjustDTOFound.getName());
+                                assertEquals(adjustDTO.getCost(), adjustDTOFound.getCost());
+                                assertEquals(adjustDTO.getIsActive(), adjustDTOFound.getIsActive());
+                            }
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("findById returns STATUS CODE 404 when adjust is not found")
+        void findById_ReturnsStatusCode404_WhenAdjustIsNotFound() throws Exception {
+
+            BDDMockito.when(adjustServiceMock.findById(Mockito.any(UUID.class)))
+                    .thenThrow(new EntityNotFoundException("The given adjust does not exist"));
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/adjusts/{id}", UUID.randomUUID())
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isNotFound(),
+                            MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
