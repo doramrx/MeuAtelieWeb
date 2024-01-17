@@ -426,4 +426,23 @@ class AdjustControllerTest {
                     .andDo(MockMvcResultHandlers.print());
         }
     }
+
+    @DisplayName("Test deleteAdjust method")
+    @Nested
+    class DeleteAdjustTests {
+
+        @Test
+        @DisplayName("deleteAdjust returns STATUS CODE 204 and inactivates adjust when successful")
+        void deleteAdjust_ReturnsStatusCode204AndInactivatesAdjust_WhenSuccessful() throws Exception {
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.delete("/adjusts/{id}", UUID.randomUUID())
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isNoContent())
+                    .andDo(MockMvcResultHandlers.print());
+        }
+    }
 }
