@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meuatelieweb.backend.controllers.AdjustController;
 import com.meuatelieweb.backend.domain.adjust.AdjustService;
 import com.meuatelieweb.backend.domain.adjust.dto.AdjustDTO;
+import com.meuatelieweb.backend.domain.adjust.dto.SaveUpdateAdjustDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +32,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.createValidAdjustDTO;
+import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.createValidSaveUpdateAdjustDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @WebMvcTest(controllers = {AdjustController.class})
 @ExtendWith(MockitoExtension.class)
@@ -172,6 +175,124 @@ class AdjustControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isNotFound(),
                             MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+    }
+
+    @DisplayName("Test addAdjust method")
+    @Nested
+    class AddAdjustTests {
+
+        @Test
+        @DisplayName("addAdjust returns STATUS CODE 201 and adjust when successful")
+        void addAdjust_ReturnsStatusCode201AndAdjust_WhenSuccessful() throws Exception {
+            SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
+            AdjustDTO adjustDTO = createValidAdjustDTO(UUID.randomUUID());
+
+            BDDMockito.when(adjustServiceMock.addAdjust(Mockito.any(SaveUpdateAdjustDTO.class)))
+                    .thenReturn(adjustDTO);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/adjusts")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(saveUpdateAdjustDTO))
+            );
+
+            String expectedLocation = String.format("http://localhost/adjusts/%s", adjustDTO.getId());
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isCreated(),
+                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(adjustDTO.getId())), UUID.class),
+                            MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(adjustDTO.getName()), String.class),
+                            MockMvcResultMatchers.jsonPath("$.cost", CoreMatchers.is(String.valueOf(adjustDTO.getCost())), String.class),
+                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(String.valueOf(adjustDTO.getIsActive())), String.class),
+
+                            result -> {
+                                String redirectedUrl = result.getResponse().getRedirectedUrl();
+                                assertNotNull(redirectedUrl);
+                                assertEquals(expectedLocation, redirectedUrl);
+                                assertEquals(expectedLocation, result.getResponse().getHeader("Location"));
+                            }
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("addAdjust returns STATUS CODE 400 when adjust is null")
+        void addAdjust_ReturnsStatusCode400_WhenAdjustIsNull() throws Exception {
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/adjusts")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(null))
+            );
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("addAdjust returns STATUS CODE 400 when adjust name is null")
+        void addAdjust_ReturnsStatusCode400_WhenAdjustNameIsNull() throws Exception {
+            SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
+            saveUpdateAdjustDTO.setName(null);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/adjusts")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(saveUpdateAdjustDTO))
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isBadRequest(),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("name")),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given name cannot be empty"))
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("addAdjust returns STATUS CODE 400 when adjust cost lesser than 0.01 cent")
+        void addAdjust_ReturnsStatusCode400_WhenAdjustCostIsLesserThan1Cent() throws Exception {
+            SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
+            saveUpdateAdjustDTO.setCost(0.0);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/adjusts")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(saveUpdateAdjustDTO))
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isBadRequest(),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("cost")),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given cost cannot be lesser than 0.01"))
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("addAdjust returns STATUS CODE 400 when adjust cost is negative")
+        void addAdjust_ReturnsStatusCode400_WhenAdjustCostIsNegative() throws Exception {
+            SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
+            saveUpdateAdjustDTO.setCost(-1.0);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/adjusts")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(saveUpdateAdjustDTO))
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isBadRequest(),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("cost")),
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given cost cannot be lesser than 0.01"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }

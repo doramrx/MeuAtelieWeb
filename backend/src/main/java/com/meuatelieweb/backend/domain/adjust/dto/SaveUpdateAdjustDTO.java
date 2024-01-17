@@ -15,7 +15,7 @@ public class SaveUpdateAdjustDTO {
     @NotBlank(message = "The given name cannot be empty")
     private String name;
 
-    @Positive(message = "The given cost must be higher than 0")
+    @Positive(message = "The given cost cannot be lesser than 0.01")
     @Digits(integer = 4, fraction = 2, message = "The cost must have up to 4 digits in total, with 2 decimals")
     private Double cost;
 }

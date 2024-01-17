@@ -74,7 +74,7 @@ public class AdjustService {
         }
 
         if (cost < 0.01) {
-            throw new IllegalArgumentException("The given cost cannot be lower than 0.01");
+            throw new IllegalArgumentException("The given cost cannot be lesser than 0.01");
         }
     }
 
