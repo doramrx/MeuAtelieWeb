@@ -121,11 +121,9 @@ class MeasureControllerTest {
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
-
-
     }
 
-    @DisplayName("Test findAll method")
+    @DisplayName("Test findById method")
     @Nested
     class FindByIdTests {
 
