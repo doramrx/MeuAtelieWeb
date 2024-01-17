@@ -52,15 +52,20 @@ public class AdjustService {
     }
 
     private void validateSavingAdjustDTO(SaveUpdateAdjustDTO saveAdjustDTO) {
-        if (saveAdjustDTO.getName() == null) {
-            throw new IllegalArgumentException("The given name cannot be empty");
-        }
+
+        this.validateAdjustName(saveAdjustDTO.getName());
 
         if (repository.existsByName(saveAdjustDTO.getName())) {
             throw new DuplicateKeyException("The given adjust name already exists");
         }
 
         this.validateAdjustCostValue(saveAdjustDTO.getCost());
+    }
+
+    private void validateAdjustName(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("The given name cannot be empty");
+        }
     }
 
     private void validateAdjustCostValue(Double cost) {
@@ -83,17 +88,18 @@ public class AdjustService {
         Adjust adjust = repository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new EntityNotFoundException("The given adjust does not exist or is already inactive"));
 
-        if (updateAdjustDTO.getName() != null) {
-            if (repository.existsByNameAndIdNot(updateAdjustDTO.getName(), adjust.getId())) {
-                throw new DuplicateKeyException("The given adjust name is already being used");
-            }
-            adjust.setName(updateAdjustDTO.getName());
+        this.validateAdjustName(updateAdjustDTO.getName());
+
+        if (repository.existsByNameAndIdNot(updateAdjustDTO.getName(), adjust.getId())) {
+            throw new DuplicateKeyException("The given adjust name is already being used");
         }
 
-        if (updateAdjustDTO.getCost() != null) {
-            this.validateAdjustCostValue(updateAdjustDTO.getCost());
-            adjust.setCost(updateAdjustDTO.getCost());
-        }
+        adjust.setName(updateAdjustDTO.getName());
+
+        this.validateAdjustCostValue(updateAdjustDTO.getCost());
+
+        adjust.setCost(updateAdjustDTO.getCost());
+
         return converter.toAdjustDTO(repository.save(adjust));
     }
 

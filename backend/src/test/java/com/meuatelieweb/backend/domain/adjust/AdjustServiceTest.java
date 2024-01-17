@@ -16,7 +16,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,8 +23,7 @@ import java.util.UUID;
 
 import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Tests for Adjust Service")
@@ -203,6 +201,103 @@ class AdjustServiceTest {
 
             assertThrows(IllegalArgumentException.class,
                     () -> adjustService.addAdjust(saveUpdateAdjustDTO));
+        }
+    }
+
+    @DisplayName("Test updateAdjust method")
+    @Nested
+    class UpdateAdjustTests {
+
+        private void mockRepositoryFindByIdAndIsActiveTrue() {
+            BDDMockito.when(adjustRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
+                    .thenReturn(Optional.of(createValidAdjust()));
+        }
+
+        private void mockRepositorySave(){
+            BDDMockito.when(adjustRepositoryMock.save(any(Adjust.class)))
+                    .thenReturn(createValidAdjust());
+        }
+
+        @Test
+        @DisplayName("updateAdjust updates adjust when successful")
+        void updateAdjust_UpdatesAdjust_WhenSuccessful() {
+            AdjustDTO adjustDTO = createValidAdjustDTO(createValidAdjust().getId());
+
+            this.mockRepositoryFindByIdAndIsActiveTrue();
+            this.mockRepositorySave();
+
+            mockConverterToAdjustDTO(adjustDTO);
+
+            AdjustDTO adjustUpdated = adjustService.updateAdjust(UUID.randomUUID(), createValidSaveUpdateAdjustDTO());
+
+            assertNotNull(adjustUpdated);
+            assertEquals(adjustDTO.getId(), adjustUpdated.getId());
+            assertEquals(adjustDTO.getName(), adjustUpdated.getName());
+            assertEquals(adjustDTO.getCost(), adjustUpdated.getCost());
+            assertEquals(adjustDTO.getIsActive(), adjustUpdated.getIsActive());
+        }
+
+        @Test
+        @DisplayName("updateAdjust throws IllegalArgumentException when adjust is null")
+        void updateAdjust_ThrowsIllegalArgumentException_WhenAdjustIsNull() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> adjustService.updateAdjust(UUID.randomUUID(), null));
+        }
+
+        @Test
+        @DisplayName("updateAdjust throws IllegalArgumentException when adjust id is null")
+        void updateAdjust_ThrowsIllegalArgumentException_WhenAdjustIdIsNull() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> adjustService.updateAdjust(null, createValidSaveUpdateAdjustDTO()));
+        }
+
+        @Test
+        @DisplayName("updateAdjust throws EntityNotFoundException when adjust does not exist")
+        void updateAdjust_ThrowsEntityNotFoundException_WhenAdjustDoesNotExist() {
+            BDDMockito.when(adjustRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
+                    .thenReturn(Optional.empty());
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> adjustService.updateAdjust(UUID.randomUUID(), createValidSaveUpdateAdjustDTO()));
+        }
+
+        @Test
+        @DisplayName("updateAdjust throws DuplicateKeyException when adjust name already exists")
+        void updateAdjust_ThrowsDuplicateKeyException_WhenAdjustNameAlreadyExists() {
+
+            this.mockRepositoryFindByIdAndIsActiveTrue();
+
+            BDDMockito.when(adjustRepositoryMock.existsByNameAndIdNot(anyString(), any(UUID.class)))
+                    .thenReturn(true);
+
+            assertThrows(DuplicateKeyException.class,
+                    () -> adjustService.updateAdjust(UUID.randomUUID(), createValidSaveUpdateAdjustDTO()));
+        }
+
+        @Test
+        @DisplayName("updateAdjust throws IllegalArgumentException when adjust cost is null")
+        void updateAdjust_ThrowsIllegalArgumentException_WhenAdjustCostIsNull() {
+
+            this.mockRepositoryFindByIdAndIsActiveTrue();
+
+            SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
+            saveUpdateAdjustDTO.setCost(null);
+
+            assertThrows(IllegalArgumentException.class,
+                    () -> adjustService.updateAdjust(UUID.randomUUID(), saveUpdateAdjustDTO));
+        }
+
+        @Test
+        @DisplayName("updateAdjust throws IllegalArgumentException when adjust cost is lesser than 0.01 cent")
+        void updateAdjust_ThrowsIllegalArgumentException_WhenAdjustCostIsLesserThan1Cent() {
+
+            this.mockRepositoryFindByIdAndIsActiveTrue();
+
+            SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
+            saveUpdateAdjustDTO.setCost(0.0);
+
+            assertThrows(IllegalArgumentException.class,
+                    () -> adjustService.updateAdjust(UUID.randomUUID(), saveUpdateAdjustDTO));
         }
     }
 }
