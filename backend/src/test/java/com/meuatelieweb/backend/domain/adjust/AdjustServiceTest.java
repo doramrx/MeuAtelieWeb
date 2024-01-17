@@ -300,4 +300,41 @@ class AdjustServiceTest {
                     () -> adjustService.updateAdjust(UUID.randomUUID(), saveUpdateAdjustDTO));
         }
     }
+
+    @DisplayName("Test deleteAdjust method")
+    @Nested
+    class DeleteAdjustTest {
+
+        private void mockRepositoryExistsByIdAndIsActiveTrue(Boolean existsOrIsActive) {
+            BDDMockito.when(adjustRepositoryMock.existsByIdAndIsActiveTrue(any(UUID.class)))
+                    .thenReturn(existsOrIsActive);
+        }
+
+        @Test
+        @DisplayName("deleteAdjust inactivates adjust when successful")
+        void deleteAdjust_InactivatesAdjust_WhenSuccessful() {
+
+            this.mockRepositoryExistsByIdAndIsActiveTrue(true);
+
+            assertDoesNotThrow(() -> adjustService.deleteAdjust(UUID.randomUUID()));
+        }
+
+        @Test
+        @DisplayName("deleteAdjust throws EntityNotFoundException when adjust does not exist or is already inactive")
+        void deleteAdjust_ThrowsEntityNotFoundException_WhenAdjustDoesNotExistOrIsAlreadyInactive() {
+
+            this.mockRepositoryExistsByIdAndIsActiveTrue(false);
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> adjustService.deleteAdjust(UUID.randomUUID()));
+        }
+
+        @Test
+        @DisplayName("deleteAdjust throws EntityNotFoundException when adjust id is null")
+        void deleteAdjust_ThrowsEntityNotFoundException_WhenAdjustIdIsNull() {
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> adjustService.deleteAdjust(null));
+        }
+    }
 }
