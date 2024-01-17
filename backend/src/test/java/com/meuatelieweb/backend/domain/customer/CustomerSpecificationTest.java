@@ -1,5 +1,6 @@
 package com.meuatelieweb.backend.domain.customer;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -26,8 +27,11 @@ class CustomerSpecificationTest {
     @InjectMocks
     private CustomerSpecification customerSpecification;
 
-    public List<Customer> populateDatabase() {
-        List<Customer> customers = List.of(
+    private List<Customer> customers;
+
+    @BeforeEach
+    public void setUpDatabase() {
+        this.customers = List.of(
                 Customer.builder()
                         .id(UUID.randomUUID())
                         .name("Ada LoveLace")
@@ -49,84 +53,75 @@ class CustomerSpecificationTest {
                         .build()
         );
 
-        customers.forEach(customerRepository::save);
-        return customers;
+        this.customers.forEach(customerRepository::save);
     }
 
     @Test
     @DisplayName("applyFilter returns page of customers filtered by name when successful")
     void applyFilter_ReturnsPageOfCustomersFilteredByName_WhenSuccessful() {
 
-        List<Customer> customers = this.populateDatabase();
-
         Specification<Customer> specification = CustomerSpecification
                 .applyFilter("Ada L", null, null, null);
 
-        PageImpl<Customer> page = new PageImpl<>(customers, Pageable.ofSize(20), 20);
+        PageImpl<Customer> page = new PageImpl<>(this.customers, Pageable.ofSize(20), 20);
 
         List<Customer> result = customerRepository.findAll(specification, page.getPageable()).toList();
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals(3, result.size());
-        assertTrue(result.containsAll(customers));
+        assertTrue(result.containsAll(this.customers));
     }
 
     @Test
     @DisplayName("applyFilter returns page of customers filtered by email when successful")
     void applyFilter_ReturnsPageOfCustomersFilteredByEmail_WhenSuccessful() {
 
-        List<Customer> customers = this.populateDatabase();
-
         Specification<Customer> specification = CustomerSpecification
                 .applyFilter(null, "ada@lovelace.com", null, null);
 
-        PageImpl<Customer> page = new PageImpl<>(customers, Pageable.ofSize(20), 20);
+        PageImpl<Customer> page = new PageImpl<>(this.customers, Pageable.ofSize(20), 20);
 
         List<Customer> result = customerRepository.findAll(specification, page.getPageable()).toList();
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
-        assertTrue(result.contains(customers.get(0)));
+        assertTrue(result.contains(this.customers.get(0)));
     }
 
     @Test
     @DisplayName("applyFilter returns page of customers filtered by phone when successful")
     void applyFilter_ReturnsPageOfCustomersFilteredByPhone_WhenSuccessful() {
 
-        List<Customer> customers = this.populateDatabase();
-
         Specification<Customer> specification = CustomerSpecification
                 .applyFilter(null, null, "00100110100", null);
 
-        PageImpl<Customer> page = new PageImpl<>(customers, Pageable.ofSize(20), 20);
+        PageImpl<Customer> page = new PageImpl<>(this.customers, Pageable.ofSize(20), 20);
 
         List<Customer> result = customerRepository.findAll(specification, page.getPageable()).toList();
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
-        assertTrue(result.contains(customers.get(2)));
+        assertTrue(result.contains(this.customers.get(2)));
     }
 
     @Test
     @DisplayName("applyFilter returns page of customers filtered by isActive when successful")
     void applyFilter_ReturnsPageOfCustomersFilteredByIsActive_WhenSuccessful() {
 
-        List<Customer> customers = this.populateDatabase();
-
         Specification<Customer> specification = CustomerSpecification
                 .applyFilter(null, null, null, false);
 
-        PageImpl<Customer> page = new PageImpl<>(customers, Pageable.ofSize(20), 20);
+        PageImpl<Customer> page = new PageImpl<>(this.customers, Pageable.ofSize(20), 20);
 
         List<Customer> result = customerRepository.findAll(specification, page.getPageable()).toList();
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
-        assertTrue(result.contains(customers.get(2)));
+        assertTrue(result.contains(this.customers.get(2)));
     }
 
 }
