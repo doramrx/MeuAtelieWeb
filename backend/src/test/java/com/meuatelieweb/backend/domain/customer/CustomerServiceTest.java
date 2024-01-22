@@ -1,6 +1,5 @@
 package com.meuatelieweb.backend.domain.customer;
 
-import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.UpdateCustomerDTO;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,9 +21,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.customer.CustomerCreator.*;
+import static com.meuatelieweb.backend.util.CustomerCreator.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,13 +36,6 @@ class CustomerServiceTest {
 
     @Mock
     private CustomerRepository customerRepositoryMock;
-
-    @Mock
-    private CustomerConverter customerConverterMock;
-
-    private void mockConverterToCustomerDTO(CustomerDTO customerDTO) {
-        when(customerConverterMock.toCustomerDTO(any(Customer.class))).thenReturn(customerDTO);
-    }
 
     @DisplayName("Test findAll method")
     @Nested
@@ -61,18 +54,14 @@ class CustomerServiceTest {
 
             this.mockRepositoryFindAll(pageable);
 
-            CustomerDTO customerDTO = createValidCustomerDTO(validCustomers.get(0).getId());
-
-            mockConverterToCustomerDTO(customerDTO);
-
-            List<CustomerDTO> customerList = customerService.findAll(
+            List<Customer> customerList = customerService.findAll(
                     pageable.getPageable(), null, null, null, null
             ).toList();
 
             assertNotNull(customerList);
             assertFalse(customerList.isEmpty());
             assertEquals(1, customerList.size());
-            assertEquals(customerDTO, customerList.get(0));
+            assertEquals(validCustomers.get(0), customerList.get(0));
         }
 
         @Test
@@ -82,48 +71,45 @@ class CustomerServiceTest {
 
             this.mockRepositoryFindAll(pageable);
 
-            List<CustomerDTO> customerList = customerService.findAll(
+            List<Customer> customers = customerService.findAll(
                     pageable.getPageable(), null, null, null, null
             ).toList();
 
-            assertNotNull(customerList);
-            assertTrue(customerList.isEmpty());
+            assertNotNull(customers);
+            assertTrue(customers.isEmpty());
         }
     }
 
     @DisplayName("Test findById method")
     @Nested
     class FindByIdTests {
-        
-        private void mockRepositoryFindById(){
+
+        private void mockRepositoryFindById(Customer customer) {
             BDDMockito.when(customerRepositoryMock.findById(any(UUID.class)))
-                    .thenReturn(Optional.of(createValidCustomer()));
+                    .thenReturn(Optional.ofNullable(customer));
         }
 
         @Test
         @DisplayName("findById returns customer when successful")
         void findById_ReturnsCustomer_WhenSuccessful() {
-            CustomerDTO customerDTO = createValidCustomerDTO(UUID.randomUUID());
+            Customer customer = createValidCustomer();
 
-            this.mockRepositoryFindById();
+            this.mockRepositoryFindById(customer);
 
-            mockConverterToCustomerDTO(customerDTO);
-
-            CustomerDTO customerFound = customerService.findById(UUID.randomUUID());
+            Customer customerFound = customerService.findById(UUID.randomUUID());
 
             assertNotNull(customerFound);
-            assertEquals(customerDTO.getId(), customerFound.getId());
-            assertEquals(customerDTO.getName(), customerFound.getName());
-            assertEquals(customerDTO.getEmail(), customerFound.getEmail());
-            assertEquals(customerDTO.getPhone(), customerFound.getPhone());
-            assertEquals(customerDTO.getIsActive(), customerFound.getIsActive());
+            assertEquals(customer.getId(), customerFound.getId());
+            assertEquals(customer.getName(), customerFound.getName());
+            assertEquals(customer.getEmail(), customerFound.getEmail());
+            assertEquals(customer.getPhone(), customerFound.getPhone());
+            assertEquals(customer.getIsActive(), customerFound.getIsActive());
         }
 
         @Test
         @DisplayName("findById throws EntityNotFoundException when customer is not found")
         void findById_ThrowsEntityNotFoundException_WhenCustomerIsNotFound() {
-            BDDMockito.when(customerRepositoryMock.findById(any(UUID.class)))
-                    .thenReturn(Optional.empty());
+            this.mockRepositoryFindById(null);
 
             assertThrows(EntityNotFoundException.class,
                     () -> customerService.findById(UUID.randomUUID()));
@@ -141,24 +127,22 @@ class CustomerServiceTest {
     @Nested
     class AddCustomerTests {
 
-        private void mockRepositorySave(){
+        private void mockRepositorySave(Customer customer) {
             BDDMockito.when(customerRepositoryMock.save(any(Customer.class)))
-                    .thenReturn(createValidCustomer());
+                    .thenReturn(customer);
         }
 
         @Test
         @DisplayName("addCustomer returns customer when successful")
         void addCustomer_ReturnsCustomer_WhenSuccessful() {
-            CustomerDTO customerDTO = createValidCustomerDTO(createValidCustomer().getId());
+            Customer customer = createValidCustomer();
 
-            this.mockRepositorySave();
+            this.mockRepositorySave(customer);
 
-            mockConverterToCustomerDTO(customerDTO);
-
-            CustomerDTO customerSaved = customerService.addCustomer(createValidSaveCustomerDTO());
+            Customer customerSaved = customerService.addCustomer(createValidSaveCustomerDTO());
 
             assertNotNull(customerSaved);
-            assertEquals(customerDTO, customerSaved);
+            assertEquals(customer, customerSaved);
         }
 
         @Test
@@ -221,34 +205,24 @@ class CustomerServiceTest {
     @Nested
     class UpdateCustomerTests {
 
-        private void mockRepositoryFindByIdAndIsActiveTrue() {
+        private void mockRepositoryFindByIdAndIsActiveTrue(Customer customer) {
             BDDMockito.when(customerRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
-                    .thenReturn(Optional.of(createValidCustomer()));
-        }
-
-        private void mockRepositorySave(){
-            BDDMockito.when(customerRepositoryMock.save(any(Customer.class)))
-                    .thenReturn(createValidCustomer());
+                    .thenReturn(Optional.ofNullable(customer));
         }
 
         @Test
         @DisplayName("updateCustomer updates customer when successful")
         void updateCustomer_UpdatesCustomer_WhenSuccessful() {
-            CustomerDTO customerDTO = createValidCustomerDTO(createValidCustomer().getId());
 
-            this.mockRepositoryFindByIdAndIsActiveTrue();
-            this.mockRepositorySave();
+            Customer customerSpy = spy(createValidCustomer());
 
-            mockConverterToCustomerDTO(customerDTO);
+            this.mockRepositoryFindByIdAndIsActiveTrue(customerSpy);
 
-            CustomerDTO customerUpdated = customerService.updateCustomer(UUID.randomUUID(), createValidUpdateCustomerDTO());
+            customerService.updateCustomer(UUID.randomUUID(), createValidUpdateCustomerDTO());
 
-            assertNotNull(customerUpdated);
-            assertEquals(customerDTO.getId(), customerUpdated.getId());
-            assertEquals(customerDTO.getName(), customerUpdated.getName());
-            assertEquals(customerDTO.getEmail(), customerUpdated.getEmail());
-            assertEquals(customerDTO.getPhone(), customerUpdated.getPhone());
-            assertEquals(customerDTO.getIsActive(), customerUpdated.getIsActive());
+            verify(customerSpy, atMostOnce()).setName(anyString());
+            verify(customerSpy, atMostOnce()).setPhone(anyString());
+            verify(customerRepositoryMock, atMostOnce()).save(any(Customer.class));
         }
 
         @Test
@@ -268,8 +242,8 @@ class CustomerServiceTest {
         @Test
         @DisplayName("updateCustomer throws EntityNotFoundException when customer does not exist")
         void updateCustomer_ThrowsEntityNotFoundException_WhenCustomerDoesNotExist() {
-            BDDMockito.when(customerRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
-                    .thenReturn(Optional.empty());
+
+            this.mockRepositoryFindByIdAndIsActiveTrue(null);
 
             assertThrows(EntityNotFoundException.class,
                     () -> customerService.updateCustomer(UUID.randomUUID(), createValidUpdateCustomerDTO()));
@@ -279,7 +253,7 @@ class CustomerServiceTest {
         @DisplayName("updateCustomer throws DuplicateKeyException when phone already exists")
         void updateCustomer_ThrowsDuplicateKeyException_WhenPhoneAlreadyExists() {
 
-            this.mockRepositoryFindByIdAndIsActiveTrue();
+            this.mockRepositoryFindByIdAndIsActiveTrue(createValidCustomer());
 
             BDDMockito.when(customerRepositoryMock.existsByPhoneAndIdNot(anyString(), any(UUID.class)))
                     .thenReturn(true);
@@ -292,7 +266,7 @@ class CustomerServiceTest {
         @DisplayName("updateCustomer throws IllegalArgumentException when phone is not valid")
         void updateCustomer_ThrowsIllegalArgumentException_WhenPhoneIsNotValid() {
 
-            this.mockRepositoryFindByIdAndIsActiveTrue();
+            this.mockRepositoryFindByIdAndIsActiveTrue(createValidCustomer());
 
             UpdateCustomerDTO updateCustomerDTO = createValidUpdateCustomerDTO();
             updateCustomerDTO.setPhone("abc123");
