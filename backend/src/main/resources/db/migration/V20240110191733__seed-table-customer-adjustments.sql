@@ -1,4 +1,4 @@
-insert into customer_adjustments (id, adjustment_cost, id_adjustments, id_order_item) values
+insert into customer_adjustments (id, adjustment_cost, id_adjustment, id_order_item) values
   ('8fd373b0-75a3-4924-8d6e-7827cb3c55fd', 15.75, 'bd7e9753-9111-4391-9e91-67ff988060cc', 'f480a2e9-6fbd-4287-9137-75c03b8d64c8'),
   ('3afc7c97-135d-40cd-badc-7895c8eb6a98', 20.0, 'cff9506a-a773-4162-aca8-2a152423f4a9', '22524e0e-1301-4a8f-8717-4019e82ee3f6'),
   ('d8dab37c-bac0-3424-a5e4-ee818744ce08', 30.0, 'd6dab37c-bac0-4659-a5e4-ee818744ce08', '30bfe48f-5f52-4f6a-bf8f-23b9d7ee8a53'),

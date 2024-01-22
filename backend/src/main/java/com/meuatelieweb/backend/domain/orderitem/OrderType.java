@@ -1,4 +1,4 @@
-package com.meuatelieweb.backend.domain.order;
+package com.meuatelieweb.backend.domain.orderitem;
 
 public enum OrderType {
     ADJUST,

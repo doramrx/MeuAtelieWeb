@@ -1,24 +1,28 @@
 package com.meuatelieweb.backend.domain.order;
 
 import com.meuatelieweb.backend.domain.customer.Customer;
+import com.meuatelieweb.backend.domain.orderitem.OrderItem;
 import jakarta.persistence.*;
-import lombok.Builder;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Table(name = "orders")
 @Entity(name = "Order")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
-public abstract class Order {
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(insertable = false, updatable = false)
-    private OrderType type;
+    private Double cost;
 
     private LocalDateTime dueDate;
 
@@ -29,6 +33,10 @@ public abstract class Order {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_customer", nullable = false)
     private Customer customer;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_order")
+    private Set<OrderItem> orderItems;
 
     @Builder.Default
     private Boolean isActive = true;
