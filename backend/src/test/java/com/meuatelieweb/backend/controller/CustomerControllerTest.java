@@ -2,6 +2,8 @@ package com.meuatelieweb.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meuatelieweb.backend.controllers.CustomerController;
+import com.meuatelieweb.backend.domain.customer.Customer;
+import com.meuatelieweb.backend.domain.customer.CustomerConverter;
 import com.meuatelieweb.backend.domain.customer.CustomerService;
 import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
@@ -32,8 +34,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.List;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.customer.CustomerCreator.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.meuatelieweb.backend.util.CustomerCreator.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @WebMvcTest(controllers = {CustomerController.class})
 @ExtendWith(MockitoExtension.class)
@@ -52,11 +55,19 @@ class CustomerControllerTest {
     @MockBean
     private CustomerService customerServiceMock;
 
+    @MockBean
+    private CustomerConverter customerConverterMock;
+
+    private void mockConverterToCustomerDTO(Customer customer, CustomerDTO expectedCustomerDTO) {
+        BDDMockito.when(customerConverterMock.toCustomerDTO(customer))
+                .thenReturn(expectedCustomerDTO);
+    }
+
     @DisplayName("Test findAll method")
     @Nested
     class FindAllTests {
 
-        private void mockServiceFindAll(Page<CustomerDTO> customersList) {
+        private void mockServiceFindAll(Page<Customer> customersList) {
             BDDMockito.when(customerServiceMock.findAll(
                     Mockito.any(Pageable.class),
                     Mockito.anyString(),
@@ -70,17 +81,19 @@ class CustomerControllerTest {
         @DisplayName("findAll returns STATUS CODE 200 and a page of customers when successful")
         void findAll_ReturnsStatusCode200AndPageOfCustomers_WhenSuccessful() throws Exception {
 
-            List<CustomerDTO> customerDTOList = List.of(
-                    createValidCustomerDTO(UUID.randomUUID()),
-                    createValidCustomerDTO(UUID.randomUUID())
+            List<Customer> customers = List.of(
+                    createValidCustomer(),
+                    createValidCustomer()
             );
 
-            Page<CustomerDTO> customersList = new PageImpl<>(
-                    customerDTOList,
+            Page<Customer> customersPage = new PageImpl<>(
+                    customers,
                     Pageable.ofSize(20),
                     20);
 
-            this.mockServiceFindAll(customersList);
+            this.mockServiceFindAll(customersPage);
+            mockConverterToCustomerDTO(customers.get(0), createValidCustomerDTO(customers.get(0).getId()));
+            mockConverterToCustomerDTO(customers.get(1), createValidCustomerDTO(customers.get(1).getId()));
 
             ResultActions response = mockMvc.perform(
                     MockMvcRequestBuilders.get("/customers")
@@ -103,12 +116,12 @@ class CustomerControllerTest {
         @DisplayName("findAll returns STATUS CODE 200 and empty page of customers when customers do not exist")
         void findAll_ReturnsStatusCode200AndEmptyPageOfCustomers_WhenCustomersDoNotExist() throws Exception {
 
-            Page<CustomerDTO> customersList = new PageImpl<>(
+            Page<Customer> customersPage = new PageImpl<>(
                     List.of(),
                     Pageable.ofSize(20),
                     20);
 
-            this.mockServiceFindAll(customersList);
+            this.mockServiceFindAll(customersPage);
 
             ResultActions response = mockMvc.perform(
                     MockMvcRequestBuilders.get("/customers")
@@ -136,13 +149,15 @@ class CustomerControllerTest {
         @DisplayName("findById returns STATUS CODE 200 and a customer when successful")
         void findById_ReturnsStatusCode200AndCustomer_WhenSuccessful() throws Exception {
 
-            CustomerDTO customerDTO = createValidCustomerDTO(UUID.randomUUID());
+            Customer customer = createValidCustomer();
+            CustomerDTO customerDTO = createValidCustomerDTO(customer.getId());
 
             BDDMockito.when(customerServiceMock.findById(Mockito.any(UUID.class)))
-                    .thenReturn(customerDTO);
+                    .thenReturn(customer);
+            mockConverterToCustomerDTO(customer, customerDTO);
 
             ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/customers/{id}", customerDTO.getId())
+                    MockMvcRequestBuilders.get("/customers/{id}", customer.getId())
                             .contentType(MediaType.APPLICATION_JSON)
             );
 
@@ -194,10 +209,11 @@ class CustomerControllerTest {
         @DisplayName("addCustomer returns STATUS CODE 201 and customer when successful")
         void addCustomer_ReturnsStatusCode201AndCustomer_WhenSuccessful() throws Exception {
             SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
-            CustomerDTO customerDTO = createValidCustomerDTO(UUID.randomUUID());
+            Customer customer = createValidCustomer();
 
             BDDMockito.when(customerServiceMock.addCustomer(Mockito.any(SaveCustomerDTO.class)))
-                    .thenReturn(customerDTO);
+                    .thenReturn(customer);
+            mockConverterToCustomerDTO(customer, createValidCustomerDTO(customer.getId()));
 
             ResultActions response = mockMvc.perform(
                     MockMvcRequestBuilders.post("/customers")
@@ -205,16 +221,16 @@ class CustomerControllerTest {
                             .content(objectMapper.writeValueAsBytes(saveCustomerDTO))
             );
 
-            String expectedLocation = String.format("http://localhost/customers/%s", customerDTO.getId());
+            String expectedLocation = String.format("http://localhost/customers/%s", customer.getId());
 
             response
                     .andExpectAll(
                             MockMvcResultMatchers.status().isCreated(),
-                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(customerDTO.getId())), UUID.class),
-                            MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(customerDTO.getName()), String.class),
-                            MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is(customerDTO.getEmail()), String.class),
-                            MockMvcResultMatchers.jsonPath("$.phone", CoreMatchers.is(customerDTO.getPhone()), String.class),
-                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(String.valueOf(customerDTO.getIsActive())), String.class),
+                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(customer.getId())), UUID.class),
+                            MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(customer.getName()), String.class),
+                            MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is(customer.getEmail()), String.class),
+                            MockMvcResultMatchers.jsonPath("$.phone", CoreMatchers.is(customer.getPhone()), String.class),
+                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(String.valueOf(customer.getIsActive())), String.class),
 
                             result -> {
                                 String redirectedUrl = result.getResponse().getRedirectedUrl();
@@ -334,13 +350,14 @@ class CustomerControllerTest {
         @DisplayName("updateCustomer returns STATUS CODE 200 and updates customer when successful")
         void updateCustomer_ReturnsStatusCode200AndUpdatesCustomer_WhenSuccessful() throws Exception {
             UpdateCustomerDTO updateCustomerDTO = createValidUpdateCustomerDTO();
-            CustomerDTO customerDTO = createValidCustomerDTO(UUID.randomUUID());
+            Customer customer = createValidCustomer();
 
             BDDMockito.when(customerServiceMock.updateCustomer(Mockito.any(UUID.class), Mockito.any(UpdateCustomerDTO.class)))
-                    .thenReturn(customerDTO);
+                    .thenReturn(customer);
+            mockConverterToCustomerDTO(customer, createValidCustomerDTO(customer.getId()));
 
             ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/customers/{id}", customerDTO.getId())
+                    MockMvcRequestBuilders.put("/customers/{id}", customer.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsBytes(updateCustomerDTO))
             );
@@ -348,11 +365,11 @@ class CustomerControllerTest {
             response
                     .andExpectAll(
                             MockMvcResultMatchers.status().isOk(),
-                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(customerDTO.getId()))),
+                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(customer.getId()))),
                             MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(updateCustomerDTO.getName())),
-                            MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is(customerDTO.getEmail())),
+                            MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is(customer.getEmail())),
                             MockMvcResultMatchers.jsonPath("$.phone", CoreMatchers.is(updateCustomerDTO.getPhone())),
-                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(customerDTO.getIsActive()))
+                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(customer.getIsActive()))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }

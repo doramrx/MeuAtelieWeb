@@ -1,5 +1,6 @@
 package com.meuatelieweb.backend.controllers;
 
+import com.meuatelieweb.backend.domain.customer.CustomerConverter;
 import com.meuatelieweb.backend.domain.customer.CustomerService;
 import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
@@ -18,9 +19,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("customers")
 public class CustomerController {
-
     @Autowired
     private CustomerService service;
+    @Autowired
+    private CustomerConverter customerConverter;
 
     @GetMapping
     public ResponseEntity<Page<CustomerDTO>> findAll(
@@ -34,12 +36,15 @@ public class CustomerController {
             @RequestParam(name = "isActive", required = false)
             Boolean isActive
     ) {
-        return ResponseEntity.ok().body(service.findAll(pageable, name, email, phone, isActive));
+        return ResponseEntity.ok().body(
+                service.findAll(pageable, name, email, phone, isActive)
+                        .map(customerConverter::toCustomerDTO)
+        );
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CustomerDTO> findById(@PathVariable UUID id) {
-        CustomerDTO customerDTO = service.findById(id);
+        CustomerDTO customerDTO = customerConverter.toCustomerDTO(service.findById(id));
 
         return ResponseEntity.ok().body(customerDTO);
     }
@@ -49,7 +54,7 @@ public class CustomerController {
             @RequestBody @Valid SaveCustomerDTO saveCustomerDTO,
             UriComponentsBuilder uriComponentsBuilder
     ) {
-        CustomerDTO savedCustomer = service.addCustomer(saveCustomerDTO);
+        CustomerDTO savedCustomer = customerConverter.toCustomerDTO(service.addCustomer(saveCustomerDTO));
 
         URI uri = uriComponentsBuilder
                 .path("/customers/{id}")
@@ -67,7 +72,9 @@ public class CustomerController {
             @Valid
             UpdateCustomerDTO updateCustomerDTO
     ) {
-        CustomerDTO updatedCustomer = service.updateCustomer(id, updateCustomerDTO);
+        CustomerDTO updatedCustomer = customerConverter.toCustomerDTO(
+                service.updateCustomer(id, updateCustomerDTO)
+        );
 
         return ResponseEntity.ok().body(updatedCustomer);
     }

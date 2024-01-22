@@ -1,5 +1,6 @@
-package com.meuatelieweb.backend.domain.customer;
+package com.meuatelieweb.backend.util;
 
+import com.meuatelieweb.backend.domain.customer.Customer;
 import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.UpdateCustomerDTO;

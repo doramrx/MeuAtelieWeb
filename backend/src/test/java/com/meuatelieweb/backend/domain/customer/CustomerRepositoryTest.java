@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import static com.meuatelieweb.backend.domain.customer.CustomerCreator.createValidCustomer;
+import static com.meuatelieweb.backend.util.CustomerCreator.createValidCustomer;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DataJpaTest
