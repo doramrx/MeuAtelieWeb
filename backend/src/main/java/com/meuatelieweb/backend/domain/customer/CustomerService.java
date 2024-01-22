@@ -1,6 +1,5 @@
 package com.meuatelieweb.backend.domain.customer;
 
-import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.UpdateCustomerDTO;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,23 +19,19 @@ public class CustomerService {
     @Autowired
     private CustomerRepository repository;
 
-    @Autowired
-    private CustomerConverter converter;
-
-    public Page<CustomerDTO> findAll(Pageable pageable, String name, String email, String phone, Boolean isActive) {
+    public Page<Customer> findAll(Pageable pageable, String name, String email, String phone, Boolean isActive) {
         Specification<Customer> specification = CustomerSpecification.applyFilter(name, email, phone, isActive);
 
-        return repository.findAll(specification, pageable).map(converter::toCustomerDTO);
+        return repository.findAll(specification, pageable);
     }
 
-    public CustomerDTO findById(@NonNull UUID id) {
+    public Customer findById(@NonNull UUID id) {
         return repository.findById(id)
-                .map(converter::toCustomerDTO)
                 .orElseThrow(() -> new EntityNotFoundException("The given customer does not exist"));
     }
 
     @Transactional
-    public CustomerDTO addCustomer(
+    public Customer addCustomer(
             @NonNull
             SaveCustomerDTO saveCustomerDTO
     ) {
@@ -48,7 +43,7 @@ public class CustomerService {
                 .phone(saveCustomerDTO.getPhone())
                 .build();
 
-        return converter.toCustomerDTO(repository.save(customer));
+        return repository.save(customer);
     }
 
     private void validateSavingCustomerDTO(SaveCustomerDTO saveCustomerDTO) {
@@ -74,7 +69,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public CustomerDTO updateCustomer(
+    public Customer updateCustomer(
             @NonNull
             UUID id,
             @NonNull
@@ -90,12 +85,12 @@ public class CustomerService {
 
             this.validateCustomerPhoneSize(updateCustomerDTO.getPhone());
 
-            if (repository.existsByPhoneAndIdNot(updateCustomerDTO.getPhone(), customer.getId()) ) {
+            if (repository.existsByPhoneAndIdNot(updateCustomerDTO.getPhone(), customer.getId())) {
                 throw new DuplicateKeyException("The given phone is already being used by another customer");
             }
             customer.setPhone(updateCustomerDTO.getPhone());
         }
-        return converter.toCustomerDTO(repository.save(customer));
+        return repository.save(customer);
     }
 
     private void validateCustomerPhoneSize(String phone) {
