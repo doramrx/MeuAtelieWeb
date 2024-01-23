@@ -8,6 +8,7 @@ import com.meuatelieweb.backend.domain.order.Order;
 import com.meuatelieweb.backend.domain.orderitem.dto.SaveOrderItemDTO;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,8 @@ public class OrderItemService {
 
         List<OrderItem> orderItems = items.stream().map(item -> {
             this.validateItemType(item.getType());
+            this.validateItemTitle(item.getTitle());
+            this.validateItemDueDate(item.getDueDate());
 
             if (item.getType() == OrderType.ADJUST) {
                 AdjustOrderItem adjustOrderItem = new AdjustOrderItem();
@@ -60,6 +63,8 @@ public class OrderItemService {
 
                 return adjustItem;
             }
+
+            this.validateTailoredItemCost(item.getCost());
 
             TailoredOrderItem tailoredOrderItem = new TailoredOrderItem();
             tailoredOrderItem.setTitle(item.getTitle());
@@ -86,11 +91,35 @@ public class OrderItemService {
 
     private void validateItemType(OrderType type) {
         if (type == null) {
-            throw new IllegalArgumentException("Order item type cannot be null");
+            throw new IllegalArgumentException("Item type cannot be null");
         }
-
         if (!type.equals(OrderType.ADJUST) && !type.equals(OrderType.TAILORED)) {
-            throw new IllegalArgumentException("Order item type must be ADJUST or TAILORED type");
+            throw new HttpMessageConversionException("Item type must be ADJUST or TAILORED");
         }
     }
+
+    private void validateItemTitle(String title) {
+        if (title == null) {
+            throw new IllegalArgumentException("Item title cannot be null");
+        }
+    }
+
+    private void validateItemDueDate(LocalDateTime dueDate) {
+        if (dueDate == null) {
+            throw new IllegalArgumentException("Item due date cannot be null");
+        }
+        if (dueDate.isBefore(LocalDateTime.now())){
+            throw new IllegalArgumentException("Item due date is invalid");
+        }
+    }
+
+    private void validateTailoredItemCost(Double cost) {
+        if (cost == null) {
+            throw new IllegalArgumentException("The given cost cannot be empty");
+        }
+        if (cost < 0.01) {
+            throw new IllegalArgumentException("The given cost cannot be lesser than 0.01");
+        }
+    }
+
 }

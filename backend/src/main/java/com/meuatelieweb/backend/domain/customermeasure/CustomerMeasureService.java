@@ -29,6 +29,9 @@ public class CustomerMeasureService {
             @NonNull
             Set<SaveCustomerMeasureDTO> saveCustomerMeasures
     ) {
+
+        this.validateItemMeasureValues(saveCustomerMeasures);
+
         Set<Measure> measures = measureService.getMeasures(
                 saveCustomerMeasures.stream()
                         .map(SaveCustomerMeasureDTO::getMeasurementId)
@@ -36,16 +39,30 @@ public class CustomerMeasureService {
         );
 
         List<CustomerMeasure> customerMeasures = saveCustomerMeasures.stream().map(customerMeasure ->
-            CustomerMeasure.builder()
-                    .measurementValue(customerMeasure.getMeasurementValue())
-                    .measure(measures.stream()
-                            .filter(measure -> customerMeasure.getMeasurementId().equals(measure.getId()))
-                            .findFirst().get()
-                    )
-                    .orderItem(item)
-                    .build()
+                CustomerMeasure.builder()
+                        .measurementValue(customerMeasure.getMeasurementValue())
+                        .measure(measures.stream()
+                                .filter(measure -> customerMeasure.getMeasurementId().equals(measure.getId()))
+                                .findFirst().get()
+                        )
+                        .orderItem(item)
+                        .build()
         ).toList();
 
         return repository.saveAllAndFlush(customerMeasures);
+    }
+
+    private void validateItemMeasureValues(Set<SaveCustomerMeasureDTO> saveCustomerMeasures) {
+        List<Double> measureValues = saveCustomerMeasures.stream()
+                .map(SaveCustomerMeasureDTO::getMeasurementValue).toList();
+
+        for (Double value : measureValues) {
+            if (value == null) {
+                throw new IllegalArgumentException("The given measure value cannot be empty");
+            }
+            if (value < 0.01) {
+                throw new IllegalArgumentException("The given measure value cannot be lesser than 0.01");
+            }
+        }
     }
 }

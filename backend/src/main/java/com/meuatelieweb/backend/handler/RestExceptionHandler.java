@@ -7,6 +7,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -60,5 +61,17 @@ public class RestExceptionHandler {
     public ResponseEntity<ExceptionDetails> handleEntityNotFoundException(EntityNotFoundException e) {
 
         return ResponseEntity.notFound().build();
+    }
+
+    @ExceptionHandler(HttpMessageConversionException.class)
+    protected ResponseEntity<ExceptionDetails> handleHttpMessageConversionException(HttpMessageConversionException e) {
+
+        ExceptionDetails responseBody = new ExceptionDetails(
+                "Http Message Conversion Exception",
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage()
+        );
+
+        return ResponseEntity.badRequest().body(responseBody);
     }
 }

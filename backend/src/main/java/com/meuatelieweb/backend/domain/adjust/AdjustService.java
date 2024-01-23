@@ -117,7 +117,7 @@ public class AdjustService {
         Set<Adjust> adjusts = repository.findByIdInAndIsActiveTrue(adjustsIds);
 
         if (adjusts.size() != adjustsIds.size()) {
-            throw new IllegalArgumentException("Some of the given id values are invalid");
+            throw new IllegalArgumentException("Some of the given id adjusts are invalid");
         }
 
         return adjusts;

@@ -90,7 +90,7 @@ public class MeasureService {
         Set<Measure> measures = repository.findByIdInAndIsActiveTrue(measuresIds);
 
         if (measures.size() != measuresIds.size()) {
-            throw new IllegalArgumentException("Some of the given id values are invalid");
+            throw new IllegalArgumentException("Some of the given id measures are invalid");
         }
 
         return measures;
