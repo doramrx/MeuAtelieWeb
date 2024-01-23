@@ -30,6 +30,11 @@ public class CustomerService {
                 .orElseThrow(() -> new EntityNotFoundException("The given customer does not exist"));
     }
 
+    public Customer findByIdAndIsActiveTrue(@NonNull UUID id) {
+        return repository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new EntityNotFoundException("The given customer is not active"));
+    }
+
     @Transactional
     public Customer addCustomer(
             @NonNull

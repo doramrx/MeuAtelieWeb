@@ -1,6 +1,7 @@
 package com.meuatelieweb.backend.domain.order;
 
 import com.meuatelieweb.backend.domain.customer.CustomerConverter;
+import com.meuatelieweb.backend.domain.order.dto.ListOrderDTO;
 import com.meuatelieweb.backend.domain.order.dto.OrderDTO;
 import com.meuatelieweb.backend.domain.orderitem.OrderItemConverter;
 import lombok.NonNull;
@@ -21,7 +22,7 @@ public class OrderConverter {
         return new OrderDTO()
                 .builder()
                 .id(order.getId())
-                .cost(order.getCost())
+                .orderNumber(order.getOrderNumber())
                 .dueDate(order.getDueDate())
                 .createdAt(order.getCreatedAt())
                 .deliveredAt(order.getDeliveredAt())
@@ -30,6 +31,19 @@ public class OrderConverter {
                         .map(this.orderItemConverter::toOrderItemDTO)
                         .collect(Collectors.toSet())
                 )
+                .isActive(order.getIsActive())
+                .build();
+    }
+
+    public ListOrderDTO toListOrderDTO(@NonNull Order order) {
+        return new ListOrderDTO()
+                .builder()
+                .id(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .dueDate(order.getDueDate())
+                .createdAt(order.getCreatedAt())
+                .deliveredAt(order.getDeliveredAt())
+                .customer(this.customerConverter.toListOrderCustomerDTO(order.getCustomer()))
                 .isActive(order.getIsActive())
                 .build();
     }

@@ -2,10 +2,13 @@ package com.meuatelieweb.backend.domain.order;
 
 import com.meuatelieweb.backend.domain.customer.Customer;
 import com.meuatelieweb.backend.domain.orderitem.OrderItem;
+import jakarta.annotation.Generated;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -22,7 +25,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private Double cost;
+    private Integer orderNumber;
 
     private LocalDateTime dueDate;
 
@@ -36,7 +39,7 @@ public class Order {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_order")
-    private Set<OrderItem> orderItems;
+    private List<OrderItem> orderItems;
 
     @Builder.Default
     private Boolean isActive = true;

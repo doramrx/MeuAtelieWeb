@@ -1,5 +1,6 @@
 package com.meuatelieweb.backend.domain.measure;
 
+import com.meuatelieweb.backend.domain.adjust.Adjust;
 import com.meuatelieweb.backend.domain.measure.dto.MeasureDTO;
 import com.meuatelieweb.backend.domain.measure.dto.SaveUpdateMeasureDTO;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,6 +34,11 @@ public class MeasureService {
         return repository.findById(id)
                 .map(converter::toMeasureDTO)
                 .orElseThrow(() -> new EntityNotFoundException("The given measure does not exist"));
+    }
+
+    public Measure findByNameAndIsActiveTrue(@NonNull String name) {
+        return repository.findByNameAndIsActiveTrue(name)
+                .orElseThrow(() -> new EntityNotFoundException("The given measure does not exist or is already inactive"));
     }
 
     @Transactional

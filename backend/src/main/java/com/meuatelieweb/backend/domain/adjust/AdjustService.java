@@ -2,6 +2,7 @@ package com.meuatelieweb.backend.domain.adjust;
 
 import com.meuatelieweb.backend.domain.adjust.dto.AdjustDTO;
 import com.meuatelieweb.backend.domain.adjust.dto.SaveUpdateAdjustDTO;
+import com.meuatelieweb.backend.domain.customeradjust.CustomerAdjust;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -29,10 +31,15 @@ public class AdjustService {
         return repository.findAll(specification, pageable).map(converter::toAdjustDTO);
     }
 
-    public AdjustDTO findById(UUID id) {
+    public AdjustDTO findById(@NonNull UUID id) {
         return repository.findById(id)
                 .map(converter::toAdjustDTO)
                 .orElseThrow(() -> new EntityNotFoundException("The given adjust does not exist"));
+    }
+
+    public Adjust findByNameAndIsActiveTrue(@NonNull String name) {
+        return repository.findByNameAndIsActiveTrue(name)
+                .orElseThrow(() -> new EntityNotFoundException("The given adjust does not exist or is already inactive"));
     }
 
     @Transactional
@@ -109,5 +116,16 @@ public class AdjustService {
             throw new EntityNotFoundException("The given adjust does not exist or is already inactive");
         }
         repository.inactivateAdjustById(id);
+    }
+
+
+    public Set<Adjust> getAdjusts(Set<UUID> adjustsIds) {
+        Set<Adjust> adjusts = repository.findByIdInAndIsActiveTrue(adjustsIds);
+
+        if (adjusts.size() != adjustsIds.size()) {
+            throw new IllegalArgumentException("Some of the given id values are invalid");
+        }
+
+        return adjusts;
     }
 }

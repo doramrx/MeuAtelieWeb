@@ -1,6 +1,7 @@
 package com.meuatelieweb.backend.domain.orderitem;
 
 import com.meuatelieweb.backend.domain.customeradjust.CustomerAdjust;
+import com.meuatelieweb.backend.domain.order.Order;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,7 +11,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -19,6 +22,7 @@ import java.util.Set;
 @Entity
 @DiscriminatorValue("ADJUST")
 public class AdjustOrderItem extends OrderItem {
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "orderItem")
-    private Set<CustomerAdjust> customerAdjustments;
+    private List<CustomerAdjust> customerAdjustments;
 }

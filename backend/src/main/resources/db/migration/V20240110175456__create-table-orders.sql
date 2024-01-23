@@ -1,9 +1,15 @@
+create sequence orders_order_number_seq
+increment 1
+start 1;
+
 create table orders (
     id uuid primary key,
-    order_number serial not null,
-    cost double precision not null,
+    order_number int default nextval('orders_order_number_seq'),
     due_date timestamp not null,
     created_at timestamp not null,
     delivered_at timestamp,
     id_customer uuid references customers(id)
 );
+
+alter sequence orders_order_number_seq
+owned by orders.order_number;

@@ -31,4 +31,6 @@ public interface MeasureRepository extends JpaRepository<Measure, UUID> {
             """)
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     void inactivateMeasureById(UUID id);
+
+    Optional<Measure> findByNameAndIsActiveTrue(String name);
 }

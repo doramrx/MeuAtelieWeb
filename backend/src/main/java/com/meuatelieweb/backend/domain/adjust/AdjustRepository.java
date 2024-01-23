@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -17,6 +18,8 @@ public interface AdjustRepository extends JpaRepository<Adjust, UUID> {
     Optional<Adjust> findByIdAndIsActiveTrue(UUID id);
 
     Page<Adjust> findAll(Specification<Adjust> specification, Pageable pageable);
+
+    Set<Adjust> findByIdInAndIsActiveTrue(Set<UUID> ids);
 
     boolean existsByIdAndIsActiveTrue(UUID id);
 
@@ -31,4 +34,6 @@ public interface AdjustRepository extends JpaRepository<Adjust, UUID> {
             """)
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     void inactivateAdjustById(UUID id);
+
+    Optional<Adjust> findByNameAndIsActiveTrue(String name);
 }
