@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 public class CustomerMeasureService {
 
@@ -18,22 +22,30 @@ public class CustomerMeasureService {
     @Autowired
     private MeasureService measureService;
 
-/*    @Transactional
-    public CustomerMeasure addCustomerMeasure(
+    @Transactional
+    public List<CustomerMeasure> addCustomerMeasures(
             @NonNull
-            SaveCustomerMeasureDTO saveCustomerMeasureDTO,
+            OrderItem item,
             @NonNull
-            OrderItem orderItem
+            Set<SaveCustomerMeasureDTO> saveCustomerMeasures
     ) {
+        Set<Measure> measures = measureService.getMeasures(
+                saveCustomerMeasures.stream()
+                        .map(SaveCustomerMeasureDTO::getMeasurementId)
+                        .collect(Collectors.toSet())
+        );
 
-        Measure measure = measureService.findByNameAndIsActiveTrue(saveCustomerMeasureDTO.getMeasurementName());
+        List<CustomerMeasure> customerMeasures = saveCustomerMeasures.stream().map(customerMeasure ->
+            CustomerMeasure.builder()
+                    .measurementValue(customerMeasure.getMeasurementValue())
+                    .measure(measures.stream()
+                            .filter(measure -> customerMeasure.getMeasurementId().equals(measure.getId()))
+                            .findFirst().get()
+                    )
+                    .orderItem(item)
+                    .build()
+        ).toList();
 
-        CustomerMeasure customerMeasure = CustomerMeasure.builder()
-                .measure(measure)
-                .measurementValue(saveCustomerMeasureDTO.getMeasurementValue())
-                .orderItem(orderItem)
-                .build();
-
-        return repository.save(customerMeasure);
-    }*/
+        return repository.saveAllAndFlush(customerMeasures);
+    }
 }

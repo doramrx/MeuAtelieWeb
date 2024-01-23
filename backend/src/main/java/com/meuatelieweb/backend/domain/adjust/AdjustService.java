@@ -2,7 +2,6 @@ package com.meuatelieweb.backend.domain.adjust;
 
 import com.meuatelieweb.backend.domain.adjust.dto.AdjustDTO;
 import com.meuatelieweb.backend.domain.adjust.dto.SaveUpdateAdjustDTO;
-import com.meuatelieweb.backend.domain.customeradjust.CustomerAdjust;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +34,6 @@ public class AdjustService {
         return repository.findById(id)
                 .map(converter::toAdjustDTO)
                 .orElseThrow(() -> new EntityNotFoundException("The given adjust does not exist"));
-    }
-
-    public Adjust findByNameAndIsActiveTrue(@NonNull String name) {
-        return repository.findByNameAndIsActiveTrue(name)
-                .orElseThrow(() -> new EntityNotFoundException("The given adjust does not exist or is already inactive"));
     }
 
     @Transactional

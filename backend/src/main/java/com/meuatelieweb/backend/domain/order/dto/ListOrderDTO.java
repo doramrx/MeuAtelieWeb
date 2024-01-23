@@ -17,9 +17,9 @@ public class ListOrderDTO {
     private UUID id;
     private Integer orderNumber;
     private Double cost;
-    private LocalDateTime dueDate;
     private LocalDateTime createdAt;
-    private LocalDateTime deliveredAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime finishedAt;
     private ListOrderCustomerDTO customer;
     private Boolean isActive;
 }

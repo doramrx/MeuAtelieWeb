@@ -12,7 +12,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class SaveOrderDTO {
-    private LocalDateTime dueDate;
     private UUID customerId;
     private Set<SaveOrderItemDTO> items;
 }

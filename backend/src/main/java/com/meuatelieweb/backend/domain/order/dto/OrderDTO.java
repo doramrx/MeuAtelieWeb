@@ -19,9 +19,9 @@ import java.util.UUID;
 public class OrderDTO {
     private UUID id;
     private Integer orderNumber;
-    private LocalDateTime dueDate;
     private LocalDateTime createdAt;
-    private LocalDateTime deliveredAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime finishedAt;
     private CustomerDTO customer;
     private Set<OrderItemDTO> orderItems;
     private Boolean isActive;

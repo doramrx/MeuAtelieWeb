@@ -12,16 +12,12 @@ public class OrderSpecification {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("orderNumber"), orderNumber);
     }
 
-    private static Specification<Order> filterByDueDate(LocalDateTime dueDate) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("dueDate"), dueDate);
-    }
-
     private static Specification<Order> filterByCreatedAt(LocalDateTime createdAt) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("createdAt"), createdAt);
     }
 
-    private static Specification<Order> filterByDeliveredAt(LocalDateTime deliveredAt) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("deliveredAt"), deliveredAt);
+    private static Specification<Order> filterByFinishedAt(LocalDateTime finishedAt) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("finishedAt"), finishedAt);
     }
 
     private static Specification<Order> filterByCustomerName(String customerName) {
@@ -46,9 +42,8 @@ public class OrderSpecification {
 
     public static Specification<Order> applyFilter(
             Integer orderNumber,
-            LocalDateTime dueDate,
             LocalDateTime createdAt,
-            LocalDateTime deliveredAt,
+            LocalDateTime finishedAt,
             String customerName,
             String customerEmail,
             Boolean isActive)
@@ -59,16 +54,12 @@ public class OrderSpecification {
             specification = specification.and(filterByOrderNumber(orderNumber));
         }
 
-        if (dueDate != null && !dueDate.equals(LocalDateTime.MIN)) {
-            specification = specification.and(filterByDueDate(dueDate));
-        }
-
         if (createdAt != null && !createdAt.equals(LocalDateTime.MIN)) {
             specification = specification.and(filterByCreatedAt(createdAt));
         }
 
-        if (deliveredAt != null && !deliveredAt.equals(LocalDateTime.MIN)) {
-            specification = specification.and(filterByDeliveredAt(deliveredAt));
+        if (finishedAt != null && !finishedAt.equals(LocalDateTime.MIN)) {
+            specification = specification.and(filterByFinishedAt(finishedAt));
         }
 
         if (customerName != null && !customerName.isBlank()) {

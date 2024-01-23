@@ -1,7 +1,6 @@
 package com.meuatelieweb.backend.domain.orderitem;
 
 import com.meuatelieweb.backend.domain.customeradjust.CustomerAdjust;
-import com.meuatelieweb.backend.domain.order.Order;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,8 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 @Getter
 @Setter

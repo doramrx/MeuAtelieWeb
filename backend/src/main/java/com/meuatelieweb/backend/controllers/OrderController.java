@@ -31,12 +31,10 @@ public class OrderController {
             Pageable pageable,
             @RequestParam(name = "orderNumber", required = false)
             Integer orderNumber,
-            @RequestParam(name = "dueDate", required = false)
-            LocalDateTime dueDate,
             @RequestParam(name = "createdAt", required = false)
             LocalDateTime createdAt,
-            @RequestParam(name = "deliveredAt", required = false)
-            LocalDateTime deliveredAt,
+            @RequestParam(name = "finishedAt", required = false)
+            LocalDateTime finishedAt,
             @RequestParam(name = "customerName", required = false)
             String customerName,
             @RequestParam(name = "customerEmail", required = false)
@@ -45,7 +43,7 @@ public class OrderController {
             Boolean isActive
     ) {
         Page<ListOrderDTO> orderDTOPage = service.findAll(
-                pageable, orderNumber, dueDate, createdAt, deliveredAt, customerName, customerEmail, isActive
+                pageable, orderNumber, createdAt, finishedAt, customerName, customerEmail, isActive
         ).map(converter::toListOrderDTO);
 
         return ResponseEntity.ok().body(orderDTOPage);
