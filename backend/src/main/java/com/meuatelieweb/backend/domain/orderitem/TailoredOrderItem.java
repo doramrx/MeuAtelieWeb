@@ -7,7 +7,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import lombok.*;
 
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,6 +16,7 @@ import java.util.Set;
 @Entity
 @DiscriminatorValue("TAILORED")
 public class TailoredOrderItem extends OrderItem{
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "orderItem")
-    private Set<CustomerMeasure> customerMeasures;
+    private List<CustomerMeasure> customerMeasures;
 }

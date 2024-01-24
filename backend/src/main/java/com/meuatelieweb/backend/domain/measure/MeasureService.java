@@ -1,6 +1,5 @@
 package com.meuatelieweb.backend.domain.measure;
 
-import com.meuatelieweb.backend.domain.adjust.Adjust;
 import com.meuatelieweb.backend.domain.measure.dto.MeasureDTO;
 import com.meuatelieweb.backend.domain.measure.dto.SaveUpdateMeasureDTO;
 import jakarta.persistence.EntityNotFoundException;
@@ -13,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -34,11 +34,6 @@ public class MeasureService {
         return repository.findById(id)
                 .map(converter::toMeasureDTO)
                 .orElseThrow(() -> new EntityNotFoundException("The given measure does not exist"));
-    }
-
-    public Measure findByNameAndIsActiveTrue(@NonNull String name) {
-        return repository.findByNameAndIsActiveTrue(name)
-                .orElseThrow(() -> new EntityNotFoundException("The given measure does not exist or is already inactive"));
     }
 
     @Transactional
@@ -89,5 +84,15 @@ public class MeasureService {
             throw new EntityNotFoundException("The given measure does not exist or is already inactive");
         }
         repository.inactivateMeasureById(id);
+    }
+
+    public Set<Measure> getMeasures(Set<UUID> measuresIds) {
+        Set<Measure> measures = repository.findByIdInAndIsActiveTrue(measuresIds);
+
+        if (measures.size() != measuresIds.size()) {
+            throw new IllegalArgumentException("Some of the given id measures are invalid");
+        }
+
+        return measures;
     }
 }

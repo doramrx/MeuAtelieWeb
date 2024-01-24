@@ -4,7 +4,6 @@ import com.meuatelieweb.backend.domain.customer.Customer;
 import com.meuatelieweb.backend.domain.customer.CustomerService;
 import com.meuatelieweb.backend.domain.order.dto.SaveOrderDTO;
 import com.meuatelieweb.backend.domain.orderitem.*;
-import com.meuatelieweb.backend.domain.orderitem.dto.SaveOrderItemDTO;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -34,15 +31,14 @@ public class OrderService {
     public Page<Order> findAll(
             Pageable pageable,
             Integer orderNumber,
-            LocalDateTime dueDate,
             LocalDateTime createdAt,
-            LocalDateTime deliveredAt,
+            LocalDateTime finishedAt,
             String customerName,
             String customerEmail,
             Boolean isActive)
     {
         Specification<Order> specification = OrderSpecification.applyFilter(
-                orderNumber, dueDate, createdAt, deliveredAt, customerName, customerEmail, isActive
+                orderNumber, createdAt, finishedAt, customerName, customerEmail, isActive
         );
 
         return repository.findAll(specification, pageable);
@@ -59,33 +55,46 @@ public class OrderService {
 
         Order order = Order.builder()
                 .orderNumber(nextOrderNumber)
-                .dueDate(saveOrderDTO.getDueDate())
                 .createdAt(LocalDateTime.now())
                 .customer(customer)
                 .build();
 
-        List<OrderItem> orderItems = orderItemService.addOrderItems(order, saveOrderDTO.getItems());
-        order.setOrderItems(orderItems);
+        Order savedOrder = repository.saveAndFlush(order);
 
-        //
-//        return this.updateOrderWithItems(saveOrderDTO, savedOrder);
-        return repository.saveAndFlush(order);
+        List<OrderItem> orderItems = orderItemService.addOrderItems(savedOrder, saveOrderDTO.getItems());
+        savedOrder.setOrderItems(orderItems);
+
+        return repository.saveAndFlush(savedOrder);
     }
-/*    @Transactional
-    public Order updateOrderWithItems(SaveOrderDTO saveOrderDTO, Order order) {
-        //Set<OrderItem> orderItems = new HashSet<>();
-        Double totalCost = 0.0;
 
-        for (SaveOrderItemDTO saveOrderItemDTO : saveOrderDTO.getItems()) {
-            OrderItem savedOrderItem = orderItemService.addOrderItem(saveOrderItemDTO, order.getId());
-            totalCost += savedOrderItem.getCost();
-            //orderItems.add(savedOrderItem);
+    @Transactional
+    public void deleteOrder(@NonNull UUID id) {
+
+        Order order = repository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new EntityNotFoundException("The given order does not exist or is already inactive"));
+
+        orderItemService.deleteOrderItems(order.getOrderItems());
+
+        repository.inactivateOrderById(id);
+    }
+
+    @Transactional
+    public void deliverItem(UUID orderId, UUID itemId) {
+
+        Order order = repository.findByIdAndIsActiveTrue(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("The given order does not exist or is already inactive"));
+
+        orderItemService.deliverItem(itemId);
+
+        long notDeliveredItems = order.getOrderItems().stream()
+                .filter(item -> item.getDeliveredAt() == null).count();
+
+        if (notDeliveredItems == 0) {
+            order.setFinishedAt(LocalDateTime.now());
         }
 
-        //order.setCost(totalCost);
-        //order.setOrderItems(orderItems);
+        order.setUpdatedAt(LocalDateTime.now());
 
-        return repository.save(order);
-    }*/
-
+        repository.save(order);
+    }
 }

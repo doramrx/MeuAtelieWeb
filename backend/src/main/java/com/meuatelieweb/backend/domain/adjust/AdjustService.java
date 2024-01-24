@@ -31,11 +31,6 @@ public class AdjustService {
                 .orElseThrow(() -> new EntityNotFoundException("The given adjust does not exist"));
     }
 
-    public Adjust findByNameAndIsActiveTrue(@NonNull String name) {
-        return repository.findByNameAndIsActiveTrue(name)
-                .orElseThrow(() -> new EntityNotFoundException("The given adjust does not exist or is already inactive"));
-    }
-
     @Transactional
     public Adjust addAdjust(
             @NonNull
@@ -117,7 +112,7 @@ public class AdjustService {
         Set<Adjust> adjusts = repository.findByIdInAndIsActiveTrue(adjustsIds);
 
         if (adjusts.size() != adjustsIds.size()) {
-            throw new IllegalArgumentException("Some of the given id values are invalid");
+            throw new IllegalArgumentException("Some of the given id adjusts are invalid");
         }
 
         return adjusts;

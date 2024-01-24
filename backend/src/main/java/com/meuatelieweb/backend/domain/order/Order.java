@@ -2,14 +2,11 @@ package com.meuatelieweb.backend.domain.order;
 
 import com.meuatelieweb.backend.domain.customer.Customer;
 import com.meuatelieweb.backend.domain.orderitem.OrderItem;
-import jakarta.annotation.Generated;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -27,11 +24,11 @@ public class Order {
 
     private Integer orderNumber;
 
-    private LocalDateTime dueDate;
-
     private LocalDateTime createdAt;
 
-    private LocalDateTime deliveredAt;
+    private LocalDateTime updatedAt;
+
+    private LocalDateTime finishedAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_customer", nullable = false)

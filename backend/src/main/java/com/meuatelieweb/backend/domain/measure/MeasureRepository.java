@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -17,6 +18,8 @@ public interface MeasureRepository extends JpaRepository<Measure, UUID> {
     Optional<Measure> findByIdAndIsActiveTrue(UUID id);
 
     Page<Measure> findAll(Specification<Measure> specification, Pageable pageable);
+
+    Set<Measure> findByIdInAndIsActiveTrue(Set<UUID> ids);
 
     boolean existsByIdAndIsActiveTrue(UUID id);
 
@@ -31,6 +34,4 @@ public interface MeasureRepository extends JpaRepository<Measure, UUID> {
             """)
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     void inactivateMeasureById(UUID id);
-
-    Optional<Measure> findByNameAndIsActiveTrue(String name);
 }

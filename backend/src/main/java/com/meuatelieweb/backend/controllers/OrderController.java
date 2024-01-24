@@ -20,6 +20,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("orders")
 public class OrderController {
+
     @Autowired
     private OrderService service;
 
@@ -31,12 +32,10 @@ public class OrderController {
             Pageable pageable,
             @RequestParam(name = "orderNumber", required = false)
             Integer orderNumber,
-            @RequestParam(name = "dueDate", required = false)
-            LocalDateTime dueDate,
             @RequestParam(name = "createdAt", required = false)
             LocalDateTime createdAt,
-            @RequestParam(name = "deliveredAt", required = false)
-            LocalDateTime deliveredAt,
+            @RequestParam(name = "finishedAt", required = false)
+            LocalDateTime finishedAt,
             @RequestParam(name = "customerName", required = false)
             String customerName,
             @RequestParam(name = "customerEmail", required = false)
@@ -45,7 +44,7 @@ public class OrderController {
             Boolean isActive
     ) {
         Page<ListOrderDTO> orderDTOPage = service.findAll(
-                pageable, orderNumber, dueDate, createdAt, deliveredAt, customerName, customerEmail, isActive
+                pageable, orderNumber, createdAt, finishedAt, customerName, customerEmail, isActive
         ).map(converter::toListOrderDTO);
 
         return ResponseEntity.ok().body(orderDTOPage);
@@ -71,5 +70,19 @@ public class OrderController {
                 .toUri();
 
         return ResponseEntity.created(uri).body(savedOrder);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable UUID id) {
+        service.deleteOrder(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{orderId}/items/{itemId}/deliver")
+    public ResponseEntity<Void> deliverItem(@PathVariable UUID orderId, @PathVariable UUID itemId) {
+        service.deliverItem(orderId, itemId);
+
+        return ResponseEntity.ok().build();
     }
 }

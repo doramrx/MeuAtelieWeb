@@ -4,10 +4,16 @@ import com.meuatelieweb.backend.domain.customermeasure.dto.SaveCustomerMeasureDT
 import com.meuatelieweb.backend.domain.measure.Measure;
 import com.meuatelieweb.backend.domain.measure.MeasureService;
 import com.meuatelieweb.backend.domain.orderitem.OrderItem;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerMeasureService {
@@ -18,22 +24,52 @@ public class CustomerMeasureService {
     @Autowired
     private MeasureService measureService;
 
-/*    @Transactional
-    public CustomerMeasure addCustomerMeasure(
+    @Transactional
+    public List<CustomerMeasure> addCustomerMeasures(
             @NonNull
-            SaveCustomerMeasureDTO saveCustomerMeasureDTO,
+            OrderItem item,
             @NonNull
-            OrderItem orderItem
+            Set<SaveCustomerMeasureDTO> saveCustomerMeasures
     ) {
 
-        Measure measure = measureService.findByNameAndIsActiveTrue(saveCustomerMeasureDTO.getMeasurementName());
+        this.validateItemMeasureValues(saveCustomerMeasures);
 
-        CustomerMeasure customerMeasure = CustomerMeasure.builder()
-                .measure(measure)
-                .measurementValue(saveCustomerMeasureDTO.getMeasurementValue())
-                .orderItem(orderItem)
-                .build();
+        Set<Measure> measures = measureService.getMeasures(
+                saveCustomerMeasures.stream()
+                        .map(SaveCustomerMeasureDTO::getMeasurementId)
+                        .collect(Collectors.toSet())
+        );
 
-        return repository.save(customerMeasure);
-    }*/
+        List<CustomerMeasure> customerMeasures = saveCustomerMeasures.stream().map(customerMeasure ->
+                CustomerMeasure.builder()
+                        .measurementValue(customerMeasure.getMeasurementValue())
+                        .measure(measures.stream()
+                                .filter(measure -> customerMeasure.getMeasurementId().equals(measure.getId()))
+                                .findFirst().get()
+                        )
+                        .orderItem(item)
+                        .build()
+        ).toList();
+
+        return repository.saveAllAndFlush(customerMeasures);
+    }
+
+    private void validateItemMeasureValues(Set<SaveCustomerMeasureDTO> saveCustomerMeasures) {
+        saveCustomerMeasures.forEach(measureValue -> {
+            if (measureValue.getMeasurementValue() == null) {
+                throw new IllegalArgumentException("The given measure value cannot be empty");
+            }
+            if (measureValue.getMeasurementValue() < 0.01) {
+                throw new IllegalArgumentException("The given measure value cannot be lesser than 0.01");
+            }
+        });
+    }
+
+    @Transactional
+    public void deleteCustomerMeasures(@NonNull Set<UUID> ids) {
+        if (!repository.existsByIdIn(ids)) {
+            throw new EntityNotFoundException("Some of the given customer measures do not exist or are already inactive");
+        }
+        repository.inactivateCustomerMeasureById(ids);
+    }
 }

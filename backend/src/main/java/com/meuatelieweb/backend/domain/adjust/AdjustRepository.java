@@ -34,6 +34,4 @@ public interface AdjustRepository extends JpaRepository<Adjust, UUID> {
             """)
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     void inactivateAdjustById(UUID id);
-
-    Optional<Adjust> findByNameAndIsActiveTrue(String name);
 }

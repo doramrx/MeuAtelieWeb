@@ -4,6 +4,7 @@ import com.meuatelieweb.backend.domain.order.Order;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -26,6 +27,12 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_order")
     private Order order;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime dueDate;
+
+    private LocalDateTime deliveredAt;
 
     @Builder.Default
     private Boolean isActive = true;

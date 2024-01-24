@@ -3,6 +3,7 @@ create table orders (
     order_number SERIAL,
     due_date timestamp not null,
     created_at timestamp not null,
-    delivered_at timestamp,
+    updated_at timestamp,
+    finished_at timestamp,
     id_customer uuid references customers(id)
 );
