@@ -2,6 +2,8 @@ package com.meuatelieweb.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meuatelieweb.backend.controllers.AdjustController;
+import com.meuatelieweb.backend.domain.adjust.Adjust;
+import com.meuatelieweb.backend.domain.adjust.AdjustConverter;
 import com.meuatelieweb.backend.domain.adjust.AdjustService;
 import com.meuatelieweb.backend.domain.adjust.dto.AdjustDTO;
 import com.meuatelieweb.backend.domain.adjust.dto.SaveUpdateAdjustDTO;
@@ -32,7 +34,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @WebMvcTest(controllers = {AdjustController.class})
 @ExtendWith(MockitoExtension.class)
@@ -49,35 +52,45 @@ class AdjustControllerTest {
     private AdjustController adjustController;
 
     @MockBean
+    private AdjustConverter adjustConverterMock;
+
+    @MockBean
     private AdjustService adjustServiceMock;
+
+    private void mockConverterToAdjustDTO(Adjust adjust, AdjustDTO adjustDTO) {
+        BDDMockito.when(adjustConverterMock.toAdjustDTO(adjust))
+                .thenReturn(adjustDTO);
+    }
 
     @DisplayName("Test findAll method")
     @Nested
     class FindAllTests {
 
-        private void mockServiceFindAll(Page<AdjustDTO> adjustsList) {
+        private void mockServiceFindAll(Page<Adjust> adjustPage) {
             BDDMockito.when(adjustServiceMock.findAll(
                     Mockito.any(Pageable.class),
                     Mockito.anyString(),
                     Mockito.anyBoolean())
-            ).thenReturn(adjustsList);
+            ).thenReturn(adjustPage);
         }
 
         @Test
         @DisplayName("findAll returns STATUS CODE 200 and a page of adjusts when successful")
         void findAll_ReturnsStatusCode200AndPageOfAdjusts_WhenSuccessful() throws Exception {
 
-            List<AdjustDTO> adjustDTOList = List.of(
-                    createValidAdjustDTO(UUID.randomUUID()),
-                    createValidAdjustDTO(UUID.randomUUID())
+            List<Adjust> adjusts = List.of(
+                    createValidAdjust(),
+                    createValidAdjust()
             );
 
-            Page<AdjustDTO> adjustsList = new PageImpl<>(
-                    adjustDTOList,
+            Page<Adjust> adjustPage = new PageImpl<>(
+                    adjusts,
                     Pageable.ofSize(20),
                     20);
 
-            this.mockServiceFindAll(adjustsList);
+            this.mockServiceFindAll(adjustPage);
+            mockConverterToAdjustDTO(adjusts.get(0), createValidAdjustDTO(adjusts.get(0).getId()));
+            mockConverterToAdjustDTO(adjusts.get(1), createValidAdjustDTO(adjusts.get(1).getId()));
 
             ResultActions response = mockMvc.perform(
                     MockMvcRequestBuilders.get("/adjusts")
@@ -98,12 +111,12 @@ class AdjustControllerTest {
         @DisplayName("findAll returns STATUS CODE 200 and empty page of adjusts when adjusts do not exist")
         void findAll_ReturnsStatusCode200AndEmptyPageOfAdjusts_WhenAdjustsDoNotExist() throws Exception {
 
-            Page<AdjustDTO> adjustsList = new PageImpl<>(
+            Page<Adjust> adjustPage = new PageImpl<>(
                     List.of(),
                     Pageable.ofSize(20),
                     20);
 
-            this.mockServiceFindAll(adjustsList);
+            this.mockServiceFindAll(adjustPage);
 
             ResultActions response = mockMvc.perform(
                     MockMvcRequestBuilders.get("/adjusts")
@@ -129,13 +142,15 @@ class AdjustControllerTest {
         @DisplayName("findById returns STATUS CODE 200 and a adjust when successful")
         void findById_ReturnsStatusCode200AndAdjust_WhenSuccessful() throws Exception {
 
-            AdjustDTO adjustDTO = createValidAdjustDTO(UUID.randomUUID());
+            Adjust adjust = createValidAdjust();
+            AdjustDTO validAdjustDTO = createValidAdjustDTO(adjust.getId());
 
             BDDMockito.when(adjustServiceMock.findById(Mockito.any(UUID.class)))
-                    .thenReturn(adjustDTO);
+                    .thenReturn(adjust);
+            mockConverterToAdjustDTO(adjust, validAdjustDTO);
 
             ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/adjusts/{id}", adjustDTO.getId())
+                    MockMvcRequestBuilders.get("/adjusts/{id}", adjust.getId())
                             .contentType(MediaType.APPLICATION_JSON)
             );
 
@@ -148,10 +163,10 @@ class AdjustControllerTest {
                                         AdjustDTO.class
                                 );
 
-                                assertEquals(adjustDTO.getId(), adjustDTOFound.getId());
-                                assertEquals(adjustDTO.getName(), adjustDTOFound.getName());
-                                assertEquals(adjustDTO.getCost(), adjustDTOFound.getCost());
-                                assertEquals(adjustDTO.getIsActive(), adjustDTOFound.getIsActive());
+                                assertEquals(adjust.getId(), adjustDTOFound.getId());
+                                assertEquals(adjust.getName(), adjustDTOFound.getName());
+                                assertEquals(adjust.getCost(), adjustDTOFound.getCost());
+                                assertEquals(adjust.getIsActive(), adjustDTOFound.getIsActive());
                             }
                     )
                     .andDo(MockMvcResultHandlers.print());
@@ -186,10 +201,12 @@ class AdjustControllerTest {
         @DisplayName("addAdjust returns STATUS CODE 201 and adjust when successful")
         void addAdjust_ReturnsStatusCode201AndAdjust_WhenSuccessful() throws Exception {
             SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
-            AdjustDTO adjustDTO = createValidAdjustDTO(UUID.randomUUID());
+            Adjust adjust = createValidAdjust();
+            AdjustDTO validAdjustDTO = createValidAdjustDTO(adjust.getId());
 
             BDDMockito.when(adjustServiceMock.addAdjust(Mockito.any(SaveUpdateAdjustDTO.class)))
-                    .thenReturn(adjustDTO);
+                    .thenReturn(adjust);
+            mockConverterToAdjustDTO(adjust, validAdjustDTO);
 
             ResultActions response = mockMvc.perform(
                     MockMvcRequestBuilders.post("/adjusts")
@@ -197,15 +214,15 @@ class AdjustControllerTest {
                             .content(objectMapper.writeValueAsBytes(saveUpdateAdjustDTO))
             );
 
-            String expectedLocation = String.format("http://localhost/adjusts/%s", adjustDTO.getId());
+            String expectedLocation = String.format("http://localhost/adjusts/%s", adjust.getId());
 
             response
                     .andExpectAll(
                             MockMvcResultMatchers.status().isCreated(),
-                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(adjustDTO.getId())), UUID.class),
-                            MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(adjustDTO.getName()), String.class),
-                            MockMvcResultMatchers.jsonPath("$.cost", CoreMatchers.is(String.valueOf(adjustDTO.getCost())), String.class),
-                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(String.valueOf(adjustDTO.getIsActive())), String.class),
+                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(adjust.getId())), UUID.class),
+                            MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(adjust.getName()), String.class),
+                            MockMvcResultMatchers.jsonPath("$.cost", CoreMatchers.is(String.valueOf(adjust.getCost())), String.class),
+                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(String.valueOf(adjust.getIsActive())), String.class),
 
                             result -> {
                                 String redirectedUrl = result.getResponse().getRedirectedUrl();
@@ -304,13 +321,15 @@ class AdjustControllerTest {
         @DisplayName("updateAdjust returns STATUS CODE 200 and updates adjust when successful")
         void updateAdjust_ReturnsStatusCode200AndUpdatesAdjust_WhenSuccessful() throws Exception {
             SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
-            AdjustDTO adjustDTO = createValidAdjustDTO(UUID.randomUUID());
+            Adjust adjust = createValidAdjust();
+            AdjustDTO validAdjustDTO = createValidAdjustDTO(adjust.getId());
 
             BDDMockito.when(adjustServiceMock.updateAdjust(Mockito.any(UUID.class), Mockito.any(SaveUpdateAdjustDTO.class)))
-                    .thenReturn(adjustDTO);
+                    .thenReturn(adjust);
+            mockConverterToAdjustDTO(adjust, validAdjustDTO);
 
             ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/adjusts/{id}", adjustDTO.getId())
+                    MockMvcRequestBuilders.put("/adjusts/{id}", adjust.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsBytes(saveUpdateAdjustDTO))
             );
@@ -318,10 +337,10 @@ class AdjustControllerTest {
             response
                     .andExpectAll(
                             MockMvcResultMatchers.status().isOk(),
-                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(adjustDTO.getId()))),
+                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(adjust.getId()))),
                             MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(saveUpdateAdjustDTO.getName())),
                             MockMvcResultMatchers.jsonPath("$.cost", CoreMatchers.is(saveUpdateAdjustDTO.getCost())),
-                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(adjustDTO.getIsActive()))
+                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(adjust.getIsActive()))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }

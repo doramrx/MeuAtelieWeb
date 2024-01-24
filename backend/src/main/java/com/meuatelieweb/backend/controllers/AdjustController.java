@@ -1,5 +1,6 @@
 package com.meuatelieweb.backend.controllers;
 
+import com.meuatelieweb.backend.domain.adjust.AdjustConverter;
 import com.meuatelieweb.backend.domain.adjust.AdjustService;
 import com.meuatelieweb.backend.domain.adjust.dto.AdjustDTO;
 import com.meuatelieweb.backend.domain.adjust.dto.SaveUpdateAdjustDTO;
@@ -20,6 +21,8 @@ public class AdjustController {
 
     @Autowired
     private AdjustService service;
+    @Autowired
+    private AdjustConverter converter;
 
     @GetMapping
     public ResponseEntity<Page<AdjustDTO>> findAll(
@@ -29,12 +32,14 @@ public class AdjustController {
             @RequestParam(name = "isActive", required = false)
             Boolean isActive
     ) {
-        return ResponseEntity.ok().body(service.findAll(pageable, name, isActive));
+        return ResponseEntity.ok().body(
+                service.findAll(pageable, name, isActive).map(converter::toAdjustDTO)
+        );
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AdjustDTO> findById(@PathVariable UUID id) {
-        AdjustDTO adjustDTO = service.findById(id);
+        AdjustDTO adjustDTO = converter.toAdjustDTO(service.findById(id));
 
         return ResponseEntity.ok().body(adjustDTO);
     }
@@ -44,7 +49,7 @@ public class AdjustController {
             @RequestBody @Valid SaveUpdateAdjustDTO saveAdjustDTO,
             UriComponentsBuilder uriComponentsBuilder
     ) {
-        AdjustDTO savedAdjust = service.addAdjust(saveAdjustDTO);
+        AdjustDTO savedAdjust = converter.toAdjustDTO(service.addAdjust(saveAdjustDTO));
 
         URI uri = uriComponentsBuilder
                 .path("/adjusts/{id}")
@@ -61,7 +66,7 @@ public class AdjustController {
             @Valid
             SaveUpdateAdjustDTO updateAdjustDTO
     ) {
-        AdjustDTO updatedAdjust = service.updateAdjust(id, updateAdjustDTO);
+        AdjustDTO updatedAdjust = converter.toAdjustDTO(service.updateAdjust(id, updateAdjustDTO));
 
         return ResponseEntity.ok().body(updatedAdjust);
     }
