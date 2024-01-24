@@ -1,12 +1,12 @@
 package com.meuatelieweb.backend.domain.adjust;
 
-import com.meuatelieweb.backend.domain.adjust.dto.AdjustDTO;
 import com.meuatelieweb.backend.domain.adjust.dto.SaveUpdateAdjustDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,9 +21,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.*;
+import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.createValidAdjust;
+import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.createValidSaveUpdateAdjustDTO;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Tests for Adjust Service")
@@ -34,13 +37,6 @@ class AdjustServiceTest {
 
     @Mock
     private AdjustRepository adjustRepositoryMock;
-
-    @Mock
-    private AdjustConverter adjustConverterMock;
-
-    private void mockConverterToAdjustDTO(AdjustDTO adjustDTO){
-        BDDMockito.when(adjustConverterMock.toAdjustDTO(any(Adjust.class))).thenReturn(adjustDTO);
-    }
 
     @DisplayName("Test findAll method")
     @Nested
@@ -58,18 +54,14 @@ class AdjustServiceTest {
 
             this.mockRepositoryFindAll(pageable);
 
-            AdjustDTO adjustDTO = createValidAdjustDTO(validAdjusts.get(0).getId());
-
-            mockConverterToAdjustDTO(adjustDTO);
-
-            List<AdjustDTO> adjustList = adjustService.findAll(
+            List<Adjust> adjustList = adjustService.findAll(
                     pageable.getPageable(), null, null
             ).toList();
 
             assertNotNull(adjustList);
             assertFalse(adjustList.isEmpty());
             assertEquals(1, adjustList.size());
-            assertEquals(adjustDTO, adjustList.get(0));
+            assertEquals(validAdjusts.get(0), adjustList.get(0));
         }
 
         @Test
@@ -79,7 +71,7 @@ class AdjustServiceTest {
 
             this.mockRepositoryFindAll(pageable);
 
-            List<AdjustDTO> adjustList = adjustService.findAll(
+            List<Adjust> adjustList = adjustService.findAll(
                     pageable.getPageable(), null, null
             ).toList();
 
@@ -92,34 +84,31 @@ class AdjustServiceTest {
     @Nested
     class FindByIdTests {
 
-        private void mockRepositoryFindById(){
+        private void mockRepositoryFindById(Adjust adjust) {
             BDDMockito.when(adjustRepositoryMock.findById(any(UUID.class)))
-                    .thenReturn(Optional.of(createValidAdjust()));
+                    .thenReturn(Optional.ofNullable(adjust));
         }
 
         @Test
         @DisplayName("findById returns adjust when successful")
         void findById_ReturnsAdjust_WhenSuccessful() {
-            AdjustDTO adjustDTO = createValidAdjustDTO(UUID.randomUUID());
+            Adjust adjust = createValidAdjust();
 
-            this.mockRepositoryFindById();
+            this.mockRepositoryFindById(adjust);
 
-            mockConverterToAdjustDTO(adjustDTO);
-
-            AdjustDTO adjustFound = adjustService.findById(UUID.randomUUID());
+            Adjust adjustFound = adjustService.findById(UUID.randomUUID());
 
             assertNotNull(adjustFound);
-            assertEquals(adjustDTO.getId(), adjustFound.getId());
-            assertEquals(adjustDTO.getName(), adjustFound.getName());
-            assertEquals(adjustDTO.getCost(), adjustFound.getCost());
-            assertEquals(adjustDTO.getIsActive(), adjustFound.getIsActive());
+            assertEquals(adjust.getId(), adjustFound.getId());
+            assertEquals(adjust.getName(), adjustFound.getName());
+            assertEquals(adjust.getCost(), adjustFound.getCost());
+            assertEquals(adjust.getIsActive(), adjustFound.getIsActive());
         }
 
         @Test
         @DisplayName("findById throws EntityNotFoundException when adjust is not found")
         void findById_ThrowsEntityNotFoundException_WhenAdjustIsNotFound() {
-            BDDMockito.when(adjustRepositoryMock.findById(any(UUID.class)))
-                    .thenReturn(Optional.empty());
+            this.mockRepositoryFindById(null);
 
             assertThrows(EntityNotFoundException.class,
                     () -> adjustService.findById(UUID.randomUUID()));
@@ -128,7 +117,7 @@ class AdjustServiceTest {
         @Test
         @DisplayName("findById throws EntityNotFoundException when id adjust is null")
         void findById_ThrowsEntityNotFoundException_WhenIdAdjustIsNull() {
-            assertThrows(EntityNotFoundException.class,
+            assertThrows(IllegalArgumentException.class,
                     () -> adjustService.findById(null));
         }
     }
@@ -137,24 +126,21 @@ class AdjustServiceTest {
     @Nested
     class AddAdjustTests {
 
-        private void mockRepositorySave(){
-            BDDMockito.when(adjustRepositoryMock.save(any(Adjust.class)))
-                    .thenReturn(createValidAdjust());
-        }
-
         @Test
         @DisplayName("addAdjust returns adjust when successful")
         void addAdjust_ReturnsAdjust_WhenSuccessful() {
-            AdjustDTO adjustDTO = createValidAdjustDTO(createValidAdjust().getId());
+            SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
+            ArgumentCaptor<Adjust> argumentCaptor = ArgumentCaptor.forClass(Adjust.class);
 
-            this.mockRepositorySave();
+            adjustService.addAdjust(createValidSaveUpdateAdjustDTO());
+            verify(adjustRepositoryMock, atMostOnce()).save(argumentCaptor.capture());
 
-            mockConverterToAdjustDTO(adjustDTO);
+            Adjust savedAdjust = argumentCaptor.getValue();
 
-            AdjustDTO adjustSaved = adjustService.addAdjust(createValidSaveUpdateAdjustDTO());
-
-            assertNotNull(adjustSaved);
-            assertEquals(adjustDTO, adjustSaved);
+            assertNotNull(savedAdjust);
+            assertEquals(saveUpdateAdjustDTO.getName(), savedAdjust.getName());
+            assertEquals(saveUpdateAdjustDTO.getCost(), savedAdjust.getCost());
+            assertTrue(savedAdjust.getIsActive());
         }
 
         @Test
@@ -208,38 +194,33 @@ class AdjustServiceTest {
     @Nested
     class UpdateAdjustTests {
 
-        private void mockRepositoryFindByIdAndIsActiveTrue() {
-            BDDMockito.when(adjustRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
-                    .thenReturn(Optional.of(createValidAdjust()));
-        }
+        private void mockRepositoryFindByIdAndIsActiveTrue(Adjust adjust) {
 
-        private void mockRepositorySave(){
-            BDDMockito.when(adjustRepositoryMock.save(any(Adjust.class)))
-                    .thenReturn(createValidAdjust());
+            BDDMockito.when(adjustRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
+                    .thenReturn(Optional.ofNullable(adjust));
         }
 
         @Test
         @DisplayName("updateAdjust updates adjust when successful")
         void updateAdjust_UpdatesAdjust_WhenSuccessful() {
-            AdjustDTO adjustDTO = createValidAdjustDTO(createValidAdjust().getId());
+            SaveUpdateAdjustDTO validSaveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
+            Adjust adjustSpy = spy(createValidAdjust());
 
-            this.mockRepositoryFindByIdAndIsActiveTrue();
-            this.mockRepositorySave();
+            this.mockRepositoryFindByIdAndIsActiveTrue(adjustSpy);
 
-            mockConverterToAdjustDTO(adjustDTO);
+            adjustService.updateAdjust(
+                    UUID.randomUUID(), validSaveUpdateAdjustDTO
+            );
 
-            AdjustDTO adjustUpdated = adjustService.updateAdjust(UUID.randomUUID(), createValidSaveUpdateAdjustDTO());
-
-            assertNotNull(adjustUpdated);
-            assertEquals(adjustDTO.getId(), adjustUpdated.getId());
-            assertEquals(adjustDTO.getName(), adjustUpdated.getName());
-            assertEquals(adjustDTO.getCost(), adjustUpdated.getCost());
-            assertEquals(adjustDTO.getIsActive(), adjustUpdated.getIsActive());
+            verify(adjustSpy, atLeastOnce()).setName(validSaveUpdateAdjustDTO.getName());
+            verify(adjustSpy, atLeastOnce()).setCost(validSaveUpdateAdjustDTO.getCost());
+            verify(adjustRepositoryMock, atMostOnce()).save(any(Adjust.class));
         }
 
         @Test
         @DisplayName("updateAdjust throws IllegalArgumentException when adjust is null")
         void updateAdjust_ThrowsIllegalArgumentException_WhenAdjustIsNull() {
+
             assertThrows(IllegalArgumentException.class,
                     () -> adjustService.updateAdjust(UUID.randomUUID(), null));
         }
@@ -247,6 +228,7 @@ class AdjustServiceTest {
         @Test
         @DisplayName("updateAdjust throws IllegalArgumentException when adjust id is null")
         void updateAdjust_ThrowsIllegalArgumentException_WhenAdjustIdIsNull() {
+
             assertThrows(IllegalArgumentException.class,
                     () -> adjustService.updateAdjust(null, createValidSaveUpdateAdjustDTO()));
         }
@@ -254,8 +236,8 @@ class AdjustServiceTest {
         @Test
         @DisplayName("updateAdjust throws EntityNotFoundException when adjust does not exist")
         void updateAdjust_ThrowsEntityNotFoundException_WhenAdjustDoesNotExist() {
-            BDDMockito.when(adjustRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
-                    .thenReturn(Optional.empty());
+
+            this.mockRepositoryFindByIdAndIsActiveTrue(null);
 
             assertThrows(EntityNotFoundException.class,
                     () -> adjustService.updateAdjust(UUID.randomUUID(), createValidSaveUpdateAdjustDTO()));
@@ -265,7 +247,7 @@ class AdjustServiceTest {
         @DisplayName("updateAdjust throws DuplicateKeyException when adjust name already exists")
         void updateAdjust_ThrowsDuplicateKeyException_WhenAdjustNameAlreadyExists() {
 
-            this.mockRepositoryFindByIdAndIsActiveTrue();
+            this.mockRepositoryFindByIdAndIsActiveTrue(createValidAdjust());
 
             BDDMockito.when(adjustRepositoryMock.existsByNameAndIdNot(anyString(), any(UUID.class)))
                     .thenReturn(true);
@@ -278,7 +260,7 @@ class AdjustServiceTest {
         @DisplayName("updateAdjust throws IllegalArgumentException when adjust cost is null")
         void updateAdjust_ThrowsIllegalArgumentException_WhenAdjustCostIsNull() {
 
-            this.mockRepositoryFindByIdAndIsActiveTrue();
+            this.mockRepositoryFindByIdAndIsActiveTrue(createValidAdjust());
 
             SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
             saveUpdateAdjustDTO.setCost(null);
@@ -291,7 +273,7 @@ class AdjustServiceTest {
         @DisplayName("updateAdjust throws IllegalArgumentException when adjust cost is lesser than 0.01 cent")
         void updateAdjust_ThrowsIllegalArgumentException_WhenAdjustCostIsLesserThan1Cent() {
 
-            this.mockRepositoryFindByIdAndIsActiveTrue();
+            this.mockRepositoryFindByIdAndIsActiveTrue(createValidAdjust());
 
             SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
             saveUpdateAdjustDTO.setCost(0.0);
