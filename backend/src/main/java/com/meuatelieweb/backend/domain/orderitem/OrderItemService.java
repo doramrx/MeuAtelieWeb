@@ -181,4 +181,30 @@ public class OrderItemService {
 
         repository.save(orderItem);
     }
+
+    @Transactional
+    public void singleDeleteCustomerAdjustFromItem(UUID itemId, UUID customerAdjustId) {
+
+        OrderItem orderItem = repository.findByIdAndIsActiveTrue(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("The given item does not exist or is already inactive"));
+
+        if (orderItem.getDeliveredAt() != null) {
+            throw new IllegalArgumentException("The customer adjust cannot be deleted, the item was already delivered");
+        }
+
+        customerAdjustService.singleDeleteCustomerAdjust(customerAdjustId);
+    }
+
+    @Transactional
+    public void singleDeleteCustomerMeasureFromItem(UUID itemId, UUID customerMeasureId) {
+
+        OrderItem orderItem = repository.findByIdAndIsActiveTrue(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("The given item does not exist or is already inactive"));
+
+        if (orderItem.getDeliveredAt() != null) {
+            throw new IllegalArgumentException("The customer measure cannot be deleted, the item was already delivered");
+        }
+
+        customerMeasureService.singleDeleteCustomerMeasure(customerMeasureId);
+    }
 }

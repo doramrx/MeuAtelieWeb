@@ -56,4 +56,12 @@ public class CustomerAdjustService {
         }
         repository.inactivateCustomerAdjustById(ids);
     }
+
+    @Transactional
+    public void singleDeleteCustomerAdjust(@NonNull UUID id) {
+        CustomerAdjust customerAdjust = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("The given customer adjust does not exist"));
+
+        repository.delete(customerAdjust);
+    }
 }

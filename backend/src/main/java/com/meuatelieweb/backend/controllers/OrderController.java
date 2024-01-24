@@ -85,4 +85,30 @@ public class OrderController {
 
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/{orderId}/items/{itemId}/adjusts/{customerAdjustId}")
+    public ResponseEntity<OrderDTO> singleDeleteCustomerAdjustFromItem(
+            @PathVariable UUID orderId,
+            @PathVariable UUID itemId,
+            @PathVariable UUID customerAdjustId) {
+
+        OrderDTO orderDTO = converter.toOrderDTO(
+                service.singleDeleteCustomerAdjustFromItem(orderId, itemId, customerAdjustId)
+        );
+
+        return ResponseEntity.ok().body(orderDTO);
+    }
+
+    @DeleteMapping("/{orderId}/items/{itemId}/measures/{customerMeasureId}")
+    public ResponseEntity<OrderDTO> singleDeleteCustomerMeasureFromItem(
+            @PathVariable UUID orderId,
+            @PathVariable UUID itemId,
+            @PathVariable UUID customerMeasureId) {
+
+        OrderDTO orderDTO = converter.toOrderDTO(
+                service.singleDeleteCustomerMeasureFromItem(orderId, itemId, customerMeasureId)
+        );
+
+        return ResponseEntity.ok().body(orderDTO);
+    }
 }

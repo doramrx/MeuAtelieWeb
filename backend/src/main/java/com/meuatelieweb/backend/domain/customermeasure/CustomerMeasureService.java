@@ -1,5 +1,6 @@
 package com.meuatelieweb.backend.domain.customermeasure;
 
+import com.meuatelieweb.backend.domain.customeradjust.CustomerAdjust;
 import com.meuatelieweb.backend.domain.customermeasure.dto.SaveCustomerMeasureDTO;
 import com.meuatelieweb.backend.domain.measure.Measure;
 import com.meuatelieweb.backend.domain.measure.MeasureService;
@@ -71,5 +72,13 @@ public class CustomerMeasureService {
             throw new EntityNotFoundException("Some of the given customer measures do not exist or are already inactive");
         }
         repository.inactivateCustomerMeasureById(ids);
+    }
+
+    @Transactional
+    public void singleDeleteCustomerMeasure(@NonNull UUID id) {
+        CustomerMeasure customerMeasure = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("The given customer measure does not exist"));
+
+        repository.delete(customerMeasure);
     }
 }

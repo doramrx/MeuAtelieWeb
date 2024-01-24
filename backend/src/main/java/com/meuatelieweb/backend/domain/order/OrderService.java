@@ -97,4 +97,30 @@ public class OrderService {
 
         repository.save(order);
     }
+
+    @Transactional
+    public Order singleDeleteCustomerAdjustFromItem(UUID orderId, UUID itemId, UUID customerAdjustId) {
+
+        Order order = repository.findByIdAndIsActiveTrue(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("The given order does not exist or is already inactive"));
+
+        orderItemService.singleDeleteCustomerAdjustFromItem(itemId, customerAdjustId);
+
+        order.setUpdatedAt(LocalDateTime.now());
+
+        return repository.save(order);
+    }
+
+    @Transactional
+    public Order singleDeleteCustomerMeasureFromItem(UUID orderId, UUID itemId, UUID customerMeasureId) {
+
+        Order order = repository.findByIdAndIsActiveTrue(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("The given order does not exist or is already inactive"));
+
+        orderItemService.singleDeleteCustomerMeasureFromItem(itemId, customerMeasureId);
+
+        order.setUpdatedAt(LocalDateTime.now());
+
+        return repository.save(order);
+    }
 }
