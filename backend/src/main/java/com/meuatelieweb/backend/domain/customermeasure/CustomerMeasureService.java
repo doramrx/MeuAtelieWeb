@@ -4,6 +4,7 @@ import com.meuatelieweb.backend.domain.customermeasure.dto.SaveCustomerMeasureDT
 import com.meuatelieweb.backend.domain.measure.Measure;
 import com.meuatelieweb.backend.domain.measure.MeasureService;
 import com.meuatelieweb.backend.domain.orderitem.OrderItem;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,16 +55,21 @@ public class CustomerMeasureService {
     }
 
     private void validateItemMeasureValues(Set<SaveCustomerMeasureDTO> saveCustomerMeasures) {
-        List<Double> measureValues = saveCustomerMeasures.stream()
-                .map(SaveCustomerMeasureDTO::getMeasurementValue).toList();
-
-        for (Double value : measureValues) {
-            if (value == null) {
+        saveCustomerMeasures.forEach(measureValue -> {
+            if (measureValue.getMeasurementValue() == null) {
                 throw new IllegalArgumentException("The given measure value cannot be empty");
             }
-            if (value < 0.01) {
+            if (measureValue.getMeasurementValue() < 0.01) {
                 throw new IllegalArgumentException("The given measure value cannot be lesser than 0.01");
             }
+        });
+    }
+
+    @Transactional
+    public void deleteCustomerMeasures(@NonNull Set<UUID> ids) {
+        if (!repository.existsByIdIn(ids)) {
+            throw new EntityNotFoundException("Some of the given customer measures do not exist or are already inactive");
         }
+        repository.inactivateCustomerMeasureById(ids);
     }
 }

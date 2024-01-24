@@ -66,4 +66,35 @@ public class OrderService {
 
         return repository.saveAndFlush(savedOrder);
     }
+
+    @Transactional
+    public void deleteOrder(@NonNull UUID id) {
+
+        Order order = repository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new EntityNotFoundException("The given order does not exist or is already inactive"));
+
+        orderItemService.deleteOrderItems(order.getOrderItems());
+
+        repository.inactivateOrderById(id);
+    }
+
+    @Transactional
+    public void deliverItem(UUID orderId, UUID itemId) {
+
+        Order order = repository.findByIdAndIsActiveTrue(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("The given order does not exist or is already inactive"));
+
+        orderItemService.deliverItem(itemId);
+
+        long notDeliveredItems = order.getOrderItems().stream()
+                .filter(item -> item.getDeliveredAt() == null).count();
+
+        if (notDeliveredItems == 0) {
+            order.setFinishedAt(LocalDateTime.now());
+        }
+
+        order.setUpdatedAt(LocalDateTime.now());
+
+        repository.save(order);
+    }
 }

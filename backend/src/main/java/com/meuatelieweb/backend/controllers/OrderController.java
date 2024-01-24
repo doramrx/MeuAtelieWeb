@@ -20,6 +20,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("orders")
 public class OrderController {
+
     @Autowired
     private OrderService service;
 
@@ -69,5 +70,19 @@ public class OrderController {
                 .toUri();
 
         return ResponseEntity.created(uri).body(savedOrder);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable UUID id) {
+        service.deleteOrder(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{orderId}/items/{itemId}/deliver")
+    public ResponseEntity<Void> deliverItem(@PathVariable UUID orderId, @PathVariable UUID itemId) {
+        service.deliverItem(orderId, itemId);
+
+        return ResponseEntity.ok().build();
     }
 }

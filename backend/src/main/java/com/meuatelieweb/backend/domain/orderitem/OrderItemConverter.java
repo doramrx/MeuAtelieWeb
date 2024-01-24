@@ -37,6 +37,7 @@ public class OrderItemConverter {
             adjustOrderItem.setCost(orderItem.getCost());
             adjustOrderItem.setCreatedAt(orderItem.getCreatedAt());
             adjustOrderItem.setDueDate(orderItem.getDueDate());
+            adjustOrderItem.setDeliveredAt(orderItem.getDeliveredAt());
             adjustOrderItem.setIsActive(orderItem.getIsActive());
 
             return adjustOrderItem;
@@ -55,6 +56,7 @@ public class OrderItemConverter {
         tailoredOrderItem.setCost(orderItem.getCost());
         tailoredOrderItem.setCreatedAt(orderItem.getCreatedAt());
         tailoredOrderItem.setDueDate(orderItem.getDueDate());
+        tailoredOrderItem.setDeliveredAt(orderItem.getDeliveredAt());
         tailoredOrderItem.setIsActive(orderItem.getIsActive());
 
         return tailoredOrderItem;

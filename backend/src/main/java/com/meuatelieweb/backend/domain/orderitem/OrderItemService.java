@@ -6,6 +6,7 @@ import com.meuatelieweb.backend.domain.customermeasure.CustomerMeasure;
 import com.meuatelieweb.backend.domain.customermeasure.CustomerMeasureService;
 import com.meuatelieweb.backend.domain.order.Order;
 import com.meuatelieweb.backend.domain.orderitem.dto.SaveOrderItemDTO;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -15,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderItemService {
@@ -35,6 +38,10 @@ public class OrderItemService {
             @NonNull
             Set<SaveOrderItemDTO> items
     ) {
+
+        if (items.isEmpty()) {
+            throw new IllegalArgumentException("The order must have at least one item");
+        }
 
         List<OrderItem> orderItems = items.stream().map(item -> {
             this.validateItemType(item.getType());
@@ -108,7 +115,7 @@ public class OrderItemService {
         if (dueDate == null) {
             throw new IllegalArgumentException("Item due date cannot be null");
         }
-        if (dueDate.isBefore(LocalDateTime.now())){
+        if (dueDate.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Item due date is invalid");
         }
     }
@@ -122,4 +129,56 @@ public class OrderItemService {
         }
     }
 
+    @Transactional
+    public void deleteOrderItems(@NonNull List<OrderItem> items) {
+
+        Set<UUID> ids = items.stream()
+                .map(OrderItem::getId)
+                .collect(Collectors.toSet());
+
+        if (!repository.existsByIdIn(ids)) {
+            throw new EntityNotFoundException("Some of the given order items do not exist");
+        }
+
+        items.forEach(item -> {
+            if (item instanceof AdjustOrderItem adjustOrderItem) {
+
+                if (!adjustOrderItem.getCustomerAdjustments().isEmpty()) {
+                    Set<UUID> customerAdjustsIds = adjustOrderItem.getCustomerAdjustments().stream()
+                            .map(CustomerAdjust::getId)
+                            .collect(Collectors.toSet());
+
+                    customerAdjustService.deleteCustomerAdjusts(customerAdjustsIds);
+                }
+            }
+
+            if (item instanceof TailoredOrderItem tailoredOrderItem) {
+
+                if (!tailoredOrderItem.getCustomerMeasures().isEmpty()) {
+                    Set<UUID> customerMeasuresIds = tailoredOrderItem.getCustomerMeasures().stream()
+                            .map(CustomerMeasure::getId)
+                            .collect(Collectors.toSet());
+
+                    customerMeasureService.deleteCustomerMeasures(customerMeasuresIds);
+                }
+            }
+        });
+
+        repository.inactivateOrderItemById(ids);
+    }
+
+    @Transactional
+    public void deliverItem(UUID id) {
+
+        OrderItem orderItem = repository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new EntityNotFoundException("The given item does not exist or is already inactive"));
+
+        if (orderItem.getDeliveredAt() != null){
+            throw new IllegalArgumentException("The given item is already delivered");
+        }
+
+        orderItem.setDeliveredAt(LocalDateTime.now());
+
+        repository.save(orderItem);
+    }
 }
