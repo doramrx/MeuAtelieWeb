@@ -1,5 +1,6 @@
 package com.meuatelieweb.backend.controllers;
 
+import com.meuatelieweb.backend.domain.measure.MeasureConverter;
 import com.meuatelieweb.backend.domain.measure.MeasureService;
 import com.meuatelieweb.backend.domain.measure.dto.MeasureDTO;
 import com.meuatelieweb.backend.domain.measure.dto.SaveUpdateMeasureDTO;
@@ -21,6 +22,9 @@ public class MeasureController {
     @Autowired
     private MeasureService service;
 
+    @Autowired
+    private MeasureConverter converter;
+
     @GetMapping
     public ResponseEntity<Page<MeasureDTO>> findAll(
             Pageable pageable,
@@ -29,12 +33,14 @@ public class MeasureController {
             @RequestParam(name = "isActive", required = false)
             Boolean isActive
     ) {
-        return ResponseEntity.ok().body(service.findAll(pageable, name, isActive));
+        return ResponseEntity.ok().body(
+                service.findAll(pageable, name, isActive).map(converter::toMeasureDTO)
+        );
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MeasureDTO> findById(@PathVariable UUID id) {
-        MeasureDTO measureDTO = service.findById(id);
+        MeasureDTO measureDTO = converter.toMeasureDTO(service.findById(id));
 
         return ResponseEntity.ok().body(measureDTO);
     }
@@ -44,7 +50,7 @@ public class MeasureController {
             @RequestBody @Valid SaveUpdateMeasureDTO saveMeasureDTO,
             UriComponentsBuilder uriComponentsBuilder
     ) {
-        MeasureDTO savedMeasure = service.addMeasure(saveMeasureDTO);
+        MeasureDTO savedMeasure = converter.toMeasureDTO(service.addMeasure(saveMeasureDTO));
 
         URI uri = uriComponentsBuilder
                 .path("/measures/{id}")
@@ -61,7 +67,7 @@ public class MeasureController {
             @Valid
             SaveUpdateMeasureDTO updateMeasureDTO
     ) {
-        MeasureDTO updatedMeasure = service.updateMeasure(id, updateMeasureDTO);
+        MeasureDTO updatedMeasure = converter.toMeasureDTO(service.updateMeasure(id, updateMeasureDTO));
 
         return ResponseEntity.ok().body(updatedMeasure);
     }

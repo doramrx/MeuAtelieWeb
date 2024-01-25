@@ -2,6 +2,8 @@ package com.meuatelieweb.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meuatelieweb.backend.controllers.MeasureController;
+import com.meuatelieweb.backend.domain.measure.Measure;
+import com.meuatelieweb.backend.domain.measure.MeasureConverter;
 import com.meuatelieweb.backend.domain.measure.MeasureService;
 import com.meuatelieweb.backend.domain.measure.dto.MeasureDTO;
 import com.meuatelieweb.backend.domain.measure.dto.SaveUpdateMeasureDTO;
@@ -31,8 +33,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.List;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.measure.MeasureCreator.createValidMeasureDTO;
-import static com.meuatelieweb.backend.domain.measure.MeasureCreator.createValidSaveUpdateMeasureDTO;
+import static com.meuatelieweb.backend.domain.measure.MeasureCreator.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -51,35 +52,45 @@ class MeasureControllerTest {
     private MeasureController measureController;
 
     @MockBean
+    private MeasureConverter measureConverterMock;
+
+    @MockBean
     private MeasureService measureServiceMock;
+
+    private void mockConverterToMeasureDTO(Measure measure, MeasureDTO measureDTO) {
+        BDDMockito.when(measureConverterMock.toMeasureDTO(measure))
+                .thenReturn(measureDTO);
+    }
 
     @DisplayName("Test findAll method")
     @Nested
     class FindAllTests {
 
-        private void mockServiceFindAll(Page<MeasureDTO> measuresList) {
+        private void mockServiceFindAll(Page<Measure> measurePage) {
             BDDMockito.when(measureServiceMock.findAll(
                     Mockito.any(Pageable.class),
                     Mockito.anyString(),
                     Mockito.anyBoolean())
-            ).thenReturn(measuresList);
+            ).thenReturn(measurePage);
         }
 
         @Test
         @DisplayName("findAll returns STATUS CODE 200 and a page of measures when successful")
         void findAll_ReturnsStatusCode200AndPageOfMeasures_WhenSuccessful() throws Exception {
 
-            List<MeasureDTO> measureDTOList = List.of(
-                    createValidMeasureDTO(UUID.randomUUID()),
-                    createValidMeasureDTO(UUID.randomUUID())
+            List<Measure> measures = List.of(
+                    createValidMeasure(),
+                    createValidMeasure()
             );
 
-            Page<MeasureDTO> measuresList = new PageImpl<>(
-                    measureDTOList,
+            Page<Measure> measurePage = new PageImpl<>(
+                    measures,
                     Pageable.ofSize(20),
                     20);
 
-            this.mockServiceFindAll(measuresList);
+            this.mockServiceFindAll(measurePage);
+            mockConverterToMeasureDTO(measures.get(0), createValidMeasureDTO(measures.get(0).getId()));
+            mockConverterToMeasureDTO(measures.get(1), createValidMeasureDTO(measures.get(1).getId()));
 
             ResultActions response = mockMvc.perform(
                     MockMvcRequestBuilders.get("/measures")
@@ -100,12 +111,12 @@ class MeasureControllerTest {
         @DisplayName("findAll returns STATUS CODE 200 and empty page of measures when measures do not exist")
         void findAll_ReturnsStatusCode200AndEmptyPageOfMeasures_WhenMeasuresDoNotExist() throws Exception {
 
-            Page<MeasureDTO> measuresList = new PageImpl<>(
+            Page<Measure> measurePage = new PageImpl<>(
                     List.of(),
                     Pageable.ofSize(20),
                     20);
 
-            this.mockServiceFindAll(measuresList);
+            this.mockServiceFindAll(measurePage);
 
             ResultActions response = mockMvc.perform(
                     MockMvcRequestBuilders.get("/measures")
@@ -131,13 +142,15 @@ class MeasureControllerTest {
         @DisplayName("findById returns STATUS CODE 200 and a measure when successful")
         void findById_ReturnsStatusCode200AndMeasure_WhenSuccessful() throws Exception {
 
-            MeasureDTO measureDTO = createValidMeasureDTO(UUID.randomUUID());
+            Measure measure = createValidMeasure();
+            MeasureDTO validMeasureDTO = createValidMeasureDTO(measure.getId());
 
             BDDMockito.when(measureServiceMock.findById(Mockito.any(UUID.class)))
-                    .thenReturn(measureDTO);
+                    .thenReturn(measure);
+            mockConverterToMeasureDTO(measure, validMeasureDTO);
 
             ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/measures/{id}", measureDTO.getId())
+                    MockMvcRequestBuilders.get("/measures/{id}", measure.getId())
                             .contentType(MediaType.APPLICATION_JSON)
             );
 
@@ -150,9 +163,9 @@ class MeasureControllerTest {
                                         MeasureDTO.class
                                 );
 
-                                assertEquals(measureDTO.getId(), measureDTOFound.getId());
-                                assertEquals(measureDTO.getName(), measureDTOFound.getName());
-                                assertEquals(measureDTO.getIsActive(), measureDTOFound.getIsActive());
+                                assertEquals(measure.getId(), measureDTOFound.getId());
+                                assertEquals(measure.getName(), measureDTOFound.getName());
+                                assertEquals(measure.getIsActive(), measureDTOFound.getIsActive());
                             }
                     )
                     .andDo(MockMvcResultHandlers.print());
@@ -187,10 +200,12 @@ class MeasureControllerTest {
         @DisplayName("addMeasure returns STATUS CODE 201 and measure when successful")
         void addMeasure_ReturnsStatusCode201AndMeasure_WhenSuccessful() throws Exception {
             SaveUpdateMeasureDTO saveUpdateMeasureDTO = createValidSaveUpdateMeasureDTO();
-            MeasureDTO measureDTO = createValidMeasureDTO(UUID.randomUUID());
+            Measure measure = createValidMeasure();
+            MeasureDTO validMeasureDTO = createValidMeasureDTO(measure.getId());
 
             BDDMockito.when(measureServiceMock.addMeasure(Mockito.any(SaveUpdateMeasureDTO.class)))
-                    .thenReturn(measureDTO);
+                    .thenReturn(measure);
+            mockConverterToMeasureDTO(measure, validMeasureDTO);
 
             ResultActions response = mockMvc.perform(
                     MockMvcRequestBuilders.post("/measures")
@@ -198,14 +213,14 @@ class MeasureControllerTest {
                             .content(objectMapper.writeValueAsBytes(saveUpdateMeasureDTO))
             );
 
-            String expectedLocation = String.format("http://localhost/measures/%s", measureDTO.getId());
+            String expectedLocation = String.format("http://localhost/measures/%s", measure.getId());
 
             response
                     .andExpectAll(
                             MockMvcResultMatchers.status().isCreated(),
-                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(measureDTO.getId())), UUID.class),
-                            MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(measureDTO.getName()), String.class),
-                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(String.valueOf(measureDTO.getIsActive())), String.class),
+                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(measure.getId())), UUID.class),
+                            MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(measure.getName()), String.class),
+                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(String.valueOf(measure.getIsActive())), String.class),
 
                             result -> {
                                 String redirectedUrl = result.getResponse().getRedirectedUrl();
@@ -262,13 +277,15 @@ class MeasureControllerTest {
         @DisplayName("updateMeasure returns STATUS CODE 200 and updates measure when successful")
         void updateMeasure_ReturnsStatusCode200AndUpdatesMeasure_WhenSuccessful() throws Exception {
             SaveUpdateMeasureDTO saveUpdateMeasureDTO = createValidSaveUpdateMeasureDTO();
-            MeasureDTO measureDTO = createValidMeasureDTO(UUID.randomUUID());
+            Measure measure = createValidMeasure();
+            MeasureDTO validMeasureDTO = createValidMeasureDTO(measure.getId());
 
             BDDMockito.when(measureServiceMock.updateMeasure(Mockito.any(UUID.class), Mockito.any(SaveUpdateMeasureDTO.class)))
-                    .thenReturn(measureDTO);
+                    .thenReturn(measure);
+            mockConverterToMeasureDTO(measure, validMeasureDTO);
 
             ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/measures/{id}", measureDTO.getId())
+                    MockMvcRequestBuilders.put("/measures/{id}", measure.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsBytes(saveUpdateMeasureDTO))
             );
@@ -276,9 +293,9 @@ class MeasureControllerTest {
             response
                     .andExpectAll(
                             MockMvcResultMatchers.status().isOk(),
-                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(measureDTO.getId()))),
+                            MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(String.valueOf(measure.getId()))),
                             MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(saveUpdateMeasureDTO.getName())),
-                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(measureDTO.getIsActive()))
+                            MockMvcResultMatchers.jsonPath("$.isActive", CoreMatchers.is(measure.getIsActive()))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }

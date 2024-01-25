@@ -21,28 +21,20 @@ public class MeasureService {
     @Autowired
     private MeasureRepository repository;
 
-    @Autowired
-    private MeasureConverter converter;
 
-    public Page<MeasureDTO> findAll(Pageable pageable, String name, Boolean isActive) {
+    public Page<Measure> findAll(Pageable pageable, String name, Boolean isActive) {
         Specification<Measure> specification = MeasureSpecification.applyFilter(name, isActive);
 
-        return repository.findAll(specification, pageable).map(converter::toMeasureDTO);
+        return repository.findAll(specification, pageable);
     }
 
-    public MeasureDTO findById(UUID id) {
-        return repository.findById(id)
-                .map(converter::toMeasureDTO)
-                .orElseThrow(() -> new EntityNotFoundException("The given measure does not exist"));
-    }
-
-    public Measure findMeasureById(UUID id) {
+    public Measure findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("The given measure does not exist"));
     }
 
     @Transactional
-    public MeasureDTO addMeasure(
+    public Measure addMeasure(
             @NonNull
             SaveUpdateMeasureDTO saveMeasureDTO
     ) {
@@ -51,7 +43,7 @@ public class MeasureService {
 
         Measure measure = Measure.builder().name(saveMeasureDTO.getName()).build();
 
-        return converter.toMeasureDTO(repository.save(measure));
+        return repository.save(measure);
     }
 
     private void validateSavingMeasureDTO(SaveUpdateMeasureDTO saveMeasureDTO) {
@@ -65,7 +57,7 @@ public class MeasureService {
     }
 
     @Transactional
-    public MeasureDTO updateMeasure(
+    public Measure updateMeasure(
             @NonNull
             UUID id,
             @NonNull
@@ -80,7 +72,7 @@ public class MeasureService {
             }
             measure.setName(updateMeasureDTO.getName());
         }
-        return converter.toMeasureDTO(repository.save(measure));
+        return repository.save(measure);
     }
 
     @Transactional

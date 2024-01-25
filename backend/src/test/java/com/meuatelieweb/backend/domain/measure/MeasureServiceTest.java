@@ -1,15 +1,12 @@
 package com.meuatelieweb.backend.domain.measure;
 
-import com.meuatelieweb.backend.domain.measure.dto.MeasureDTO;
 import com.meuatelieweb.backend.domain.measure.dto.SaveUpdateMeasureDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageImpl;
@@ -24,6 +21,8 @@ import java.util.UUID;
 import static com.meuatelieweb.backend.domain.measure.MeasureCreator.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.internal.verification.VerificationModeFactory.atMostOnce;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Tests for Measure Service")
@@ -34,13 +33,6 @@ class MeasureServiceTest {
 
     @Mock
     private MeasureRepository measureRepositoryMock;
-
-    @Mock
-    private MeasureConverter measureConverterMock;
-
-    private void mockConverterToMeasureDTO(MeasureDTO measureDTO){
-        BDDMockito.when(measureConverterMock.toMeasureDTO(any(Measure.class))).thenReturn(measureDTO);
-    }
 
     @DisplayName("Test findAll method")
     @Nested
@@ -58,18 +50,14 @@ class MeasureServiceTest {
 
             this.mockRepositoryFindAll(pageable);
 
-            MeasureDTO measureDTO = createValidMeasureDTO(validMeasures.get(0).getId());
-
-            mockConverterToMeasureDTO(measureDTO);
-
-            List<MeasureDTO> measureList = measureService.findAll(
+            List<Measure> measureList = measureService.findAll(
                     pageable.getPageable(), null, null
             ).toList();
 
             assertNotNull(measureList);
             assertFalse(measureList.isEmpty());
             assertEquals(1, measureList.size());
-            assertEquals(measureDTO, measureList.get(0));
+            assertEquals(validMeasures.get(0), measureList.get(0));
         }
 
         @Test
@@ -79,7 +67,7 @@ class MeasureServiceTest {
 
             this.mockRepositoryFindAll(pageable);
 
-            List<MeasureDTO> measureList = measureService.findAll(
+            List<Measure> measureList = measureService.findAll(
                     pageable.getPageable(), null, null
             ).toList();
 
@@ -92,26 +80,24 @@ class MeasureServiceTest {
     @Nested
     class FindByIdTests {
 
-        private void mockRepositoryFindById(){
+        private void mockRepositoryFindById(Measure measure){
             BDDMockito.when(measureRepositoryMock.findById(any(UUID.class)))
-                    .thenReturn(Optional.of(createValidMeasure()));
+                    .thenReturn(Optional.ofNullable(measure));
         }
 
         @Test
         @DisplayName("findById returns measure when successful")
         void findById_ReturnsMeasure_WhenSuccessful() {
-            MeasureDTO measureDTO = createValidMeasureDTO(UUID.randomUUID());
+            Measure measure = createValidMeasure();
 
-            this.mockRepositoryFindById();
+            this.mockRepositoryFindById(measure);
 
-            mockConverterToMeasureDTO(measureDTO);
-
-            MeasureDTO measureFound = measureService.findById(UUID.randomUUID());
+            Measure measureFound = measureService.findById(UUID.randomUUID());
 
             assertNotNull(measureFound);
-            assertEquals(measureDTO.getId(), measureFound.getId());
-            assertEquals(measureDTO.getName(), measureFound.getName());
-            assertEquals(measureDTO.getIsActive(), measureFound.getIsActive());
+            assertEquals(measure.getId(), measureFound.getId());
+            assertEquals(measure.getName(), measureFound.getName());
+            assertEquals(measure.getIsActive(), measureFound.getIsActive());
         }
 
         @Test
@@ -136,24 +122,20 @@ class MeasureServiceTest {
     @Nested
     class AddMeasureTests {
 
-        private void mockRepositorySave(){
-            BDDMockito.when(measureRepositoryMock.save(any(Measure.class)))
-                    .thenReturn(createValidMeasure());
-        }
-
         @Test
         @DisplayName("addMeasure returns measure when successful")
         void addMeasure_ReturnsMeasure_WhenSuccessful() {
-            MeasureDTO measureDTO = createValidMeasureDTO(createValidMeasure().getId());
+            SaveUpdateMeasureDTO saveUpdateMeasureDTO = createValidSaveUpdateMeasureDTO();
+            ArgumentCaptor<Measure> argumentCaptor = ArgumentCaptor.forClass(Measure.class);
 
-            this.mockRepositorySave();
+            measureService.addMeasure(createValidSaveUpdateMeasureDTO());
+            verify(measureRepositoryMock, atMostOnce()).save(argumentCaptor.capture());
 
-            mockConverterToMeasureDTO(measureDTO);
+            Measure savedMeasure = argumentCaptor.getValue();
 
-            MeasureDTO measureSaved = measureService.addMeasure(createValidSaveUpdateMeasureDTO());
-
-            assertNotNull(measureSaved);
-            assertEquals(measureDTO, measureSaved);
+            assertNotNull(savedMeasure);
+            assertEquals(saveUpdateMeasureDTO.getName(), savedMeasure.getName());
+            assertTrue(savedMeasure.getIsActive());
         }
 
         @Test
@@ -187,9 +169,9 @@ class MeasureServiceTest {
     @Nested
     class UpdateMeasureTests {
 
-        private void mockRepositoryFindByIdAndIsActiveTrue() {
+        private void mockRepositoryFindByIdAndIsActiveTrue(Measure measure) {
             BDDMockito.when(measureRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
-                    .thenReturn(Optional.of(createValidMeasure()));
+                    .thenReturn(Optional.ofNullable(measure));
         }
 
         private void mockRepositorySave(){
@@ -200,24 +182,24 @@ class MeasureServiceTest {
         @Test
         @DisplayName("updateMeasure updates measure when successful")
         void updateMeasure_UpdatesMeasure_WhenSuccessful() {
-            MeasureDTO measureDTO = createValidMeasureDTO(createValidMeasure().getId());
+            SaveUpdateMeasureDTO validSaveUpdateMeasureDTO = createValidSaveUpdateMeasureDTO();
+            Measure measureSpy = spy(createValidMeasure());
 
-            this.mockRepositoryFindByIdAndIsActiveTrue();
+            this.mockRepositoryFindByIdAndIsActiveTrue(measureSpy);
             this.mockRepositorySave();
 
-            mockConverterToMeasureDTO(measureDTO);
+            measureService.updateMeasure(
+                    UUID.randomUUID(), createValidSaveUpdateMeasureDTO()
+            );
 
-            MeasureDTO measureUpdated = measureService.updateMeasure(UUID.randomUUID(), createValidSaveUpdateMeasureDTO());
-
-            assertNotNull(measureUpdated);
-            assertEquals(measureDTO.getId(), measureUpdated.getId());
-            assertEquals(measureDTO.getName(), measureUpdated.getName());
-            assertEquals(measureDTO.getIsActive(), measureUpdated.getIsActive());
+            verify(measureSpy, atLeastOnce()).setName(validSaveUpdateMeasureDTO.getName());
+            verify(measureRepositoryMock, atMostOnce()).save(any(Measure.class));
         }
 
         @Test
         @DisplayName("updateMeasure throws IllegalArgumentException when measure is null")
         void updateMeasure_ThrowsIllegalArgumentException_WhenMeasureIsNull() {
+
             assertThrows(IllegalArgumentException.class,
                     () -> measureService.updateMeasure(UUID.randomUUID(), null));
         }
@@ -225,6 +207,7 @@ class MeasureServiceTest {
         @Test
         @DisplayName("updateMeasure throws IllegalArgumentException when measure id is null")
         void updateMeasure_ThrowsIllegalArgumentException_WhenMeasureIdIsNull() {
+
             assertThrows(IllegalArgumentException.class,
                     () -> measureService.updateMeasure(null, createValidSaveUpdateMeasureDTO()));
         }
@@ -232,8 +215,8 @@ class MeasureServiceTest {
         @Test
         @DisplayName("updateMeasure throws EntityNotFoundException when measure does not exist")
         void updateMeasure_ThrowsEntityNotFoundException_WhenMeasureDoesNotExist() {
-            BDDMockito.when(measureRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
-                    .thenReturn(Optional.empty());
+
+            this.mockRepositoryFindByIdAndIsActiveTrue(null);
 
             assertThrows(EntityNotFoundException.class,
                     () -> measureService.updateMeasure(UUID.randomUUID(), createValidSaveUpdateMeasureDTO()));
@@ -243,7 +226,7 @@ class MeasureServiceTest {
         @DisplayName("updateMeasure throws DuplicateKeyException when measure name already exists")
         void updateMeasure_ThrowsDuplicateKeyException_WhenMeasureNameAlreadyExists() {
 
-            this.mockRepositoryFindByIdAndIsActiveTrue();
+            this.mockRepositoryFindByIdAndIsActiveTrue(createValidMeasure());
 
             BDDMockito.when(measureRepositoryMock.existsByNameAndIdNot(anyString(), any(UUID.class)))
                     .thenReturn(true);
