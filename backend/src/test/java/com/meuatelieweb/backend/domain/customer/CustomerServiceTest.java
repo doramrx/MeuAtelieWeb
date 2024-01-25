@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -127,22 +128,22 @@ class CustomerServiceTest {
     @Nested
     class AddCustomerTests {
 
-        private void mockRepositorySave(Customer customer) {
-            BDDMockito.when(customerRepositoryMock.save(any(Customer.class)))
-                    .thenReturn(customer);
-        }
-
         @Test
         @DisplayName("addCustomer returns customer when successful")
         void addCustomer_ReturnsCustomer_WhenSuccessful() {
-            Customer customer = createValidCustomer();
+            SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
+            ArgumentCaptor<Customer> argumentCaptor = ArgumentCaptor.forClass(Customer.class);
 
-            this.mockRepositorySave(customer);
+            customerService.addCustomer(createValidSaveCustomerDTO());
+            verify(customerRepositoryMock, atMostOnce()).save(argumentCaptor.capture());
 
-            Customer customerSaved = customerService.addCustomer(createValidSaveCustomerDTO());
+            Customer customerSaved = argumentCaptor.getValue();
 
             assertNotNull(customerSaved);
-            assertEquals(customer, customerSaved);
+            assertEquals(saveCustomerDTO.getName(), customerSaved.getName());
+            assertEquals(saveCustomerDTO.getEmail(), customerSaved.getEmail());
+            assertEquals(saveCustomerDTO.getPhone(), customerSaved.getPhone());
+            assertTrue(customerSaved.getIsActive());
         }
 
         @Test
@@ -213,21 +214,24 @@ class CustomerServiceTest {
         @Test
         @DisplayName("updateCustomer updates customer when successful")
         void updateCustomer_UpdatesCustomer_WhenSuccessful() {
-
+            UpdateCustomerDTO validUpdateCustomerDTO = createValidUpdateCustomerDTO();
             Customer customerSpy = spy(createValidCustomer());
 
             this.mockRepositoryFindByIdAndIsActiveTrue(customerSpy);
 
-            customerService.updateCustomer(UUID.randomUUID(), createValidUpdateCustomerDTO());
+            customerService.updateCustomer(
+                    UUID.randomUUID(), validUpdateCustomerDTO
+            );
 
-            verify(customerSpy, atMostOnce()).setName(anyString());
-            verify(customerSpy, atMostOnce()).setPhone(anyString());
+            verify(customerSpy, atLeastOnce()).setName(validUpdateCustomerDTO.getName());
+            verify(customerSpy, atLeastOnce()).setPhone(validUpdateCustomerDTO.getPhone());
             verify(customerRepositoryMock, atMostOnce()).save(any(Customer.class));
         }
 
         @Test
         @DisplayName("updateCustomer throws IllegalArgumentException when customer is null")
         void updateCustomer_ThrowsIllegalArgumentException_WhenCustomerIsNull() {
+
             assertThrows(IllegalArgumentException.class,
                     () -> customerService.updateCustomer(UUID.randomUUID(), null));
         }
@@ -235,6 +239,7 @@ class CustomerServiceTest {
         @Test
         @DisplayName("updateCustomer throws IllegalArgumentException when customer id is null")
         void updateCustomer_ThrowsIllegalArgumentException_WhenCustomerIdIsNull() {
+
             assertThrows(IllegalArgumentException.class,
                     () -> customerService.updateCustomer(null, createValidUpdateCustomerDTO()));
         }
