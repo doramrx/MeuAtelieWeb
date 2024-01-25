@@ -24,14 +24,18 @@ public class CustomerAdjustService {
     @Autowired
     private AdjustService adjustService;
 
+    public CustomerAdjust findById(@NonNull UUID id) {
+        return repository.findCustomerAdjustById(id)
+                .orElseThrow(() -> new EntityNotFoundException("The given customer adjust does not exist"));
+    }
+
     @Transactional
     public List<CustomerAdjust> addCustomerAdjusts(
             @NonNull
             OrderItem item,
             @NonNull
-            Set<SaveCustomerAdjustDTO> saveCustomerAdjusts
+            List<SaveCustomerAdjustDTO> saveCustomerAdjusts
     ) {
-
         Set<Adjust> adjusts = adjustService.getAdjusts(
                 saveCustomerAdjusts.stream()
                         .map(SaveCustomerAdjustDTO::getAdjustmentId)
@@ -54,14 +58,12 @@ public class CustomerAdjustService {
         if (!repository.existsByIdIn(ids)) {
             throw new EntityNotFoundException("Some of the given customer adjusts do not exist");
         }
-        repository.inactivateCustomerAdjustById(ids);
+        repository.deleteAllByIdIn(ids);
     }
 
     @Transactional
     public void singleDeleteCustomerAdjust(@NonNull UUID id) {
-        CustomerAdjust customerAdjust = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("The given customer adjust does not exist"));
-
+        CustomerAdjust customerAdjust = this.findById(id);
         repository.delete(customerAdjust);
     }
 }

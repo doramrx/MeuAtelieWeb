@@ -18,6 +18,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     Optional<Order> findByIdAndIsActiveTrue(UUID id);
 
+    boolean existsByIdAndFinishedAtNull(UUID id);
+
     @Query(nativeQuery = true, value = "SELECT nextval('orders_order_number_seq')")
     Integer getNextOrderNumber();
 

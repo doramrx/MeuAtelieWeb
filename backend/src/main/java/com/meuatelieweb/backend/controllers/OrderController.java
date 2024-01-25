@@ -1,10 +1,16 @@
 package com.meuatelieweb.backend.controllers;
 
+import com.meuatelieweb.backend.domain.customermeasure.dto.UpdateCustomerMeasureDTO;
 import com.meuatelieweb.backend.domain.order.OrderConverter;
 import com.meuatelieweb.backend.domain.order.OrderService;
 import com.meuatelieweb.backend.domain.order.dto.ListOrderDTO;
 import com.meuatelieweb.backend.domain.order.dto.OrderDTO;
 import com.meuatelieweb.backend.domain.order.dto.SaveOrderDTO;
+import com.meuatelieweb.backend.domain.order.dto.UpdateOrderDTO;
+import com.meuatelieweb.backend.domain.orderitem.OrderType;
+import com.meuatelieweb.backend.domain.orderitem.dto.SaveCustomerAdjustMeasureDTO;
+import com.meuatelieweb.backend.domain.orderitem.dto.SaveOrderItemDTO;
+import com.meuatelieweb.backend.domain.orderitem.dto.UpdateOrderItemDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -72,11 +78,81 @@ public class OrderController {
         return ResponseEntity.created(uri).body(savedOrder);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable UUID id) {
-        service.deleteOrder(id);
+    @PostMapping("/{orderId}/items/")
+    public ResponseEntity<OrderDTO> addOrderItemToOrder (
+            @PathVariable UUID orderId,
+            @RequestBody SaveOrderItemDTO saveOrderItem
+    ) {
+        OrderDTO savedOrder = this.converter.toOrderDTO(service.addOrderItemToOrder(orderId, saveOrderItem));
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().body(savedOrder);
+    }
+
+    @PostMapping("/{orderId}/items/{itemId}")
+    public ResponseEntity<OrderDTO> addAdjustsMeasuresToOrderItem (
+            @PathVariable UUID orderId,
+            @PathVariable UUID itemId,
+            @RequestBody SaveCustomerAdjustMeasureDTO requestBody
+    ) {
+        OrderDTO orderDTO = new OrderDTO();
+
+        if (requestBody.getType() == OrderType.ADJUST) {
+            orderDTO = this.converter.toOrderDTO(service.addAdjustsToOrderItem(orderId, itemId, requestBody));
+
+        } else if (requestBody.getType() == OrderType.TAILORED) {
+            orderDTO = this.converter.toOrderDTO(service.addMeasuresToOrderItem(orderId, itemId, requestBody));
+
+        } else {
+            return ResponseEntity.badRequest().body(orderDTO);
+        }
+        return ResponseEntity.ok().body(orderDTO);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<OrderDTO> updateOrder(
+            @PathVariable
+            UUID id,
+            @RequestBody
+            @Valid
+            UpdateOrderDTO updateOrderDTO)
+    {
+        OrderDTO updatedOrder = converter.toOrderDTO(service.updateOrder(id, updateOrderDTO));
+
+        return ResponseEntity.ok().body(updatedOrder);
+    }
+
+    @PutMapping("/{orderId}/items/{itemId}")
+    public ResponseEntity<OrderDTO> updateOrderItem(
+            @PathVariable
+            UUID orderId,
+            @PathVariable
+            UUID itemId,
+            @RequestBody
+            @Valid
+            UpdateOrderItemDTO updateOrderItemDTO)
+    {
+        OrderDTO updatedOrder = converter.toOrderDTO(service.updateOrderItem(orderId, itemId, updateOrderItemDTO));
+
+        return ResponseEntity.ok().body(updatedOrder);
+    }
+
+    @PutMapping("/{orderId}/items/{itemId}/customer-measures/{customerMeasureId}")
+    public ResponseEntity<OrderDTO> updateOrderItemMeasures(
+            @PathVariable
+            UUID orderId,
+            @PathVariable
+            UUID itemId,
+            @PathVariable
+            UUID customerMeasureId,
+            @RequestBody
+            @Valid
+            UpdateCustomerMeasureDTO updateCustomerMeasureDTO
+    ) {
+        OrderDTO updatedOrder = converter.toOrderDTO(
+                service.updateOrderItemCustomerMeasure(orderId, itemId, customerMeasureId, updateCustomerMeasureDTO)
+        );
+
+        return ResponseEntity.ok().body(updatedOrder);
     }
 
     @PatchMapping("/{orderId}/items/{itemId}/deliver")
@@ -84,6 +160,20 @@ public class OrderController {
         service.deliverItem(orderId, itemId);
 
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable UUID id) {
+        service.deleteOrder(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{orderId}/items/{itemId}")
+    public ResponseEntity<Void> singleDeleteItemFromOrder(@PathVariable UUID orderId, @PathVariable UUID itemId) {
+        service.singleDeleteItemFromOrder(orderId, itemId);
+
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{orderId}/items/{itemId}/adjusts/{customerAdjustId}")

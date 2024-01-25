@@ -16,6 +16,10 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
 
     boolean existsByIdIn(Set<UUID> ids);
 
+    boolean existsByIdAndIsActiveTrue(UUID id);
+
+    boolean existsByIdAndDeliveredAtNull(UUID id);
+
     @Query("""
             UPDATE OrderItem
             SET isActive = false

@@ -2,8 +2,15 @@ package com.meuatelieweb.backend.domain.order;
 
 import com.meuatelieweb.backend.domain.customer.Customer;
 import com.meuatelieweb.backend.domain.customer.CustomerService;
+import com.meuatelieweb.backend.domain.customeradjust.dto.SaveCustomerAdjustListDTO;
+import com.meuatelieweb.backend.domain.customermeasure.dto.SaveCustomerMeasureListDTO;
+import com.meuatelieweb.backend.domain.customermeasure.dto.UpdateCustomerMeasureDTO;
 import com.meuatelieweb.backend.domain.order.dto.SaveOrderDTO;
+import com.meuatelieweb.backend.domain.order.dto.UpdateOrderDTO;
 import com.meuatelieweb.backend.domain.orderitem.*;
+import com.meuatelieweb.backend.domain.orderitem.dto.SaveCustomerAdjustMeasureDTO;
+import com.meuatelieweb.backend.domain.orderitem.dto.SaveOrderItemDTO;
+import com.meuatelieweb.backend.domain.orderitem.dto.UpdateOrderItemDTO;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -44,8 +52,14 @@ public class OrderService {
         return repository.findAll(specification, pageable);
     }
 
-    public Order findById(UUID id) {
-        return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("The given order does not exist"));
+    public Order findById(@NonNull UUID id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("The given order does not exist"));
+    }
+
+    public Order findByIdAndIsActiveTrue(@NonNull UUID id) {
+        return repository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new EntityNotFoundException("The given order does not exist or is already inactive"));
     }
 
     @Transactional
@@ -68,21 +82,111 @@ public class OrderService {
     }
 
     @Transactional
-    public void deleteOrder(@NonNull UUID id) {
+    public Order addOrderItemToOrder(
+            @NonNull UUID orderId,
+            @NonNull SaveOrderItemDTO saveOrderItem
+    ) {
+        this.validateIfOrderWasFinished(orderId);
+        Order order = this.findByIdAndIsActiveTrue(orderId);
 
-        Order order = repository.findByIdAndIsActiveTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("The given order does not exist or is already inactive"));
+        orderItemService.addOrderItems(order, Set.of(saveOrderItem));
 
-        orderItemService.deleteOrderItems(order.getOrderItems());
+        order.setUpdatedAt(LocalDateTime.now());
 
-        repository.inactivateOrderById(id);
+        return repository.saveAndFlush(order);
     }
 
     @Transactional
-    public void deliverItem(UUID orderId, UUID itemId) {
+    public Order addAdjustsToOrderItem(
+            @NonNull UUID orderId,
+            @NonNull UUID itemId,
+            @NonNull SaveCustomerAdjustMeasureDTO requestBody
+    ) {
+        this.validateIfOrderWasFinished(orderId);
+        Order order = this.findByIdAndIsActiveTrue(orderId);
 
-        Order order = repository.findByIdAndIsActiveTrue(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("The given order does not exist or is already inactive"));
+        if (requestBody.getCustomerAdjusts().getAdjusts().isEmpty()) {
+            throw new IllegalArgumentException("There are no adjusts to add to order item");
+        }
+
+        SaveCustomerAdjustListDTO adjusts = requestBody.getCustomerAdjusts();
+
+        orderItemService.addAdjustsToOrderItem(itemId, adjusts);
+
+        order.setUpdatedAt(LocalDateTime.now());
+        return repository.saveAndFlush(order);
+    }
+
+    @Transactional
+    public Order addMeasuresToOrderItem(
+            @NonNull UUID orderId,
+            @NonNull UUID itemId,
+            @NonNull SaveCustomerAdjustMeasureDTO requestBody
+    ) {
+        this.validateIfOrderWasFinished(orderId);
+        Order order = this.findByIdAndIsActiveTrue(orderId);
+
+        if (requestBody.getCustomerMeasures().getMeasures().isEmpty()) {
+            throw new IllegalArgumentException("There are no measures to add to order item");
+        }
+
+        SaveCustomerMeasureListDTO measures = requestBody.getCustomerMeasures();
+
+        orderItemService.addMeasuresToOrderItem(itemId, measures);
+
+        order.setUpdatedAt(LocalDateTime.now());
+        return repository.saveAndFlush(order);
+    }
+
+    @Transactional
+    public Order updateOrder(@NonNull UUID id, @NonNull UpdateOrderDTO updateOrderDTO) {
+
+        this.validateIfOrderWasFinished(id);
+        Order order = this.findByIdAndIsActiveTrue(id);
+
+        Customer customer = customerService.findByIdAndIsActiveTrue(updateOrderDTO.getCustomerId());
+        order.setCustomer(customer);
+
+        order.setUpdatedAt(LocalDateTime.now());
+        return repository.save(order);
+    }
+
+    @Transactional
+    public Order updateOrderItem(
+            @NonNull UUID orderId,
+            @NonNull UUID itemId,
+            @NonNull UpdateOrderItemDTO updateOrderItemDTO) {
+
+        this.validateIfOrderWasFinished(orderId);
+        Order order = this.findByIdAndIsActiveTrue(orderId);
+
+        orderItemService.updateOrderItem(itemId, updateOrderItemDTO);
+
+        order.setUpdatedAt(LocalDateTime.now());
+        return repository.save(order);
+    }
+
+    @Transactional
+    public Order updateOrderItemCustomerMeasure(
+            @NonNull UUID orderId,
+            @NonNull UUID itemId,
+            @NonNull UUID customerMeasureId,
+            @NonNull UpdateCustomerMeasureDTO updateCustomerMeasureDTO
+    ) {
+        this.validateIfOrderWasFinished(orderId);
+        Order order = this.findByIdAndIsActiveTrue(orderId);
+
+        orderItemService.updateOrderItemCustomerMeasure(itemId, customerMeasureId, updateCustomerMeasureDTO);
+
+        order.setUpdatedAt(LocalDateTime.now());
+        return repository.saveAndFlush(order);
+    }
+
+    @Transactional
+    public void deliverItem(@NonNull UUID orderId, @NonNull UUID itemId) {
+
+        this.validateIfOrderWasFinished(orderId);
+        Order order = this.findByIdAndIsActiveTrue(orderId);
 
         orderItemService.deliverItem(itemId);
 
@@ -99,10 +203,20 @@ public class OrderService {
     }
 
     @Transactional
+    public void deleteOrder(@NonNull UUID id) {
+
+        Order order = this.findByIdAndIsActiveTrue(id);
+
+        orderItemService.deleteOrderItems(order.getOrderItems());
+
+        repository.inactivateOrderById(id);
+    }
+
+    @Transactional
     public Order singleDeleteCustomerAdjustFromItem(UUID orderId, UUID itemId, UUID customerAdjustId) {
 
-        Order order = repository.findByIdAndIsActiveTrue(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("The given order does not exist or is already inactive"));
+        this.validateIfOrderWasFinished(orderId);
+        Order order = this.findByIdAndIsActiveTrue(orderId);
 
         orderItemService.singleDeleteCustomerAdjustFromItem(itemId, customerAdjustId);
 
@@ -114,8 +228,8 @@ public class OrderService {
     @Transactional
     public Order singleDeleteCustomerMeasureFromItem(UUID orderId, UUID itemId, UUID customerMeasureId) {
 
-        Order order = repository.findByIdAndIsActiveTrue(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("The given order does not exist or is already inactive"));
+        this.validateIfOrderWasFinished(orderId);
+        Order order = this.findByIdAndIsActiveTrue(orderId);
 
         orderItemService.singleDeleteCustomerMeasureFromItem(itemId, customerMeasureId);
 
@@ -123,4 +237,38 @@ public class OrderService {
 
         return repository.save(order);
     }
+
+    @Transactional
+    public void singleDeleteItemFromOrder(UUID orderId, UUID itemId) {
+
+        this.validateIfOrderWasFinished(orderId);
+        Order order = this.findByIdAndIsActiveTrue(orderId);
+
+        OrderItem item = orderItemService.findActiveOrderItemById(itemId);
+
+        orderItemService.singleDeleteItemFromOrder(item);
+
+        if (!this.validateIfOrderHasActiveItems(order.getOrderItems())){
+            this.deleteOrder(orderId);
+        } else {
+            order.setUpdatedAt(LocalDateTime.now());
+            repository.save(order);
+        }
+    }
+
+    private Boolean validateIfOrderHasActiveItems(List<OrderItem> items){
+        long notActiveItems = items.stream()
+                .filter(item -> !item.getIsActive())
+                .count();
+
+        return notActiveItems != items.size();
+    }
+
+    private void validateIfOrderWasFinished(@NonNull UUID id) {
+        if (!repository.existsByIdAndFinishedAtNull(id)) {
+            throw new IllegalArgumentException("The order cannot be modified because it has already been finished");
+        }
+    }
 }
+
+

@@ -36,6 +36,11 @@ public class MeasureService {
                 .orElseThrow(() -> new EntityNotFoundException("The given measure does not exist"));
     }
 
+    public Measure findMeasureById(UUID id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("The given measure does not exist"));
+    }
+
     @Transactional
     public MeasureDTO addMeasure(
             @NonNull

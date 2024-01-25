@@ -1,7 +1,7 @@
 package com.meuatelieweb.backend.domain.customermeasure;
 
-import com.meuatelieweb.backend.domain.customeradjust.CustomerAdjust;
 import com.meuatelieweb.backend.domain.customermeasure.dto.SaveCustomerMeasureDTO;
+import com.meuatelieweb.backend.domain.customermeasure.dto.UpdateCustomerMeasureDTO;
 import com.meuatelieweb.backend.domain.measure.Measure;
 import com.meuatelieweb.backend.domain.measure.MeasureService;
 import com.meuatelieweb.backend.domain.orderitem.OrderItem;
@@ -25,15 +25,22 @@ public class CustomerMeasureService {
     @Autowired
     private MeasureService measureService;
 
+    public CustomerMeasure findById(@NonNull UUID id) {
+        return repository.findCustomerMeasureById(id)
+                .orElseThrow(() -> new EntityNotFoundException("The given customer measure does not exist"));
+    }
+
     @Transactional
     public List<CustomerMeasure> addCustomerMeasures(
             @NonNull
             OrderItem item,
             @NonNull
-            Set<SaveCustomerMeasureDTO> saveCustomerMeasures
+            List<SaveCustomerMeasureDTO> saveCustomerMeasures
     ) {
 
-        this.validateItemMeasureValues(saveCustomerMeasures);
+        saveCustomerMeasures.forEach(measureValue -> {
+            this.validateItemMeasureValue(measureValue.getMeasurementValue());
+        });
 
         Set<Measure> measures = measureService.getMeasures(
                 saveCustomerMeasures.stream()
@@ -55,30 +62,42 @@ public class CustomerMeasureService {
         return repository.saveAllAndFlush(customerMeasures);
     }
 
-    private void validateItemMeasureValues(Set<SaveCustomerMeasureDTO> saveCustomerMeasures) {
-        saveCustomerMeasures.forEach(measureValue -> {
-            if (measureValue.getMeasurementValue() == null) {
-                throw new IllegalArgumentException("The given measure value cannot be empty");
-            }
-            if (measureValue.getMeasurementValue() < 0.01) {
-                throw new IllegalArgumentException("The given measure value cannot be lesser than 0.01");
-            }
-        });
+    @Transactional
+    public void updateCustomerMeasure(
+            @NonNull UUID id,
+            @NonNull UpdateCustomerMeasureDTO updateCustomerMeasure
+    ) {
+
+        CustomerMeasure customerMeasure = this.findById(id);
+
+        if (updateCustomerMeasure.getMeasurementValue() != null) {
+            this.validateItemMeasureValue(updateCustomerMeasure.getMeasurementValue());
+            customerMeasure.setMeasurementValue(updateCustomerMeasure.getMeasurementValue());
+        }
+        repository.saveAndFlush(customerMeasure);
     }
 
     @Transactional
     public void deleteCustomerMeasures(@NonNull Set<UUID> ids) {
         if (!repository.existsByIdIn(ids)) {
-            throw new EntityNotFoundException("Some of the given customer measures do not exist or are already inactive");
+            throw new EntityNotFoundException("Some of the given customer measures do not exist");
         }
-        repository.inactivateCustomerMeasureById(ids);
+        repository.deleteAllByIdIn(ids);
     }
 
     @Transactional
     public void singleDeleteCustomerMeasure(@NonNull UUID id) {
-        CustomerMeasure customerMeasure = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("The given customer measure does not exist"));
-
+        CustomerMeasure customerMeasure = this.findById(id);
         repository.delete(customerMeasure);
     }
+
+    private void validateItemMeasureValue(Double value){
+        if (value == null) {
+            throw new IllegalArgumentException("The given measure value cannot be empty");
+        }
+        if (value < 0.01) {
+            throw new IllegalArgumentException("The given measure value cannot be lesser than 0.01");
+        }
+    }
+
 }
