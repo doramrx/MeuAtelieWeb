@@ -22,7 +22,6 @@ public class OrderItemCreator {
         LocalDateTime deliveredAt= null;
         Boolean isActive = true;
         List<CustomerAdjust> customerAdjustments = List.of();
-        Order order = new Order();
 
         OrderItem adjustItem = new AdjustOrderItem();
         adjustItem.setId(id);
@@ -34,7 +33,6 @@ public class OrderItemCreator {
         adjustItem.setDeliveredAt(deliveredAt);
         adjustItem.setIsActive(isActive);
         ((AdjustOrderItem) adjustItem).setCustomerAdjustments(customerAdjustments);
-        adjustItem.setOrder(order);
 
         return adjustItem;
     }
@@ -50,7 +48,6 @@ public class OrderItemCreator {
         LocalDateTime deliveredAt= null;
         Boolean isActive = true;
         List<CustomerMeasure> customerMeasures = List.of();
-        Order order = new Order();
 
         OrderItem tailoredItem = new TailoredOrderItem();
         tailoredItem.setId(id);
@@ -62,7 +59,6 @@ public class OrderItemCreator {
         tailoredItem.setDeliveredAt(deliveredAt);
         tailoredItem.setIsActive(isActive);
         ((TailoredOrderItem) tailoredItem).setCustomerMeasures(customerMeasures);
-        tailoredItem.setOrder(order);
 
         return tailoredItem;
     }
