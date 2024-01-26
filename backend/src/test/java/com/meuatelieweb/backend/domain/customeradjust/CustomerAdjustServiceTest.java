@@ -1,10 +1,14 @@
 package com.meuatelieweb.backend.domain.customeradjust;
 
+import com.meuatelieweb.backend.domain.adjust.Adjust;
+import com.meuatelieweb.backend.domain.adjust.AdjustService;
+import com.meuatelieweb.backend.domain.customeradjust.dto.SaveCustomerAdjustDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -12,12 +16,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
+import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.createValidAdjust;
 import static com.meuatelieweb.backend.domain.customeradjust.CustomerAdjustCreator.createValidCustomerAdjust;
 import static com.meuatelieweb.backend.domain.customeradjust.CustomerAdjustCreator.createValidSaveCustomerAdjustDTO;
 import static com.meuatelieweb.backend.domain.orderitem.OrderItemCreator.createValidAdjustOrderItem;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Tests for Customer Adjust Service")
@@ -28,6 +33,10 @@ class CustomerAdjustServiceTest {
 
     @Mock
     private CustomerAdjustRepository customerAdjustRepositoryMock;
+
+    @Mock
+    private AdjustService adjustService;
+
 
     @DisplayName("Test findById method")
     @Nested
@@ -76,26 +85,39 @@ class CustomerAdjustServiceTest {
     @Nested
     class AddCustomerAdjustsTests {
 
-//        @Test
-//        @DisplayName("addCustomerAdjusts returns list of customer adjusts when successful")
-//        void addCustomerAdjusts_ReturnsListOfCustomerAdjusts_WhenSuccessful() {
-//
-//            List<SaveCustomerAdjustDTO> saveCustomerAdjustList = List.of(
-//                    createValidSaveCustomerAdjustDTO()
-//            );
-//
-//            ArgumentCaptor<List<CustomerAdjust>> argumentCaptor = ArgumentCaptor.forClass(List.class);
-//
-//            customerAdjustService.addCustomerAdjusts(createValidAdjustOrderItem(), saveCustomerAdjustList);
-//            verify(customerAdjustRepositoryMock, atMostOnce()).saveAllAndFlush(argumentCaptor.capture());
-//
-//            List<CustomerAdjust> customerAdjustsSavedList = argumentCaptor.getValue();
-//            CustomerAdjust customerAdjust = customerAdjustsSavedList.get(0);
-//
-//            assertNotNull(customerAdjust);
-//            assertEquals(saveCustomerAdjustList.get(0).getAdjustmentId(), customerAdjust.getId());
-//            assertTrue(customerAdjust.getIsActive());
-//        }
+        private void mockAdjustServiceGetAdjusts(Set<Adjust> adjusts) {
+            BDDMockito.when(adjustService.getAdjusts(any(Set.class)))
+                    .thenReturn(adjusts);
+        }
+
+        @Test
+        @DisplayName("addCustomerAdjusts returns list of customer adjusts when successful")
+        void addCustomerAdjusts_ReturnsListOfCustomerAdjusts_WhenSuccessful() {
+
+            UUID adjustId = UUID.fromString("322730d7-e8c7-4c60-afa4-e6bb875573f8");
+
+            List<SaveCustomerAdjustDTO> saveCustomerAdjustList = List.of(createValidSaveCustomerAdjustDTO());
+            saveCustomerAdjustList.get(0).setAdjustmentId(adjustId);
+
+            Set<Adjust> adjusts = Set.of(createValidAdjust());
+            adjusts.iterator().next().setId(adjustId);
+
+            this.mockAdjustServiceGetAdjusts(adjusts);
+
+            ArgumentCaptor<List<CustomerAdjust>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+
+            customerAdjustService.addCustomerAdjusts(createValidAdjustOrderItem(), saveCustomerAdjustList);
+            verify(customerAdjustRepositoryMock, atMostOnce()).saveAllAndFlush(argumentCaptor.capture());
+
+            List<CustomerAdjust> customerAdjustsSaved = argumentCaptor.getValue();
+            CustomerAdjust customerAdjust = customerAdjustsSaved.get(0);
+
+            assertNotNull(customerAdjust);
+            assertEquals(saveCustomerAdjustList.get(0).getAdjustmentId(), customerAdjust.getAdjust().getId());
+            assertEquals(adjusts.iterator().next().getName(), customerAdjust.getAdjust().getName());
+            assertEquals(adjusts.iterator().next().getCost(), customerAdjust.getAdjust().getCost());
+            assertTrue(customerAdjust.getIsActive());
+        }
 
         @Test
         @DisplayName("addCustomerAdjusts throws IllegalArgumentException when customer adjust is null")
