@@ -35,7 +35,7 @@ class CustomerAdjustServiceTest {
     private CustomerAdjustRepository customerAdjustRepositoryMock;
 
     @Mock
-    private AdjustService adjustService;
+    private AdjustService adjustServiceMock;
 
 
     @DisplayName("Test findById method")
@@ -86,7 +86,7 @@ class CustomerAdjustServiceTest {
     class AddCustomerAdjustsTests {
 
         private void mockAdjustServiceGetAdjusts(Set<Adjust> adjusts) {
-            BDDMockito.when(adjustService.getAdjusts(any(Set.class)))
+            BDDMockito.when(adjustServiceMock.getAdjusts(any(Set.class)))
                     .thenReturn(adjusts);
         }
 

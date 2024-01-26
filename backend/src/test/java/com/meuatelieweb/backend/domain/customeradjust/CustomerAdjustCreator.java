@@ -5,7 +5,6 @@ import com.meuatelieweb.backend.domain.customeradjust.dto.SaveCustomerAdjustDTO;
 import java.util.UUID;
 
 import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.createValidAdjust;
-import static com.meuatelieweb.backend.domain.orderitem.OrderItemCreator.createValidAdjustOrderItem;
 
 public class CustomerAdjustCreator {
 
@@ -14,7 +13,6 @@ public class CustomerAdjustCreator {
                 .id(UUID.randomUUID())
                 .adjust(createValidAdjust())
                 .adjustmentCost(createValidAdjust().getCost())
-                .orderItem(createValidAdjustOrderItem())
                 .isActive(true)
                 .build();
     }
