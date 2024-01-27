@@ -139,4 +139,48 @@ class OrderServiceTest {
                     () -> orderService.findById(null));
         }
     }
+
+    @DisplayName("Test findByIdAndIsActiveTrue method")
+    @Nested
+    class FindByIdAndIsActiveTrueTests {
+
+        private void mockRepositoryFindByIdAndIsActiveTrue(Order order) {
+            BDDMockito.when(orderRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
+                    .thenReturn(Optional.ofNullable(order));
+        }
+
+        @Test
+        @DisplayName("findByIdAndIsActiveTrue returns order when successful")
+        void findByIdAndIsActiveTrue_ReturnsOrder_WhenSuccessful() {
+            Order order = createValidOrder();
+
+            this.mockRepositoryFindByIdAndIsActiveTrue(order);
+
+            Order orderFound = orderService.findByIdAndIsActiveTrue(UUID.randomUUID());
+
+            assertNotNull(orderFound);
+            assertEquals(order.getId(), orderFound.getId());
+            assertEquals(order.getOrderNumber(), orderFound.getOrderNumber());
+            assertEquals(order.getCreatedAt(), orderFound.getCreatedAt());
+            assertEquals(order.getUpdatedAt(), orderFound.getUpdatedAt());
+            assertEquals(order.getFinishedAt(), orderFound.getFinishedAt());
+            assertEquals(order.getIsActive(), orderFound.getIsActive());
+        }
+
+        @Test
+        @DisplayName("findByIdAndIsActiveTrue throws EntityNotFoundException when order is not found")
+        void findByIdAndIsActiveTrue_ThrowsEntityNotFoundException_WhenOrderIsNotFound() {
+            this.mockRepositoryFindByIdAndIsActiveTrue(null);
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> orderService.findByIdAndIsActiveTrue(UUID.randomUUID()));
+        }
+
+        @Test
+        @DisplayName("findByIdAndIsActiveTrue throws IllegalArgumentException when id order is null")
+        void findByIdAndIsActiveTrue_ThrowsIllegalArgumentException_WhenIdOrderIsNull() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> orderService.findByIdAndIsActiveTrue(null));
+        }
+    }
 }
