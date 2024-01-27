@@ -2,10 +2,12 @@ package com.meuatelieweb.backend.domain.order;
 
 import com.meuatelieweb.backend.domain.customer.CustomerService;
 import com.meuatelieweb.backend.domain.orderitem.OrderItemService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static com.meuatelieweb.backend.util.OrderCreator.createValidOrder;
 import static org.junit.jupiter.api.Assertions.*;
@@ -92,4 +96,47 @@ class OrderServiceTest {
         }
     }
 
+    @DisplayName("Test findById method")
+    @Nested
+    class FindByIdTests {
+
+        private void mockRepositoryFindById(Order order) {
+            BDDMockito.when(orderRepositoryMock.findById(any(UUID.class)))
+                    .thenReturn(Optional.ofNullable(order));
+        }
+
+        @Test
+        @DisplayName("findById returns order when successful")
+        void findById_ReturnsOrder_WhenSuccessful() {
+            Order order = createValidOrder();
+
+            this.mockRepositoryFindById(order);
+
+            Order orderFound = orderService.findById(UUID.randomUUID());
+
+            assertNotNull(orderFound);
+            assertEquals(order.getId(), orderFound.getId());
+            assertEquals(order.getOrderNumber(), orderFound.getOrderNumber());
+            assertEquals(order.getCreatedAt(), orderFound.getCreatedAt());
+            assertEquals(order.getUpdatedAt(), orderFound.getUpdatedAt());
+            assertEquals(order.getFinishedAt(), orderFound.getFinishedAt());
+            assertEquals(order.getIsActive(), orderFound.getIsActive());
+        }
+
+        @Test
+        @DisplayName("findById throws EntityNotFoundException when order is not found")
+        void findById_ThrowsEntityNotFoundException_WhenOrderIsNotFound() {
+            this.mockRepositoryFindById(null);
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> orderService.findById(UUID.randomUUID()));
+        }
+
+        @Test
+        @DisplayName("findById throws IllegalArgumentException when id order is null")
+        void findById_ThrowsIllegalArgumentException_WhenIdOrderIsNull() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> orderService.findById(null));
+        }
+    }
 }
