@@ -17,8 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
-import static com.meuatelieweb.backend.domain.customermeasure.CustomerMeasureCreator.*;
-import static com.meuatelieweb.backend.domain.measure.MeasureCreator.createValidMeasure;
+import static com.meuatelieweb.backend.util.CustomerMeasureCreator.*;
+import static com.meuatelieweb.backend.util.MeasureCreator.createValidMeasure;
 import static com.meuatelieweb.backend.domain.orderitem.OrderItemCreator.createValidTailoredOrderItem;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;

@@ -16,10 +16,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.customeradjust.CustomerAdjustCreator.createValidCustomerAdjust;
-import static com.meuatelieweb.backend.domain.customeradjust.CustomerAdjustCreator.createValidCustomerAdjustDTO;
-import static com.meuatelieweb.backend.domain.customermeasure.CustomerMeasureCreator.createValidCustomerMeasure;
-import static com.meuatelieweb.backend.domain.customermeasure.CustomerMeasureCreator.createValidCustomerMeasureDTO;
+import static com.meuatelieweb.backend.util.CustomerAdjustCreator.createValidCustomerAdjust;
+import static com.meuatelieweb.backend.util.CustomerAdjustCreator.createValidCustomerAdjustDTO;
+import static com.meuatelieweb.backend.util.CustomerMeasureCreator.createValidCustomerMeasure;
+import static com.meuatelieweb.backend.util.CustomerMeasureCreator.createValidCustomerMeasureDTO;
 import static com.meuatelieweb.backend.domain.orderitem.OrderItemCreator.createValidAdjustOrderItem;
 import static com.meuatelieweb.backend.domain.orderitem.OrderItemCreator.createValidTailoredOrderItem;
 import static org.junit.jupiter.api.Assertions.*;

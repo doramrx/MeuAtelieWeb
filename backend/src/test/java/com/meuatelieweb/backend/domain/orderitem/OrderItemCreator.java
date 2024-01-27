@@ -3,13 +3,41 @@ package com.meuatelieweb.backend.domain.orderitem;
 
 import com.meuatelieweb.backend.domain.customeradjust.CustomerAdjust;
 import com.meuatelieweb.backend.domain.customermeasure.CustomerMeasure;
-import com.meuatelieweb.backend.domain.order.Order;
+import com.meuatelieweb.backend.domain.orderitem.dto.SaveOrderItemDTO;
+import com.meuatelieweb.backend.domain.orderitem.dto.UpdateOrderItemDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static com.meuatelieweb.backend.util.CustomerAdjustCreator.createValidSaveCustomerAdjustDTO;
+import static com.meuatelieweb.backend.util.CustomerMeasureCreator.createValidSaveCustomerMeasureDTO;
+
 public class OrderItemCreator {
+
+    public static OrderItem createValidOrderItem() {
+
+        UUID id = UUID.randomUUID();
+        String title = "Blusa de Seda";
+        String description = null;
+        Double cost = 13.90;
+        LocalDateTime createdAt = LocalDateTime.now();
+        LocalDateTime dueDate = LocalDateTime.now().plusDays(5);
+        LocalDateTime deliveredAt = null;
+        Boolean isActive = true;
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setId(id);
+        orderItem.setTitle(title);
+        orderItem.setDescription(description);
+        orderItem.setCost(cost);
+        orderItem.setCreatedAt(createdAt);
+        orderItem.setDueDate(dueDate);
+        orderItem.setDeliveredAt(deliveredAt);
+        orderItem.setIsActive(isActive);
+
+        return orderItem;
+    }
 
     public static OrderItem createValidAdjustOrderItem() {
 
@@ -19,11 +47,11 @@ public class OrderItemCreator {
         Double cost = 13.90;
         LocalDateTime createdAt = LocalDateTime.now();
         LocalDateTime dueDate = LocalDateTime.now().plusDays(5);
-        LocalDateTime deliveredAt= null;
+        LocalDateTime deliveredAt = null;
         Boolean isActive = true;
         List<CustomerAdjust> customerAdjustments = List.of();
 
-        OrderItem adjustItem = new AdjustOrderItem();
+        AdjustOrderItem adjustItem = new AdjustOrderItem();
         adjustItem.setId(id);
         adjustItem.setTitle(title);
         adjustItem.setDescription(description);
@@ -32,7 +60,7 @@ public class OrderItemCreator {
         adjustItem.setDueDate(dueDate);
         adjustItem.setDeliveredAt(deliveredAt);
         adjustItem.setIsActive(isActive);
-        ((AdjustOrderItem) adjustItem).setCustomerAdjustments(customerAdjustments);
+        adjustItem.setCustomerAdjustments(customerAdjustments);
 
         return adjustItem;
     }
@@ -45,11 +73,11 @@ public class OrderItemCreator {
         Double cost = 350.50;
         LocalDateTime createdAt = LocalDateTime.now();
         LocalDateTime dueDate = LocalDateTime.now().plusDays(30);
-        LocalDateTime deliveredAt= null;
+        LocalDateTime deliveredAt = null;
         Boolean isActive = true;
         List<CustomerMeasure> customerMeasures = List.of();
 
-        OrderItem tailoredItem = new TailoredOrderItem();
+        TailoredOrderItem tailoredItem = new TailoredOrderItem();
         tailoredItem.setId(id);
         tailoredItem.setTitle(title);
         tailoredItem.setDescription(description);
@@ -58,9 +86,31 @@ public class OrderItemCreator {
         tailoredItem.setDueDate(dueDate);
         tailoredItem.setDeliveredAt(deliveredAt);
         tailoredItem.setIsActive(isActive);
-        ((TailoredOrderItem) tailoredItem).setCustomerMeasures(customerMeasures);
+        tailoredItem.setCustomerMeasures(customerMeasures);
 
         return tailoredItem;
+    }
+
+    public static SaveOrderItemDTO createValidSaveOrderItemDTOTailored() {
+        return SaveOrderItemDTO.builder()
+                .type(OrderType.TAILORED)
+                .title("Vestido de Festa")
+                .description(null)
+                .cost(350.50)
+                .measures(List.of(createValidSaveCustomerMeasureDTO()))
+                .dueDate(LocalDateTime.now().plusDays(30))
+                .build();
+    }
+
+    public static SaveOrderItemDTO createValidSaveOrderItemDTOAdjust() {
+        return SaveOrderItemDTO.builder()
+                .type(OrderType.ADJUST)
+                .title("Blusa de Seda")
+                .description(null)
+                .cost(13.90)
+                .adjusts(List.of(createValidSaveCustomerAdjustDTO()))
+                .dueDate(LocalDateTime.now().plusDays(5))
+                .build();
     }
 
     public static List<OrderItem> createValidOrderItemsList() {
@@ -68,5 +118,14 @@ public class OrderItemCreator {
                 createValidAdjustOrderItem(),
                 createValidTailoredOrderItem()
         );
+    }
+
+    public static UpdateOrderItemDTO createValidUpdateOrderItemDTO(){
+        return UpdateOrderItemDTO.builder()
+                .title("Vestido")
+                .description(null)
+                .cost(100.0)
+                .dueDate(LocalDateTime.now().plusDays(5))
+                .build();
     }
 }

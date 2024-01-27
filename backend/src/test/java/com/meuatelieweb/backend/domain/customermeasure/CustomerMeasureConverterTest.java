@@ -13,9 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.customermeasure.CustomerMeasureCreator.createValidCustomerMeasure;
-import static com.meuatelieweb.backend.domain.measure.MeasureCreator.createValidMeasure;
-import static com.meuatelieweb.backend.domain.measure.MeasureCreator.createValidMeasureDTO;
+import static com.meuatelieweb.backend.util.CustomerMeasureCreator.createValidCustomerMeasure;
+import static com.meuatelieweb.backend.util.MeasureCreator.createValidMeasure;
+import static com.meuatelieweb.backend.util.MeasureCreator.createValidMeasureDTO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 

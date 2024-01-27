@@ -180,11 +180,8 @@ public class OrderItemService {
         }
 
         if (orderItem instanceof TailoredOrderItem) {
-
-            if (updateOrderItemDTO.getCost() != null) {
-                this.validateTailoredItemCost(updateOrderItemDTO.getCost());
-                orderItem.setCost(updateOrderItemDTO.getCost());
-            }
+            this.validateTailoredItemCost(updateOrderItemDTO.getCost());
+            orderItem.setCost(updateOrderItemDTO.getCost());
         }
         repository.save(orderItem);
     }
@@ -255,7 +252,9 @@ public class OrderItemService {
     @Transactional
     public void singleDeleteItemFromOrder(@NonNull OrderItem item) {
 
-        this.validateItemDeliveryDate(item.getDeliveredAt());
+        if (item.getDeliveredAt() != null) {
+            throw new IllegalArgumentException("The item cannot be modified because it has already been delivered");
+        }
 
         if (item instanceof AdjustOrderItem) {
             customerAdjustService.deleteCustomerAdjusts(
@@ -270,7 +269,10 @@ public class OrderItemService {
                             .map(CustomerMeasure::getId)
                             .collect(Collectors.toSet())
             );
+        } else {
+            throw new IllegalArgumentException("The item type is invalid");
         }
+
         repository.inactivateOrderItemById(Set.of(item.getId()));
     }
 
@@ -296,9 +298,6 @@ public class OrderItemService {
         if (type == null) {
             throw new IllegalArgumentException("Item type cannot be null");
         }
-        if (!type.equals(OrderType.ADJUST) && !type.equals(OrderType.TAILORED)) {
-            throw new HttpMessageConversionException("Item type must be ADJUST or TAILORED");
-        }
     }
 
     private void validateItemTitle(String title) {
@@ -322,12 +321,6 @@ public class OrderItemService {
         }
         if (cost < 0.01) {
             throw new IllegalArgumentException("The given cost cannot be lesser than 0.01");
-        }
-    }
-
-    private void validateItemDeliveryDate(LocalDateTime deliveredAt) {
-        if (deliveredAt != null) {
-            throw new IllegalArgumentException("The item cannot be modified because it has already been delivered");
         }
     }
 

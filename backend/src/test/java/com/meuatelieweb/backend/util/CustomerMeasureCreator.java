@@ -1,13 +1,16 @@
-package com.meuatelieweb.backend.domain.customermeasure;
+package com.meuatelieweb.backend.util;
 
+import com.meuatelieweb.backend.domain.customermeasure.CustomerMeasure;
 import com.meuatelieweb.backend.domain.customermeasure.dto.CustomerMeasureDTO;
 import com.meuatelieweb.backend.domain.customermeasure.dto.SaveCustomerMeasureDTO;
+import com.meuatelieweb.backend.domain.customermeasure.dto.SaveCustomerMeasureListDTO;
 import com.meuatelieweb.backend.domain.customermeasure.dto.UpdateCustomerMeasureDTO;
 
+import java.util.List;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.measure.MeasureCreator.createValidMeasure;
-import static com.meuatelieweb.backend.domain.measure.MeasureCreator.createValidMeasureDTO;
+import static com.meuatelieweb.backend.util.MeasureCreator.createValidMeasure;
+import static com.meuatelieweb.backend.util.MeasureCreator.createValidMeasureDTO;
 
 public class CustomerMeasureCreator {
 
@@ -38,6 +41,12 @@ public class CustomerMeasureCreator {
                 .measure(createValidMeasureDTO(UUID.randomUUID()))
                 .measurementValue(60.0)
                 .isActive(true)
+                .build();
+    }
+
+    public static SaveCustomerMeasureListDTO createValidSaveCustomerMeasureListDTO() {
+        return SaveCustomerMeasureListDTO.builder()
+                .measures(List.of(createValidSaveCustomerMeasureDTO()))
                 .build();
     }
 }

@@ -16,9 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
-import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.createValidAdjust;
-import static com.meuatelieweb.backend.domain.customeradjust.CustomerAdjustCreator.createValidCustomerAdjust;
-import static com.meuatelieweb.backend.domain.customeradjust.CustomerAdjustCreator.createValidSaveCustomerAdjustDTO;
+import static com.meuatelieweb.backend.util.AdjustCreator.createValidAdjust;
+import static com.meuatelieweb.backend.util.CustomerAdjustCreator.createValidCustomerAdjust;
+import static com.meuatelieweb.backend.util.CustomerAdjustCreator.createValidSaveCustomerAdjustDTO;
 import static com.meuatelieweb.backend.domain.orderitem.OrderItemCreator.createValidAdjustOrderItem;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;

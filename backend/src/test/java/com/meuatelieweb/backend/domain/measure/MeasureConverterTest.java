@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static com.meuatelieweb.backend.domain.measure.MeasureCreator.createValidMeasure;
+import static com.meuatelieweb.backend.util.MeasureCreator.createValidMeasure;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)

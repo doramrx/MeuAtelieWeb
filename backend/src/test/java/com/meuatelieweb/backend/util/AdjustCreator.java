@@ -1,5 +1,6 @@
-package com.meuatelieweb.backend.domain.adjust;
+package com.meuatelieweb.backend.util;
 
+import com.meuatelieweb.backend.domain.adjust.Adjust;
 import com.meuatelieweb.backend.domain.adjust.dto.AdjustDTO;
 import com.meuatelieweb.backend.domain.adjust.dto.SaveUpdateAdjustDTO;
 

@@ -62,16 +62,4 @@ public class RestExceptionHandler {
 
         return ResponseEntity.notFound().build();
     }
-
-    @ExceptionHandler(HttpMessageConversionException.class)
-    protected ResponseEntity<ExceptionDetails> handleHttpMessageConversionException(HttpMessageConversionException e) {
-
-        ExceptionDetails responseBody = new ExceptionDetails(
-                "Http Message Conversion Exception",
-                HttpStatus.BAD_REQUEST.value(),
-                e.getMessage()
-        );
-
-        return ResponseEntity.badRequest().body(responseBody);
-    }
 }

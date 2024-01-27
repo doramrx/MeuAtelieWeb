@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.measure.MeasureCreator.*;
+import static com.meuatelieweb.backend.util.MeasureCreator.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;

@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.createValidAdjust;
-import static com.meuatelieweb.backend.domain.adjust.AdjustCreator.createValidSaveUpdateAdjustDTO;
+import static com.meuatelieweb.backend.util.AdjustCreator.createValidAdjust;
+import static com.meuatelieweb.backend.util.AdjustCreator.createValidSaveUpdateAdjustDTO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;

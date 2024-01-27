@@ -1,5 +1,6 @@
-package com.meuatelieweb.backend.domain.measure;
+package com.meuatelieweb.backend.util;
 
+import com.meuatelieweb.backend.domain.measure.Measure;
 import com.meuatelieweb.backend.domain.measure.dto.MeasureDTO;
 import com.meuatelieweb.backend.domain.measure.dto.SaveUpdateMeasureDTO;
 
