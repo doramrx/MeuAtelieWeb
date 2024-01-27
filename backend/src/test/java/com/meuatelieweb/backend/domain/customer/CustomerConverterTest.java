@@ -1,6 +1,7 @@
 package com.meuatelieweb.backend.domain.customer;
 
 import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
+import com.meuatelieweb.backend.domain.customer.dto.ListOrderCustomerDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,5 +38,24 @@ class CustomerConverterTest {
     void toCustomerDTO_ThrowsIllegalArgumentException_WhenCustomerIsNull() {
         assertThrows(IllegalArgumentException.class,
                 () -> customerConverter.toCustomerDTO(null));
+    }
+
+    @Test
+    @DisplayName("toListOrderCustomerDTO returns ListOrderCustomerDTO when successful")
+    void toListOrderCustomerDTO_ReturnsListOrderCustomerDTO_WhenSuccessful() {
+        Customer customer = createValidCustomer();
+
+        ListOrderCustomerDTO listOrderCustomerDTO = customerConverter.toListOrderCustomerDTO(customer);
+
+        assertNotNull(listOrderCustomerDTO);
+        assertEquals(customer.getName(), listOrderCustomerDTO.getName());
+        assertEquals(customer.getEmail(), listOrderCustomerDTO.getEmail());
+    }
+
+    @Test
+    @DisplayName("toListOrderCustomerDTO throws IllegalArgumentException when customer is null")
+    void toListOrderCustomerDTO_ThrowsIllegalArgumentException_WhenCustomerIsNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> customerConverter.toListOrderCustomerDTO(null));
     }
 }

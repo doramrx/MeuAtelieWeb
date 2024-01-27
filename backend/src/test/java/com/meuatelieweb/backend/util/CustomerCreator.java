@@ -2,6 +2,7 @@ package com.meuatelieweb.backend.util;
 
 import com.meuatelieweb.backend.domain.customer.Customer;
 import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
+import com.meuatelieweb.backend.domain.customer.dto.ListOrderCustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.UpdateCustomerDTO;
 
@@ -41,6 +42,13 @@ public class CustomerCreator {
         return UpdateCustomerDTO.builder()
                 .name("Ada Lovelace")
                 .phone("00100110100")
+                .build();
+    }
+
+    public static ListOrderCustomerDTO createValidListOrderCustomerDTO(Customer customer) {
+        return ListOrderCustomerDTO.builder()
+                .name(customer.getName())
+                .email(customer.getEmail())
                 .build();
     }
 }

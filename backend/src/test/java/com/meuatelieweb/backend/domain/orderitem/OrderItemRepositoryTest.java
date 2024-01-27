@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.meuatelieweb.backend.domain.orderitem.OrderItemCreator.createValidTailoredOrderItem;
+import static com.meuatelieweb.backend.util.OrderItemCreator.createValidTailoredOrderItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest

@@ -5,8 +5,8 @@ import com.meuatelieweb.backend.domain.order.Order;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.domain.orderitem.OrderItemCreator.createValidOrderItemsList;
 import static com.meuatelieweb.backend.util.CustomerCreator.createValidCustomer;
+import static com.meuatelieweb.backend.util.OrderItemCreator.createValidOrderItemsList;
 
 public class OrderCreator {
 
@@ -18,7 +18,7 @@ public class OrderCreator {
                 .updatedAt(null)
                 .finishedAt(null)
                 .customer(createValidCustomer())
-//                .orderItems(createValidOrderItemsList())
+                .orderItems(createValidOrderItemsList())
                 .isActive(true)
                 .build();
     }

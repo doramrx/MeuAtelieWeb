@@ -1,8 +1,13 @@
-package com.meuatelieweb.backend.domain.orderitem;
+package com.meuatelieweb.backend.util;
 
 
 import com.meuatelieweb.backend.domain.customeradjust.CustomerAdjust;
 import com.meuatelieweb.backend.domain.customermeasure.CustomerMeasure;
+import com.meuatelieweb.backend.domain.orderitem.AdjustOrderItem;
+import com.meuatelieweb.backend.domain.orderitem.OrderItem;
+import com.meuatelieweb.backend.domain.orderitem.OrderType;
+import com.meuatelieweb.backend.domain.orderitem.TailoredOrderItem;
+import com.meuatelieweb.backend.domain.orderitem.dto.OrderItemDTO;
 import com.meuatelieweb.backend.domain.orderitem.dto.SaveOrderItemDTO;
 import com.meuatelieweb.backend.domain.orderitem.dto.UpdateOrderItemDTO;
 
@@ -120,12 +125,26 @@ public class OrderItemCreator {
         );
     }
 
-    public static UpdateOrderItemDTO createValidUpdateOrderItemDTO(){
+    public static UpdateOrderItemDTO createValidUpdateOrderItemDTO() {
         return UpdateOrderItemDTO.builder()
                 .title("Vestido")
                 .description(null)
                 .cost(100.0)
                 .dueDate(LocalDateTime.now().plusDays(5))
+                .build();
+    }
+
+    public static OrderItemDTO createValidOrderItemDTO(UUID id) {
+        return OrderItemDTO.builder()
+                .id(id)
+                .type(OrderType.ADJUST)
+                .title("Blusa de Seda")
+                .description(null)
+                .cost(13.90)
+                .createdAt(LocalDateTime.now())
+                .dueDate(LocalDateTime.now().plusDays(5))
+                .deliveredAt(null)
+                .isActive(true)
                 .build();
     }
 }

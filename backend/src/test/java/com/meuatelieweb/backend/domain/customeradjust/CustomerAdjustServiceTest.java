@@ -19,7 +19,7 @@ import java.util.*;
 import static com.meuatelieweb.backend.util.AdjustCreator.createValidAdjust;
 import static com.meuatelieweb.backend.util.CustomerAdjustCreator.createValidCustomerAdjust;
 import static com.meuatelieweb.backend.util.CustomerAdjustCreator.createValidSaveCustomerAdjustDTO;
-import static com.meuatelieweb.backend.domain.orderitem.OrderItemCreator.createValidAdjustOrderItem;
+import static com.meuatelieweb.backend.util.OrderItemCreator.createValidAdjustOrderItem;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;

@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static com.meuatelieweb.backend.domain.orderitem.OrderItemCreator.*;
+import static com.meuatelieweb.backend.util.OrderItemCreator.*;
 import static com.meuatelieweb.backend.util.AdjustCreator.createValidAdjust;
 import static com.meuatelieweb.backend.util.CustomerAdjustCreator.*;
 import static com.meuatelieweb.backend.util.CustomerMeasureCreator.*;

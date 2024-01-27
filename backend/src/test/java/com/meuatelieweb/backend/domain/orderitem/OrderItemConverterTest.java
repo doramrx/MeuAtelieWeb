@@ -20,8 +20,8 @@ import static com.meuatelieweb.backend.util.CustomerAdjustCreator.createValidCus
 import static com.meuatelieweb.backend.util.CustomerAdjustCreator.createValidCustomerAdjustDTO;
 import static com.meuatelieweb.backend.util.CustomerMeasureCreator.createValidCustomerMeasure;
 import static com.meuatelieweb.backend.util.CustomerMeasureCreator.createValidCustomerMeasureDTO;
-import static com.meuatelieweb.backend.domain.orderitem.OrderItemCreator.createValidAdjustOrderItem;
-import static com.meuatelieweb.backend.domain.orderitem.OrderItemCreator.createValidTailoredOrderItem;
+import static com.meuatelieweb.backend.util.OrderItemCreator.createValidAdjustOrderItem;
+import static com.meuatelieweb.backend.util.OrderItemCreator.createValidTailoredOrderItem;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
