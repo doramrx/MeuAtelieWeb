@@ -100,7 +100,7 @@ public class AdjustService {
     }
 
     @Transactional
-    public void deleteAdjust(UUID id) {
+    public void deleteAdjust(@NonNull UUID id) {
         if (!repository.existsByIdAndIsActiveTrue(id)) {
             throw new EntityNotFoundException("The given adjust does not exist or is already inactive");
         }
@@ -108,8 +108,9 @@ public class AdjustService {
     }
 
 
-    public Set<Adjust> getAdjusts(Set<UUID> adjustsIds) {
-        Set<Adjust> adjusts = repository.findByIdInAndIsActiveTrue(adjustsIds);
+    public Set<Adjust> getAdjusts(@NonNull Set<UUID> adjustsIds) {
+        Set<Adjust> adjusts = repository.findByIdInAndIsActiveTrue(adjustsIds)
+                .orElseThrow(() -> new EntityNotFoundException("The given adjust does not exist or is already inactive"));
 
         if (adjusts.size() != adjustsIds.size()) {
             throw new IllegalArgumentException("Some of the given id adjusts are invalid");

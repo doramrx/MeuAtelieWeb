@@ -19,6 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.meuatelieweb.backend.util.AdjustCreator.createValidAdjust;
@@ -195,7 +196,6 @@ class AdjustServiceTest {
     class UpdateAdjustTests {
 
         private void mockRepositoryFindByIdAndIsActiveTrue(Adjust adjust) {
-
             BDDMockito.when(adjustRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
                     .thenReturn(Optional.ofNullable(adjust));
         }
@@ -317,6 +317,65 @@ class AdjustServiceTest {
 
             assertThrows(EntityNotFoundException.class,
                     () -> adjustService.deleteAdjust(null));
+        }
+    }
+
+    @DisplayName("Test getAdjusts method")
+    @Nested
+    class GetAdjustsTest {
+
+        private void mockRepositoryFindByIdInAndIsActiveTrue(Set<Adjust> adjusts) {
+            BDDMockito.when(adjustRepositoryMock.findByIdInAndIsActiveTrue(anySet()))
+                    .thenReturn(Optional.ofNullable(adjusts));
+        }
+
+        @Test
+        @DisplayName("getAdjusts throws IllegalArgumentException when adjusts ids are null null")
+        void getAdjusts_ThrowsIllegalArgumentException_WhenAdjustsIdsAreNull() {
+
+            assertThrows(IllegalArgumentException.class,
+                    () -> adjustService.getAdjusts(null));
+        }
+
+        @Test
+        @DisplayName("getAdjusts throws EntityNotFoundException when adjusts are not found")
+        void getAdjusts_ThrowsEntityNotFoundException_WhenAdjustsAreNotFound() {
+            String expectedMessage = "The given adjust does not exist or is already inactive";
+            this.mockRepositoryFindByIdInAndIsActiveTrue(null);
+
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                    () -> adjustService.getAdjusts(Set.of(UUID.randomUUID())));
+
+            assertEquals(expectedMessage, exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("getAdjusts throws IllegalArgumentException when some of the given id adjusts are invalid")
+        void getAdjusts_ThrowsIllegalArgumentException_WhenSomeOfTheGivenIdAdjustsAreInvalid() {
+            String expectedMessage = "Some of the given id adjusts are invalid";
+
+            Set<Adjust> adjusts = Set.of(createValidAdjust());
+
+            this.mockRepositoryFindByIdInAndIsActiveTrue(adjusts);
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> adjustService.getAdjusts(Set.of(UUID.randomUUID(), UUID.randomUUID())));
+
+            assertEquals(expectedMessage, exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("getAdjusts returns adjusts when successful")
+        void getAdjusts_ReturnsAdjusts_WhenSuccessful() {
+            Set<Adjust> adjustsSpy = spy(Set.of(createValidAdjust()));
+
+            this.mockRepositoryFindByIdInAndIsActiveTrue(adjustsSpy);
+
+            Set<Adjust> adjusts = adjustService.getAdjusts(Set.of(UUID.randomUUID()));
+
+            assertNotNull(adjusts);
+            verify(adjustsSpy, times(1)).size();
+            verify(adjustRepositoryMock, times(1)).findByIdInAndIsActiveTrue(anySet());
         }
     }
 }

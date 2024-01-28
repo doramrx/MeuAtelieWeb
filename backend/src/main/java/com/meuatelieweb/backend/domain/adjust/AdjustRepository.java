@@ -19,7 +19,7 @@ public interface AdjustRepository extends JpaRepository<Adjust, UUID> {
 
     Page<Adjust> findAll(Specification<Adjust> specification, Pageable pageable);
 
-    Set<Adjust> findByIdInAndIsActiveTrue(Set<UUID> ids);
+    Optional<Set<Adjust>> findByIdInAndIsActiveTrue(Set<UUID> ids);
 
     boolean existsByIdAndIsActiveTrue(UUID id);
 
