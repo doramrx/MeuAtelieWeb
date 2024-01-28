@@ -7,8 +7,10 @@ import com.meuatelieweb.backend.domain.customermeasure.dto.SaveCustomerMeasureLi
 import com.meuatelieweb.backend.domain.customermeasure.dto.UpdateCustomerMeasureDTO;
 import com.meuatelieweb.backend.domain.order.dto.SaveOrderDTO;
 import com.meuatelieweb.backend.domain.order.dto.UpdateOrderDTO;
-import com.meuatelieweb.backend.domain.orderitem.*;
-import com.meuatelieweb.backend.domain.orderitem.dto.SaveCustomerAdjustMeasureDTO;
+import com.meuatelieweb.backend.domain.orderitem.AdjustOrderItem;
+import com.meuatelieweb.backend.domain.orderitem.OrderItem;
+import com.meuatelieweb.backend.domain.orderitem.OrderItemService;
+import com.meuatelieweb.backend.domain.orderitem.TailoredOrderItem;
 import com.meuatelieweb.backend.domain.orderitem.dto.SaveOrderItemDTO;
 import com.meuatelieweb.backend.domain.orderitem.dto.UpdateOrderItemDTO;
 import jakarta.persistence.EntityNotFoundException;
@@ -43,8 +45,7 @@ public class OrderService {
             LocalDateTime finishedAt,
             String customerName,
             String customerEmail,
-            Boolean isActive)
-    {
+            Boolean isActive) {
         Specification<Order> specification = OrderSpecification.applyFilter(
                 orderNumber, createdAt, finishedAt, customerName, customerEmail, isActive
         );
@@ -78,7 +79,7 @@ public class OrderService {
         List<OrderItem> orderItems = orderItemService.addOrderItems(savedOrder, saveOrderDTO.getItems());
         savedOrder.setOrderItems(orderItems);
 
-        return repository.saveAndFlush(savedOrder);
+        return savedOrder;
     }
 
     @Transactional
@@ -100,42 +101,48 @@ public class OrderService {
     public Order addAdjustsToOrderItem(
             @NonNull UUID orderId,
             @NonNull UUID itemId,
-            @NonNull SaveCustomerAdjustMeasureDTO requestBody
+            @NonNull SaveCustomerAdjustListDTO saveCustomerAdjustList
     ) {
         this.validateIfOrderWasFinished(orderId);
         Order order = this.findByIdAndIsActiveTrue(orderId);
 
-        if (requestBody.getCustomerAdjusts().getAdjusts().isEmpty()) {
+        if (saveCustomerAdjustList.getAdjusts().isEmpty()) {
             throw new IllegalArgumentException("There are no adjusts to add to order item");
         }
 
-        SaveCustomerAdjustListDTO adjusts = requestBody.getCustomerAdjusts();
-
-        orderItemService.addAdjustsToOrderItem(itemId, adjusts);
-
+        AdjustOrderItem adjustOrderItem = orderItemService.addAdjustsToOrderItem(itemId, saveCustomerAdjustList);
         order.setUpdatedAt(LocalDateTime.now());
-        return repository.saveAndFlush(order);
+        order.setOrderItems(
+                order.getOrderItems().stream().map(
+                        item -> item.getId().equals(adjustOrderItem.getId()) ? adjustOrderItem : item
+                ).toList()
+        );
+
+        return order;
     }
 
     @Transactional
     public Order addMeasuresToOrderItem(
             @NonNull UUID orderId,
             @NonNull UUID itemId,
-            @NonNull SaveCustomerAdjustMeasureDTO requestBody
+            @NonNull SaveCustomerMeasureListDTO saveCustomerMeasureList
     ) {
         this.validateIfOrderWasFinished(orderId);
         Order order = this.findByIdAndIsActiveTrue(orderId);
 
-        if (requestBody.getCustomerMeasures().getMeasures().isEmpty()) {
+        if (saveCustomerMeasureList.getMeasures().isEmpty()) {
             throw new IllegalArgumentException("There are no measures to add to order item");
         }
 
-        SaveCustomerMeasureListDTO measures = requestBody.getCustomerMeasures();
-
-        orderItemService.addMeasuresToOrderItem(itemId, measures);
-
+        TailoredOrderItem tailoredOrderItem = orderItemService.addMeasuresToOrderItem(itemId, saveCustomerMeasureList);
         order.setUpdatedAt(LocalDateTime.now());
-        return repository.saveAndFlush(order);
+        order.setOrderItems(
+                order.getOrderItems().stream().map(
+                        item -> item.getId().equals(tailoredOrderItem.getId()) ? tailoredOrderItem : item
+                ).toList()
+        );
+
+        return order;
     }
 
     @Transactional
@@ -213,7 +220,11 @@ public class OrderService {
     }
 
     @Transactional
-    public Order singleDeleteCustomerAdjustFromItem(UUID orderId, UUID itemId, UUID customerAdjustId) {
+    public Order singleDeleteCustomerAdjustFromItem(
+            @NonNull UUID orderId,
+            @NonNull UUID itemId,
+            @NonNull UUID customerAdjustId
+    ) {
 
         this.validateIfOrderWasFinished(orderId);
         Order order = this.findByIdAndIsActiveTrue(orderId);
@@ -226,7 +237,11 @@ public class OrderService {
     }
 
     @Transactional
-    public Order singleDeleteCustomerMeasureFromItem(UUID orderId, UUID itemId, UUID customerMeasureId) {
+    public Order singleDeleteCustomerMeasureFromItem(
+            @NonNull UUID orderId,
+            @NonNull UUID itemId,
+            @NonNull UUID customerMeasureId
+    ) {
 
         this.validateIfOrderWasFinished(orderId);
         Order order = this.findByIdAndIsActiveTrue(orderId);
@@ -239,7 +254,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void singleDeleteItemFromOrder(UUID orderId, UUID itemId) {
+    public void singleDeleteItemFromOrder(@NonNull UUID orderId, @NonNull UUID itemId) {
 
         this.validateIfOrderWasFinished(orderId);
         Order order = this.findByIdAndIsActiveTrue(orderId);
@@ -248,7 +263,7 @@ public class OrderService {
 
         orderItemService.singleDeleteItemFromOrder(item);
 
-        if (!this.validateIfOrderHasActiveItems(order.getOrderItems())){
+        if (!this.validateIfOrderHasActiveItems(order.getOrderItems())) {
             this.deleteOrder(orderId);
         } else {
             order.setUpdatedAt(LocalDateTime.now());
@@ -256,7 +271,7 @@ public class OrderService {
         }
     }
 
-    private Boolean validateIfOrderHasActiveItems(List<OrderItem> items){
+    private Boolean validateIfOrderHasActiveItems(List<OrderItem> items) {
         long notActiveItems = items.stream()
                 .filter(item -> !item.getIsActive())
                 .count();

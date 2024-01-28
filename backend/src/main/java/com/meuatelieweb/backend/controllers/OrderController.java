@@ -1,5 +1,7 @@
 package com.meuatelieweb.backend.controllers;
 
+import com.meuatelieweb.backend.domain.customeradjust.dto.SaveCustomerAdjustListDTO;
+import com.meuatelieweb.backend.domain.customermeasure.dto.SaveCustomerMeasureListDTO;
 import com.meuatelieweb.backend.domain.customermeasure.dto.UpdateCustomerMeasureDTO;
 import com.meuatelieweb.backend.domain.order.OrderConverter;
 import com.meuatelieweb.backend.domain.order.OrderService;
@@ -7,8 +9,6 @@ import com.meuatelieweb.backend.domain.order.dto.ListOrderDTO;
 import com.meuatelieweb.backend.domain.order.dto.OrderDTO;
 import com.meuatelieweb.backend.domain.order.dto.SaveOrderDTO;
 import com.meuatelieweb.backend.domain.order.dto.UpdateOrderDTO;
-import com.meuatelieweb.backend.domain.orderitem.OrderType;
-import com.meuatelieweb.backend.domain.orderitem.dto.SaveCustomerAdjustMeasureDTO;
 import com.meuatelieweb.backend.domain.orderitem.dto.SaveOrderItemDTO;
 import com.meuatelieweb.backend.domain.orderitem.dto.UpdateOrderItemDTO;
 import jakarta.validation.Valid;
@@ -88,23 +88,29 @@ public class OrderController {
         return ResponseEntity.ok().body(savedOrder);
     }
 
-    @PostMapping("/{orderId}/items/{itemId}")
-    public ResponseEntity<OrderDTO> addAdjustsMeasuresToOrderItem (
+    @PostMapping("/{orderId}/items/{itemId}/adjusts")
+    public ResponseEntity<OrderDTO> addAdjustsToOrderItem (
             @PathVariable UUID orderId,
             @PathVariable UUID itemId,
-            @RequestBody SaveCustomerAdjustMeasureDTO requestBody
+            @RequestBody SaveCustomerAdjustListDTO saveCustomerAdjustList
     ) {
-        OrderDTO orderDTO = new OrderDTO();
+        OrderDTO orderDTO = this.converter.toOrderDTO(
+                service.addAdjustsToOrderItem(orderId, itemId, saveCustomerAdjustList)
+        );
 
-        if (requestBody.getType() == OrderType.ADJUST) {
-            orderDTO = this.converter.toOrderDTO(service.addAdjustsToOrderItem(orderId, itemId, requestBody));
+        return ResponseEntity.ok().body(orderDTO);
+    }
 
-        } else if (requestBody.getType() == OrderType.TAILORED) {
-            orderDTO = this.converter.toOrderDTO(service.addMeasuresToOrderItem(orderId, itemId, requestBody));
+    @PostMapping("/{orderId}/items/{itemId}/measures")
+    public ResponseEntity<OrderDTO> addMeasuresToOrderItem (
+            @PathVariable UUID orderId,
+            @PathVariable UUID itemId,
+            @RequestBody SaveCustomerMeasureListDTO saveCustomerMeasureListDTO
+    ) {
+        OrderDTO orderDTO = this.converter.toOrderDTO(
+                service.addMeasuresToOrderItem(orderId, itemId, saveCustomerMeasureListDTO)
+        );
 
-        } else {
-            return ResponseEntity.badRequest().body(orderDTO);
-        }
         return ResponseEntity.ok().body(orderDTO);
     }
 

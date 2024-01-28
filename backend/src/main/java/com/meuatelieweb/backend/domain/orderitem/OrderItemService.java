@@ -112,10 +112,11 @@ public class OrderItemService {
     }
 
     @Transactional
-    public void addAdjustsToOrderItem(
+    public AdjustOrderItem addAdjustsToOrderItem(
             @NonNull UUID itemId,
-            @NonNull SaveCustomerAdjustListDTO adjusts
+            @NonNull SaveCustomerAdjustListDTO saveCustomerAdjustList
     ) {
+        this.validateIfThereAreDuplicatedCustomerAdjusts(saveCustomerAdjustList.getAdjusts());
         this.validateIfOrderItemWasDelivered(itemId);
         OrderItem item = findActiveOrderItemById(itemId);
 
@@ -123,22 +124,32 @@ public class OrderItemService {
             throw new IllegalArgumentException("The item type is invalid");
         }
 
-        ((AdjustOrderItem) item).getCustomerAdjustments().forEach(customerAdjust -> {
-            adjusts.getAdjusts().stream()
-                    .filter(saveCustomerAdjustDTO -> saveCustomerAdjustDTO.getAdjustmentId().equals(customerAdjust.getAdjust().getId()))
+        AdjustOrderItem adjustOrderItem = ((AdjustOrderItem) item);
+
+        adjustOrderItem.getCustomerAdjustments().forEach(customerAdjust -> {
+            saveCustomerAdjustList.getAdjusts().stream()
+                    .filter(saveCustomerAdjust -> saveCustomerAdjust.getAdjustmentId().equals(customerAdjust.getAdjust().getId()))
                     .findFirst()
                     .ifPresent(e -> {
                         throw new IllegalArgumentException("Some of the adjusts are already being used in this item");
                     });
         });
-        customerAdjustService.addCustomerAdjusts(item, adjusts.getAdjusts());
+
+        List<CustomerAdjust> customerAdjusts = customerAdjustService.addCustomerAdjusts(item, saveCustomerAdjustList.getAdjusts());
+        List<CustomerAdjust> itemCustomerAdjusts = adjustOrderItem.getCustomerAdjustments();
+        itemCustomerAdjusts.addAll(customerAdjusts);
+
+        adjustOrderItem.setCustomerAdjustments(itemCustomerAdjusts);
+
+        return adjustOrderItem;
     }
 
     @Transactional
-    public void addMeasuresToOrderItem(
+    public TailoredOrderItem addMeasuresToOrderItem(
             @NonNull UUID itemId,
             @NonNull SaveCustomerMeasureListDTO measures
     ) {
+        this.validateIfThereAreDuplicatedDuplicatedMeasures(measures.getMeasures());
         this.validateIfOrderItemWasDelivered(itemId);
         OrderItem item = findActiveOrderItemById(itemId);
 
@@ -146,7 +157,9 @@ public class OrderItemService {
             throw new IllegalArgumentException("The item type is invalid");
         }
 
-        ((TailoredOrderItem) item).getCustomerMeasures().forEach(customerMeasure -> {
+        TailoredOrderItem tailoredOrderItem = ((TailoredOrderItem) item);
+
+        tailoredOrderItem.getCustomerMeasures().forEach(customerMeasure -> {
             measures.getMeasures().stream()
                     .filter(saveCustomerMeasureDTO -> saveCustomerMeasureDTO.getMeasurementId().equals(customerMeasure.getMeasure().getId()))
                     .findFirst()
@@ -154,7 +167,14 @@ public class OrderItemService {
                         throw new IllegalArgumentException("Some of the measures are already being used in this item");
                     });
         });
-        customerMeasureService.addCustomerMeasures(item, measures.getMeasures());
+
+        List<CustomerMeasure> customerMeasures = customerMeasureService.addCustomerMeasures(item, measures.getMeasures());
+        List<CustomerMeasure> itemCustomerMeasures = tailoredOrderItem.getCustomerMeasures();
+        itemCustomerMeasures.addAll(customerMeasures);
+
+        tailoredOrderItem.setCustomerMeasures(itemCustomerMeasures);
+
+        return tailoredOrderItem;
     }
 
     @Transactional
