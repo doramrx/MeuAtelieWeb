@@ -124,6 +124,49 @@ class CustomerServiceTest {
         }
     }
 
+    @DisplayName("Test findByIdAndIsActiveTrue method")
+    @Nested
+    class FindByIdAndIsActiveTrueTests {
+
+        private void mockRepositoryFindByIdAndIsActiveTrue(Customer customer) {
+            BDDMockito.when(customerRepositoryMock.findByIdAndIsActiveTrue(any(UUID.class)))
+                    .thenReturn(Optional.ofNullable(customer));
+        }
+
+        @Test
+        @DisplayName("findByIdAndIsActiveTrue returns customer when successful")
+        void findByIdAndIsActiveTrue_ReturnsCustomer_WhenSuccessful() {
+            Customer customer = createValidCustomer();
+
+            this.mockRepositoryFindByIdAndIsActiveTrue(customer);
+
+            Customer customerFound = customerService.findByIdAndIsActiveTrue(UUID.randomUUID());
+
+            assertNotNull(customerFound);
+            assertEquals(customer.getId(), customerFound.getId());
+            assertEquals(customer.getName(), customerFound.getName());
+            assertEquals(customer.getEmail(), customerFound.getEmail());
+            assertEquals(customer.getPhone(), customerFound.getPhone());
+            assertEquals(customer.getIsActive(), customerFound.getIsActive());
+        }
+
+        @Test
+        @DisplayName("findByIdAndIsActiveTrue throws EntityNotFoundException when customer is not found")
+        void findByIdAndIsActiveTrue_ThrowsEntityNotFoundException_WhenCustomerIsNotFound() {
+            this.mockRepositoryFindByIdAndIsActiveTrue(null);
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> customerService.findByIdAndIsActiveTrue(UUID.randomUUID()));
+        }
+
+        @Test
+        @DisplayName("findByIdAndIsActiveTrue throws IllegalArgumentException when id customer is null")
+        void findByIdAndIsActiveTrue_ThrowsIllegalArgumentException_WhenIdCustomerIsNull() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> customerService.findByIdAndIsActiveTrue(null));
+        }
+    }
+
     @DisplayName("Test addCustomer method")
     @Nested
     class AddCustomerTests {
