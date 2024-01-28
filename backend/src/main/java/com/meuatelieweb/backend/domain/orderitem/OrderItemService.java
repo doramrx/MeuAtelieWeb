@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -136,9 +137,8 @@ public class OrderItemService {
         });
 
         List<CustomerAdjust> customerAdjusts = customerAdjustService.addCustomerAdjusts(item, saveCustomerAdjustList.getAdjusts());
-        List<CustomerAdjust> itemCustomerAdjusts = adjustOrderItem.getCustomerAdjustments();
+        List<CustomerAdjust> itemCustomerAdjusts = new ArrayList<>(adjustOrderItem.getCustomerAdjustments());
         itemCustomerAdjusts.addAll(customerAdjusts);
-
         adjustOrderItem.setCustomerAdjustments(itemCustomerAdjusts);
 
         return adjustOrderItem;
@@ -169,9 +169,8 @@ public class OrderItemService {
         });
 
         List<CustomerMeasure> customerMeasures = customerMeasureService.addCustomerMeasures(item, measures.getMeasures());
-        List<CustomerMeasure> itemCustomerMeasures = tailoredOrderItem.getCustomerMeasures();
+        List<CustomerMeasure> itemCustomerMeasures = new ArrayList<>(tailoredOrderItem.getCustomerMeasures());
         itemCustomerMeasures.addAll(customerMeasures);
-
         tailoredOrderItem.setCustomerMeasures(itemCustomerMeasures);
 
         return tailoredOrderItem;
