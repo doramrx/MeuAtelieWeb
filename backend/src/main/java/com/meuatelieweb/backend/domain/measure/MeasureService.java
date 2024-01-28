@@ -83,8 +83,9 @@ public class MeasureService {
         repository.inactivateMeasureById(id);
     }
 
-    public Set<Measure> getMeasures(Set<UUID> measuresIds) {
-        Set<Measure> measures = repository.findByIdInAndIsActiveTrue(measuresIds);
+    public Set<Measure> getMeasures(@NonNull Set<UUID> measuresIds) {
+        Set<Measure> measures = repository.findByIdInAndIsActiveTrue(measuresIds)
+                .orElseThrow(() -> new EntityNotFoundException("The given measure does not exist or is already inactive"));
 
         if (measures.size() != measuresIds.size()) {
             throw new IllegalArgumentException("Some of the given id measures are invalid");

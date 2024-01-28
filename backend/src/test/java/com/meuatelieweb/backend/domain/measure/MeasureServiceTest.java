@@ -1,5 +1,6 @@
 package com.meuatelieweb.backend.domain.measure;
 
+import com.meuatelieweb.backend.domain.adjust.Adjust;
 import com.meuatelieweb.backend.domain.measure.dto.SaveUpdateMeasureDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
@@ -16,8 +17,10 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
+import static com.meuatelieweb.backend.util.AdjustCreator.createValidAdjust;
 import static com.meuatelieweb.backend.util.MeasureCreator.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -270,6 +273,65 @@ class MeasureServiceTest {
 
             assertThrows(EntityNotFoundException.class,
                     () -> measureService.deleteMeasure(null));
+        }
+    }
+
+    @DisplayName("Test getMeasures method")
+    @Nested
+    class GetMeasuresTest {
+
+        private void mockRepositoryFindByIdInAndIsActiveTrue(Set<Measure> measures) {
+            BDDMockito.when(measureRepositoryMock.findByIdInAndIsActiveTrue(anySet()))
+                    .thenReturn(Optional.ofNullable(measures));
+        }
+
+        @Test
+        @DisplayName("getMeasures throws IllegalArgumentException when measures ids are null")
+        void getMeasures_ThrowsIllegalArgumentException_WhenMeasuresIdsAreNull() {
+
+            assertThrows(IllegalArgumentException.class,
+                    () -> measureService.getMeasures(null));
+        }
+
+        @Test
+        @DisplayName("getMeasures throws EntityNotFoundException when measures are not found")
+        void getMeasures_ThrowsEntityNotFoundException_WhenMeasuresAreNotFound() {
+            String expectedMessage = "The given measure does not exist or is already inactive";
+            this.mockRepositoryFindByIdInAndIsActiveTrue(null);
+
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                    () -> measureService.getMeasures(Set.of(UUID.randomUUID())));
+
+            assertEquals(expectedMessage, exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("getMeasures throws IllegalArgumentException when some of the given id measures are invalid")
+        void getMeasures_ThrowsIllegalArgumentException_WhenSomeOfTheGivenIdMeasuresAreInvalid() {
+            String expectedMessage = "Some of the given id measures are invalid";
+
+            Set<Measure> measures = Set.of(createValidMeasure());
+
+            this.mockRepositoryFindByIdInAndIsActiveTrue(measures);
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> measureService.getMeasures(Set.of(UUID.randomUUID(), UUID.randomUUID())));
+
+            assertEquals(expectedMessage, exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("getMeasures returns measures when successful")
+        void getMeasures_ReturnsMeasures_WhenSuccessful() {
+            Set<Measure> measuresSpy = spy(Set.of(createValidMeasure()));
+
+            this.mockRepositoryFindByIdInAndIsActiveTrue(measuresSpy);
+
+            Set<Measure> measures = measureService.getMeasures(Set.of(UUID.randomUUID()));
+
+            assertNotNull(measures);
+            verify(measuresSpy, times(1)).size();
+            verify(measureRepositoryMock, times(1)).findByIdInAndIsActiveTrue(anySet());
         }
     }
 }

@@ -19,7 +19,7 @@ public interface MeasureRepository extends JpaRepository<Measure, UUID> {
 
     Page<Measure> findAll(Specification<Measure> specification, Pageable pageable);
 
-    Set<Measure> findByIdInAndIsActiveTrue(Set<UUID> ids);
+    Optional<Set<Measure>> findByIdInAndIsActiveTrue(Set<UUID> ids);
 
     boolean existsByIdAndIsActiveTrue(UUID id);
 
