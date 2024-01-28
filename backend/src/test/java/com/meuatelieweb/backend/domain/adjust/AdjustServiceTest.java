@@ -312,10 +312,10 @@ class AdjustServiceTest {
         }
 
         @Test
-        @DisplayName("deleteAdjust throws EntityNotFoundException when adjust id is null")
-        void deleteAdjust_ThrowsEntityNotFoundException_WhenAdjustIdIsNull() {
+        @DisplayName("deleteAdjust throws IllegalArgumentException when adjust id is null")
+        void deleteAdjust_ThrowsIllegalArgumentException_WhenAdjustIdIsNull() {
 
-            assertThrows(EntityNotFoundException.class,
+            assertThrows(IllegalArgumentException.class,
                     () -> adjustService.deleteAdjust(null));
         }
     }
