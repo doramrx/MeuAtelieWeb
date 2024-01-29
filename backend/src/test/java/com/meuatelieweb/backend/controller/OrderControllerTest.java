@@ -1,6 +1,5 @@
 package com.meuatelieweb.backend.controller;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meuatelieweb.backend.controllers.OrderController;
 import com.meuatelieweb.backend.domain.customer.Customer;
@@ -13,6 +12,7 @@ import com.meuatelieweb.backend.domain.order.dto.OrderDTO;
 import com.meuatelieweb.backend.domain.orderitem.OrderItem;
 import com.meuatelieweb.backend.domain.orderitem.OrderItemConverter;
 import com.meuatelieweb.backend.domain.orderitem.dto.OrderItemDTO;
+import jakarta.persistence.EntityNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -37,11 +37,15 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
+import static com.meuatelieweb.backend.util.CustomerCreator.createValidCustomer;
 import static com.meuatelieweb.backend.util.CustomerCreator.createValidCustomerDTO;
 import static com.meuatelieweb.backend.util.OrderCreator.createValidOrder;
 import static com.meuatelieweb.backend.util.OrderCreator.createValidOrderDTO;
+import static com.meuatelieweb.backend.util.OrderItemCreator.createValidOrderItem;
 import static com.meuatelieweb.backend.util.OrderItemCreator.createValidOrderItemDTO;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @WebMvcTest(controllers = {OrderController.class})
 @ExtendWith(MockitoExtension.class)
@@ -175,6 +179,75 @@ class OrderControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isOk(),
                             MockMvcResultMatchers.jsonPath("$.content.size()", CoreMatchers.is(0))
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+    }
+
+    @DisplayName("Test findById method")
+    @Nested
+    class FindByIdTests {
+
+        @Test
+        @DisplayName("findById returns STATUS CODE 200 and a order when successful")
+        void findById_ReturnsStatusCode200AndOrder_WhenSuccessful() throws Exception {
+
+            Order order = createValidOrder();
+            Customer customer = createValidCustomer();
+            OrderDTO orderDTO = createValidOrderDTO(order.getId(), customer.getId());
+            CustomerDTO customerDTO = createValidCustomerDTO(customer.getId());
+            OrderItem item = createValidOrderItem();
+            OrderItemDTO itemDTO = createValidOrderItemDTO(item.getId());
+
+            BDDMockito.when(orderServiceMock.findById(Mockito.any(UUID.class)))
+                    .thenReturn(order);
+            mockConverterToOrderDTO(order, orderDTO);
+            mockCustomerConverterToCustomerDTO(customer, customerDTO);
+            mockOrderItemConverterToOrderItemDTO(item, itemDTO);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/orders/{id}", order.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isOk(),
+                            result -> {
+                                OrderDTO orderDTOFound = objectMapper.readValue(
+                                        result.getResponse().getContentAsString(),
+                                        OrderDTO.class
+                                );
+
+                                assertEquals(orderDTO.getId(), orderDTOFound.getId());
+                                assertEquals(orderDTO.getOrderNumber(), orderDTOFound.getOrderNumber());
+                                assertEquals(orderDTO.getCreatedAt(), orderDTOFound.getCreatedAt());
+                                assertEquals(orderDTO.getUpdatedAt(), orderDTOFound.getUpdatedAt());
+                                assertEquals(orderDTO.getFinishedAt(), orderDTOFound.getFinishedAt());
+                                assertEquals(orderDTO.getIsActive(), orderDTOFound.getIsActive());
+                                assertEquals(orderDTO.getCustomer(), orderDTOFound.getCustomer());
+                                assertEquals(orderDTO.getOrderItems(), orderDTOFound.getOrderItems());
+                            }
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        @DisplayName("findById returns STATUS CODE 404 when order is not found")
+        void findById_ReturnsStatusCode404_WhenOrderIsNotFound() throws Exception {
+
+            BDDMockito.when(orderServiceMock.findById(Mockito.any(UUID.class)))
+                    .thenThrow(new EntityNotFoundException("The given order does not exist"));
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/orders/{id}", UUID.randomUUID())
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            response
+                    .andExpectAll(
+                            MockMvcResultMatchers.status().isNotFound(),
+                            MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
