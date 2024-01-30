@@ -5,13 +5,16 @@ import com.meuatelieweb.backend.controllers.OrderController;
 import com.meuatelieweb.backend.domain.customer.Customer;
 import com.meuatelieweb.backend.domain.customer.CustomerConverter;
 import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
+import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
 import com.meuatelieweb.backend.domain.order.Order;
 import com.meuatelieweb.backend.domain.order.OrderConverter;
 import com.meuatelieweb.backend.domain.order.OrderService;
 import com.meuatelieweb.backend.domain.order.dto.OrderDTO;
+import com.meuatelieweb.backend.domain.order.dto.SaveOrderDTO;
 import com.meuatelieweb.backend.domain.orderitem.OrderItem;
 import com.meuatelieweb.backend.domain.orderitem.OrderItemConverter;
 import com.meuatelieweb.backend.domain.orderitem.dto.OrderItemDTO;
+import com.meuatelieweb.backend.domain.orderitem.dto.SaveOrderItemDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.DisplayName;
@@ -37,15 +40,14 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
-import static com.meuatelieweb.backend.util.CustomerCreator.createValidCustomer;
-import static com.meuatelieweb.backend.util.CustomerCreator.createValidCustomerDTO;
-import static com.meuatelieweb.backend.util.OrderCreator.createValidOrder;
-import static com.meuatelieweb.backend.util.OrderCreator.createValidOrderDTO;
-import static com.meuatelieweb.backend.util.OrderItemCreator.createValidOrderItem;
-import static com.meuatelieweb.backend.util.OrderItemCreator.createValidOrderItemDTO;
+import static com.meuatelieweb.backend.util.CustomerCreator.*;
+import static com.meuatelieweb.backend.util.OrderCreator.*;
+import static com.meuatelieweb.backend.util.OrderItemCreator.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @WebMvcTest(controllers = {OrderController.class})
 @ExtendWith(MockitoExtension.class)
@@ -249,6 +251,26 @@ class OrderControllerTest {
                             MockMvcResultMatchers.status().isNotFound(),
                             MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
                     )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+    }
+
+    @DisplayName("Test addOrder method")
+    @Nested
+    class AddOrderTests {
+
+        @Test
+        @DisplayName("addOrder returns STATUS CODE 400 when order is null")
+        void addOrder_ReturnsStatusCode400_WhenOrderIsNull() throws Exception {
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/orders")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(null))
+            );
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
                     .andDo(MockMvcResultHandlers.print());
         }
     }
