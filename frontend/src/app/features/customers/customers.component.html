@@ -1,9 +1,42 @@
-<header class="flex justify-content-center">
-  <span>MeuAtelie</span>
+<header [class.expanded]="isHamburgerMenuExpanded">
+  <div>MeuAtelie</div>
+  <button
+    [class.opened]="isHamburgerMenuExpanded"
+    (click)="toggleHamburguerMenu()"
+    id="hamburger"
+  >
+    <div class="one"></div>
+    <div class="two"></div>
+    <div class="three"></div>
+  </button>
   <nav>
-    <a [routerLink]="['#']">Pedidos</a>
-    <a [routerLink]="['#']">Clientes</a>
-    <a [routerLink]="['#']">Ajustes</a>
-    <a [routerLink]="['#']">Medidas</a>
+    <a
+      [class.active]="selectedMenuOption === 'ORDERS'"
+      (click)="changeSelectedMenuOption('ORDERS')"
+      [routerLink]="['#']"
+    >
+      Pedidos
+    </a>
+    <a
+      [class.active]="selectedMenuOption === 'CUSTOMERS'"
+      (click)="changeSelectedMenuOption('CUSTOMERS')"
+      [routerLink]="['#']"
+    >
+      Clientes
+    </a>
+    <a
+      [class.active]="selectedMenuOption === 'ADJUSTS'"
+      (click)="changeSelectedMenuOption('ADJUSTS')"
+      [routerLink]="['#']"
+    >
+      Ajustes
+    </a>
+    <a
+      [class.active]="selectedMenuOption === 'MEASURES'"
+      (click)="changeSelectedMenuOption('MEASURES')"
+      [routerLink]="['#']"
+    >
+      Medidas
+    </a>
   </nav>
 </header>

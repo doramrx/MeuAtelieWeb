@@ -1,11 +1,22 @@
 :root {
   --primary-salmon: #F37D7D;
+  --white: #FFF;
+  --text-color-v1: #f7f9f9c4;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'DM Sans', sans-serif;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-size: 1.6rem;
 }
 
 a {
