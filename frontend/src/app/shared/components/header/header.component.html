@@ -1,0 +1,42 @@
+<header [class.expanded]="isHamburgerMenuExpanded && !matchMedia">
+  <div>MeuAtelie</div>
+  <button
+    [class.opened]="isHamburgerMenuExpanded"
+    (click)="toggleHamburguerMenu()"
+    id="hamburger"
+  >
+    <div class="one"></div>
+    <div class="two"></div>
+    <div class="three"></div>
+  </button>
+  <nav>
+    <a
+      [class.active]="selectedMenuOption === 'ORDERS'"
+      (click)="changeSelectedMenuOption('ORDERS')"
+      [routerLink]="['#']"
+    >
+      Pedidos
+    </a>
+    <a
+      [class.active]="selectedMenuOption === 'CUSTOMERS'"
+      (click)="changeSelectedMenuOption('CUSTOMERS')"
+      [routerLink]="['/customers']"
+    >
+      Clientes
+    </a>
+    <a
+      [class.active]="selectedMenuOption === 'ADJUSTS'"
+      (click)="changeSelectedMenuOption('ADJUSTS')"
+      [routerLink]="['#']"
+    >
+      Ajustes
+    </a>
+    <a
+      [class.active]="selectedMenuOption === 'MEASURES'"
+      (click)="changeSelectedMenuOption('MEASURES')"
+      [routerLink]="['#']"
+    >
+      Medidas
+    </a>
+  </nav>
+</header>

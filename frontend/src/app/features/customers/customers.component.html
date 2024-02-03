@@ -1,42 +1,12 @@
-<header [class.expanded]="isHamburgerMenuExpanded">
-  <div>MeuAtelie</div>
-  <button
-    [class.opened]="isHamburgerMenuExpanded"
-    (click)="toggleHamburguerMenu()"
-    id="hamburger"
-  >
-    <div class="one"></div>
-    <div class="two"></div>
-    <div class="three"></div>
-  </button>
-  <nav>
-    <a
-      [class.active]="selectedMenuOption === 'ORDERS'"
-      (click)="changeSelectedMenuOption('ORDERS')"
-      [routerLink]="['#']"
-    >
-      Pedidos
-    </a>
-    <a
-      [class.active]="selectedMenuOption === 'CUSTOMERS'"
-      (click)="changeSelectedMenuOption('CUSTOMERS')"
-      [routerLink]="['#']"
-    >
-      Clientes
-    </a>
-    <a
-      [class.active]="selectedMenuOption === 'ADJUSTS'"
-      (click)="changeSelectedMenuOption('ADJUSTS')"
-      [routerLink]="['#']"
-    >
-      Ajustes
-    </a>
-    <a
-      [class.active]="selectedMenuOption === 'MEASURES'"
-      (click)="changeSelectedMenuOption('MEASURES')"
-      [routerLink]="['#']"
-    >
-      Medidas
-    </a>
-  </nav>
-</header>
+<app-header [selectedMenuOption]="'CUSTOMERS'"></app-header>
+
+<form class="flex flex-column gap-3" [formGroup]="filterFormGroup">
+  <div *ngFor="let status of customerStatus" class="field-checkbox">
+    <p-radioButton
+      [inputId]="status.text"
+      [value]="status.key"
+      formControlName="status"
+    ></p-radioButton>
+    <label [for]="status.text" class="ml-1">{{ status.text }}</label>
+  </div>
+</form>

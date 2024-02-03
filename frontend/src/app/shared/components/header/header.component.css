@@ -1,0 +1,166 @@
+/* header {
+  background-color: var(--primary-salmon);
+  display: flex;
+}
+
+header div {
+  flex: 1;
+  text-align: center;
+  align-self: center;
+}
+
+header nav {
+  flex: 1.5;
+  display: flex;
+  flex-direction: row;
+}
+
+header nav a {
+  display: block;
+  padding: 14px 12px;
+  color: var(--text-color-v1);
+  transition: 0.2s;
+  position: relative;
+}
+
+header nav a.active,
+header nav a:hover {
+  font-weight: 500;
+  color: var(--white);
+}
+
+header nav a.active::after,
+header nav a:hover::after {
+  background-color: var(--white);
+  content: "";
+  width: 100%;
+  height: 2px;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+} */
+
+header {
+  background-color: var(--primary-salmon);
+  display: flex;
+  position: relative;
+  padding: 14px 12px;
+  height: 50px;
+  transition: height 0.8s;
+}
+
+header.expanded {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+}
+
+#hamburger {
+  position: absolute;
+  right: 14px;
+  top: 24px;
+  transform: translate(0, -50%);
+  width: 26px;
+  height: 30px;
+  border: none;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex-direction: column;
+}
+
+#hamburger div {
+  width: 100%;
+  height: 2px;
+  border-radius: 4px;
+  background-color: var(--white);
+  transition: 0.5s;
+}
+
+#hamburger.opened .one{
+  transform: rotate(45deg) translate(4px, -1px);
+}
+
+#hamburger.opened .two{
+  opacity: 0;
+}
+
+#hamburger.opened .three{
+  transform: rotate(-45deg) translate(11px, -6px);
+}
+
+header div {
+  text-align: center;
+}
+
+header.expanded div {
+  align-self: flex-start;
+}
+
+header nav {
+  display: none;
+  flex-direction: row;
+}
+
+header.expanded nav {
+  display: flex;
+  flex-direction: column;
+  margin-top: 40px;
+  width: 100%;
+  height: 100%;
+}
+
+header nav a {
+  display: block;
+  padding: 14px 12px;
+  color: var(--text-color-v1);
+  transition: 0.2s;
+  position: relative;
+}
+
+header.expanded nav a {
+  text-align: center;
+}
+
+header nav a.active,
+header nav a:hover {
+  font-weight: 500;
+  color: var(--white);
+}
+
+header:not(.expanded) nav a.active::after,
+header:not(.expanded) nav a:hover::after {
+  background-color: var(--white);
+  content: "";
+  width: 100%;
+  height: 2px;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+@media screen and (min-width: 570px) {
+  #hamburger {
+    display: none;
+  }
+
+  header {
+    padding: 0;
+  }
+
+  header div {
+    flex: 1;
+    text-align: center;
+    align-self: center;
+  }
+
+  header nav {
+    flex: 1.5;
+    display: flex;
+    flex-direction: row;
+  }
+}

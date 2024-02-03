@@ -1,38 +1,50 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+
+import { HeaderComponent } from '../../shared/components/header/header.component';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RadioButtonModule } from 'primeng/radiobutton';
 
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    HeaderComponent,
+    ReactiveFormsModule,
+    RadioButtonModule,
+  ],
   templateUrl: './customers.component.html',
   styleUrl: './customers.component.css',
 })
 export class CustomersComponent {
-  private _selectedMenuOption: MenuOptions;
-  private _isHamburgerMenuExpanded: boolean;
+  private _customerStatus: CustomerStatus[];
+  private _filterFormGroup: FormGroup;
 
   constructor() {
-    this._selectedMenuOption = 'ORDERS';
-    this._isHamburgerMenuExpanded = false;
+    this._filterFormGroup = new FormGroup({
+      status: new FormControl(),
+      name: new FormControl(),
+      email: new FormControl(),
+      phone: new FormControl(),
+    });
+    this._customerStatus = [
+      { text: 'Todos', key: null },
+      { text: 'Ativos', key: true },
+      { text: 'Inativos', key: false },
+    ];
   }
 
-  get selectedMenuOption() {
-    return this._selectedMenuOption;
+  get filterFormGroup() {
+    return this._filterFormGroup;
   }
 
-  get isHamburgerMenuExpanded() {
-    return this._isHamburgerMenuExpanded;
-  }
-
-  changeSelectedMenuOption(menuOption: MenuOptions) {
-    this._selectedMenuOption = menuOption;
-  }
-
-  toggleHamburguerMenu() {
-    this._isHamburgerMenuExpanded = !this._isHamburgerMenuExpanded;
+  get customerStatus() {
+    return this._customerStatus;
   }
 }
 
-type MenuOptions = 'ORDERS' | 'CUSTOMERS' | 'ADJUSTS' | 'MEASURES';
+interface CustomerStatus {
+  text: string;
+  key: boolean | null;
+}
