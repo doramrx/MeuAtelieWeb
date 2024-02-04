@@ -1,12 +1,73 @@
 <app-header [selectedMenuOption]="'CUSTOMERS'"></app-header>
 
-<form class="flex flex-column gap-3" [formGroup]="filterFormGroup">
-  <div *ngFor="let status of customerStatus" class="field-checkbox">
-    <p-radioButton
-      [inputId]="status.text"
-      [value]="status.key"
-      formControlName="status"
-    ></p-radioButton>
-    <label [for]="status.text" class="ml-1">{{ status.text }}</label>
+<aside>
+  <form class="flex flex-column gap-3" [formGroup]="filterFormGroup">
+    <label for="status">Status</label>
+    <div *ngFor="let status of customerStatus" class="field-checkbox">
+      <p-radioButton
+        [inputId]="status.text"
+        [value]="status.key"
+        formControlName="status"
+      ></p-radioButton>
+      <label [for]="status.text" class="ml-1">{{ status.text }}</label>
+    </div>
+    <div>
+      <label for="nome">Nome</label>
+      <input
+        pInputText
+        type="text"
+        placeholder="Buscar"
+        formControlName="name"
+      />
+    </div>
+    <div>
+      <label for="email">Email</label>
+      <input
+        pInputText
+        type="email"
+        placeholder="Buscar"
+        formControlName="email"
+      />
+    </div>
+    <div>
+      <label for="phone">Telefone</label>
+      <p-inputMask
+        mask="(99) 9 9999-9999"
+        formControlName="phone"
+        placeholder="Buscar"
+      ></p-inputMask>
+    </div>
+    <button (click)="applyFilters()" type="submit">FILTRAR</button>
+  </form>
+</aside>
+
+<main>
+  <button type="button">ADICIONAR CLIENTE</button>
+  <ul>
+    <li *ngFor="let customer of getCustomers()">
+      <div>
+        <p>Nome:</p>
+        <p>{{ customer.name }}</p>
+      </div>
+      <div>
+        <p>Email:</p>
+        <p>{{ customer.email }}</p>
+      </div>
+      <div>
+        <p>Telefone:</p>
+        <p>{{ customer.phone | phoneFormatter }}</p>
+      </div>
+      <div>
+        <button>Editar</button>
+        <button>Remover</button>
+      </div>
+    </li>
+  </ul>
+  <div class="paginator-container">
+    <p-paginator
+      (onPageChange)="onPageChange($event)"
+      [rows]="getPageSize()"
+      [totalRecords]="getTotalRecords()"
+    ></p-paginator>
   </div>
-</form>
+</main>

@@ -1,45 +1,3 @@
-/* header {
-  background-color: var(--primary-salmon);
-  display: flex;
-}
-
-header div {
-  flex: 1;
-  text-align: center;
-  align-self: center;
-}
-
-header nav {
-  flex: 1.5;
-  display: flex;
-  flex-direction: row;
-}
-
-header nav a {
-  display: block;
-  padding: 14px 12px;
-  color: var(--text-color-v1);
-  transition: 0.2s;
-  position: relative;
-}
-
-header nav a.active,
-header nav a:hover {
-  font-weight: 500;
-  color: var(--white);
-}
-
-header nav a.active::after,
-header nav a:hover::after {
-  background-color: var(--white);
-  content: "";
-  width: 100%;
-  height: 2px;
-  position: absolute;
-  left: 0;
-  bottom: 0;
-} */
-
 header {
   background-color: var(--primary-salmon);
   display: flex;
@@ -47,6 +5,7 @@ header {
   padding: 14px 12px;
   height: 50px;
   transition: height 0.8s;
+  z-index: 10;
 }
 
 header.expanded {

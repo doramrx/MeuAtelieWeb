@@ -1,0 +1,185 @@
+aside {
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  padding: 30px;
+  justify-content: center;
+  align-items: center;
+}
+
+aside form {
+  margin-bottom: 20px;
+}
+
+aside label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: medium;
+}
+
+:host ::ng-deep .p-inputtext,
+aside input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--input-color-v1);
+  outline: none;
+  box-shadow: none;
+  font-size: 1.3rem;
+}
+
+aside button {
+  width: 100px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px;
+  background-color: transparent;
+  color: var(--primary-salmon);
+  border: 1px solid var(--primary-salmon);
+  cursor: pointer;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.5s ease;
+}
+
+aside button:hover {
+  color: var(--white);
+  background-color: var(--primary-salmon);
+  font-weight: bold;
+}
+
+main {
+  padding: 20px;
+}
+
+main > button {
+  width: 190px;
+  margin-left: auto;
+  padding: 10px;
+  background-color: transparent;
+  color: var(--primary-salmon);
+  border: 1px solid var(--primary-salmon);
+  cursor: pointer;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.5s ease;
+}
+
+main > button:hover {
+  color: var(--white);
+  background-color: var(--primary-salmon);
+  font-weight: bold;
+}
+
+main ul {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+main ul li {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--border-card-color-v1);
+  border-radius: 10px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+  padding: 14px 16px;
+  align-items: center;
+  gap: 6px;
+}
+
+main ul li div {
+  flex: 2;
+  display: flex;
+  gap: 8px;
+  font-weight: 500;
+}
+
+main ul li div p:last-child {
+  font-weight: 300;
+}
+
+main ul li div:last-child {
+  flex: 1;
+  margin-top: 5px;
+  display: flex;
+  gap: 12px;
+}
+
+main ul li div:last-child button {
+  border: 1px solid var(--primary-red);
+  border-radius: 8px;
+  background-color: transparent;
+  padding: 6px 10px;
+  color: var(--primary-red);
+  transition: background-color 0.5s ease;
+  cursor: pointer;
+}
+
+main ul li div:last-child button:first-child {
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+}
+
+main ul li div:last-child button:hover {
+  background-color: var(--primary-red);
+  color: var(--white)
+}
+
+main ul li div:last-child button:first-child:hover {
+  background-color: var(--primary-blue);
+  color: var(--white);
+}
+
+main .paginator-container {
+  margin-top: 22px;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-pages button {
+  font-size: 1.5rem;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-icon {
+  width: 16px;
+  height: 16px;
+}
+
+@media screen and (min-width: 570px) {
+
+  aside{
+    width: 250px;
+    position: fixed;
+    padding: 100px 30px;
+  }
+
+  main {
+    margin-left: 250px;
+    padding: 40px 30px;
+  }
+}
+
+@media screen and (min-width: 900px) {
+
+  main ul li {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  main ul li div:not(:last-child) {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  main ul li div:last-child {
+    justify-content: end;
+  }
+}
