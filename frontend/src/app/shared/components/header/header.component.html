@@ -1,5 +1,7 @@
 <header [class.expanded]="isHamburgerMenuExpanded && !matchMedia">
-  <div>MeuAtelie</div>
+  <div>
+    <img src="../../../../assets/MeuAteliê.svg" alt="Logo" />
+  </div>
   <button
     [class.opened]="isHamburgerMenuExpanded"
     (click)="toggleHamburguerMenu()"

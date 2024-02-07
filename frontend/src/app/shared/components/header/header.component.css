@@ -52,8 +52,8 @@ header.expanded {
   transform: rotate(-45deg) translate(11px, -6px);
 }
 
-header div {
-  text-align: center;
+header > div img {
+  width: 140px;
 }
 
 header.expanded div {

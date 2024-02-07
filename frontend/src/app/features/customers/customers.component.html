@@ -11,7 +11,7 @@
       ></p-radioButton>
       <label [for]="status.text" class="ml-1">{{ status.text }}</label>
     </div>
-    <div>
+    <div class="form-input">
       <label for="nome">Nome</label>
       <input
         pInputText
@@ -20,7 +20,7 @@
         formControlName="name"
       />
     </div>
-    <div>
+    <div class="form-input">
       <label for="email">Email</label>
       <input
         pInputText
@@ -37,12 +37,14 @@
         placeholder="Buscar"
       ></p-inputMask>
     </div>
-    <button (click)="applyFilters()" type="submit">FILTRAR</button>
+    <button class="form-button" (click)="applyFilters()" type="submit">
+      FILTRAR
+    </button>
   </form>
 </aside>
 
 <main>
-  <button type="button">ADICIONAR CLIENTE</button>
+  <button type="button" (click)="showDialog()">ADICIONAR CLIENTE</button>
   <ul>
     <li *ngFor="let customer of getCustomers()">
       <div>
@@ -71,3 +73,38 @@
     ></p-paginator>
   </div>
 </main>
+
+<p-dialog
+  header="Novo Cliente"
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form class="flex flex-column gap-3" [formGroup]="addFormGroup">
+    <div class="form-input">
+      <label for="nome">Nome</label>
+      <input pInputText type="text" formControlName="name" />
+    </div>
+    <div class="form-input">
+      <label for="email">Email</label>
+      <input pInputText type="email" formControlName="email" />
+    </div>
+    <div>
+      <label for="phone">Telefone</label>
+      <p-inputMask
+        mask="(99) 9 9999-9999"
+        formControlName="phone"
+        [autoClear]="false"
+      ></p-inputMask>
+    </div>
+    <button
+      class="form-button"
+      (click)="saveCustomer()"
+      type="submit"
+      [disabled]="addFormGroup.invalid"
+    >
+      Salvar
+    </button>
+  </form>
+</p-dialog>

@@ -19,7 +19,7 @@ aside label {
 }
 
 :host ::ng-deep .p-inputtext,
-aside input {
+.form-input input {
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
@@ -31,7 +31,7 @@ aside input {
   font-size: 1.3rem;
 }
 
-aside button {
+.form-button {
   width: 100px;
   margin-left: auto;
   margin-right: auto;
@@ -47,7 +47,13 @@ aside button {
   transition: background-color 0.5s ease;
 }
 
-aside button:hover {
+.form-button:disabled {
+  cursor: not-allowed;
+  border: 1px solid var(--primary-grey);
+  color: var(--primary-grey);
+}
+
+.form-button:not(:disabled):hover {
   color: var(--white);
   background-color: var(--primary-salmon);
   font-weight: bold;
@@ -144,6 +150,10 @@ main .paginator-container {
   margin-top: 22px;
 }
 
+:host ::ng-deep .field-checkbox {
+  margin-bottom: 0;
+}
+
 :host ::ng-deep .p-paginator .p-paginator-pages button {
   font-size: 1.5rem;
 }
@@ -152,6 +162,56 @@ main .paginator-container {
   width: 16px;
   height: 16px;
 }
+
+:host ::ng-deep .p-radiobutton .p-radiobutton-box {
+  width: 18px;
+  height: 18px;
+}
+
+:host ::ng-deep .p-radiobutton .p-focus {
+  box-shadow: none;
+}
+
+:host ::ng-deep .p-radiobutton-checked .p-radiobutton-box .p-radiobutton-icon {
+  background-color: var(--primary-salmon);
+}
+
+:host ::ng-deep .p-radiobutton-checked .p-radiobutton-box {
+  border-color: var(--primary-salmon);
+  background-color: var(--primary-salmon);
+}
+
+:host ::ng-deep .p-radiobutton .p-radiobutton-box:not(.p-disabled):not(.p-highlight):hover {
+  border-color: var(--primary-salmon);
+}
+
+:host ::ng-deep .p-radiobutton .p-radiobutton-box .p-radiobutton-icon {
+  width: 14px;
+  height: 14px;
+}
+
+:host ::ng-deep .p-dialog {
+  width: 90vw;
+  max-width: 420px;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-header,
+:host ::ng-deep .p-dialog .p-dialog-content {
+  padding: 16px !important;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-header .p-dialog-title {
+  font-size: 2rem;
+  color: var(--primary-salmon);
+}
+
+:host ::ng-deep .p-dialog .p-dialog-content form div label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: medium;
+  font-size: 1.6rem;
+}
+
 
 @media screen and (min-width: 570px) {
 
@@ -182,4 +242,6 @@ main .paginator-container {
   main ul li div:last-child {
     justify-content: end;
   }
+
+
 }
