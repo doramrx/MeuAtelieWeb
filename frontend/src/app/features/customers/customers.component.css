@@ -212,6 +212,36 @@ main .paginator-container {
   font-size: 1.6rem;
 }
 
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-message-icon {
+  margin-left: 6px;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-message-text .p-toast-summary {
+  font-size: 1.45rem;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-message-text .p-toast-detail {
+  font-size: 1.3rem;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-icon-close {
+  align-self: flex-start;
+  margin-top: 2px;
+  margin-right: 8px;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-icon-close svg {
+  width: 14px;
+  height: 14px;
+}
 
 @media screen and (min-width: 570px) {
 

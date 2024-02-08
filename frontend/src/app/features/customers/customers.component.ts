@@ -1,4 +1,8 @@
-import { CustomerPage, QueryParams } from './../../services/customer.service';
+import {
+  CustomerPage,
+  QueryParams,
+  SaveCustomerDTO,
+} from './../../services/customer.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import {
@@ -14,10 +18,12 @@ import { InputMaskModule } from 'primeng/inputmask';
 import { ButtonModule } from 'primeng/button';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { DialogModule } from 'primeng/dialog';
+import { ToastModule } from 'primeng/toast';
 
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { CustomerService } from '../../services/customer.service';
 import { PhonePipe } from '../../shared/pipes/phone.pipe';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-customers',
@@ -33,12 +39,15 @@ import { PhonePipe } from '../../shared/pipes/phone.pipe';
     PaginatorModule,
     PhonePipe,
     DialogModule,
+    ToastModule,
   ],
+  providers: [MessageService],
   templateUrl: './customers.component.html',
   styleUrl: './customers.component.css',
 })
 export class CustomersComponent implements OnInit {
   private customerService: CustomerService = inject(CustomerService);
+  private messageService: MessageService = inject(MessageService);
 
   private _customerStatus: CustomerStatus[];
   private _filterFormGroup: FormGroup<FilterFormGroupFields>;
@@ -81,27 +90,7 @@ export class CustomersComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this._addFormGroup.get('phone')?.valueChanges.subscribe({
-      next: (phone) => {
-        if (phone) {
-          if (phone.length > 0) {
-            this._addFormGroup
-              .get('phone')
-              ?.setValidators(
-                Validators.pattern(/^\(\d{2}\) \d \d{4}-\d{4}$/g)
-              );
-            return;
-          }
-          this._addFormGroup.get('phone')?.clearValidators();
-        }
-      },
-      complete: () => {
-        this._addFormGroup
-          .get('phone')
-          ?.updateValueAndValidity({ emitEvent: false, onlySelf: true });
-      },
-    });
-
+    this.applyValidatorToCustomerPhone();
     this.fetchCustomers();
   }
 
@@ -139,7 +128,27 @@ export class CustomersComponent implements OnInit {
     this.visible = true;
   }
 
-  saveCustomer() { }
+  showSuccessToast() {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Sucesso',
+      detail: 'O cliente cadastrado com sucesso',
+    });
+  }
+
+  saveCustomer() {
+    const saveCustomer: SaveCustomerDTO = {
+      name: this._addFormGroup.value.name || '',
+      email: this._addFormGroup.value.email || '',
+      phone: this._addFormGroup.value.phone || null,
+    };
+
+    this.customerService.addCustomer(saveCustomer).subscribe({
+      next: () => {
+        this.showSuccessToast();
+      },
+    });
+  }
 
   private fetchCustomers() {
     let plainPhone = null;
@@ -162,6 +171,29 @@ export class CustomersComponent implements OnInit {
       },
       error: (error) => {
         console.error(error);
+      },
+    });
+  }
+
+  private applyValidatorToCustomerPhone() {
+    this._addFormGroup.get('phone')?.valueChanges.subscribe({
+      next: (phone) => {
+        if (phone) {
+          if (phone.length > 0) {
+            this._addFormGroup
+              .get('phone')
+              ?.setValidators(
+                Validators.pattern(/^\(\d{2}\) \d \d{4}-\d{4}$/g)
+              );
+            return;
+          }
+          this._addFormGroup.get('phone')?.clearValidators();
+        }
+      },
+      complete: () => {
+        this._addFormGroup
+          .get('phone')
+          ?.updateValueAndValidity({ emitEvent: false, onlySelf: true });
       },
     });
   }

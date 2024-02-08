@@ -108,3 +108,13 @@
     </button>
   </form>
 </p-dialog>
+
+<p-toast [life]="1800000"></p-toast>
+<button
+  type="button"
+  pButton
+  pRipple
+  (click)="showSuccessToast()"
+  label="Success"
+  class="p-button-success"
+></button>

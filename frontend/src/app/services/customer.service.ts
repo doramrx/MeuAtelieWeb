@@ -35,9 +35,13 @@ export class CustomerService {
 
     return this.http.get<CustomerPage>(this.BASE_URL, { params: httpParams });
   }
+
+  addCustomer(dto: SaveCustomerDTO): Observable<CustomerDTO> {
+    return this.http.post<CustomerDTO>(this.BASE_URL, dto);
+  }
 }
 
-interface Customer {
+interface CustomerDTO {
   id: string;
   name: string;
   email: string;
@@ -45,12 +49,18 @@ interface Customer {
   isActive: boolean;
 }
 
+export interface SaveCustomerDTO {
+  name: string;
+  email: string;
+  phone: string | null;
+}
+
 export interface CustomerPage {
   totalElements: number;
   pageable: {
     pageSize: number;
   };
-  content: Customer[];
+  content: CustomerDTO[];
 }
 
 export interface QueryParams {
