@@ -23,7 +23,8 @@ import { ToastModule } from 'primeng/toast';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { CustomerService } from '../../services/customer.service';
 import { PhonePipe } from '../../shared/pipes/phone.pipe';
-import { MessageService } from 'primeng/api';
+import { Message, MessageService } from 'primeng/api';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-customers',
@@ -65,7 +66,7 @@ export class CustomersComponent implements OnInit {
       phone: new FormControl(null),
     });
     this._addFormGroup = new FormGroup<AddFormGroupFields>({
-      name: new FormControl(null, [Validators.required]),
+      name: new FormControl(null),
       email: new FormControl(null, [Validators.required, Validators.email]),
       phone: new FormControl(null),
     });
@@ -128,40 +129,55 @@ export class CustomersComponent implements OnInit {
     this.visible = true;
   }
 
-  showSuccessToast() {
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Sucesso',
-      detail: 'O cliente cadastrado com sucesso',
-    });
+  showToast(message: Message) {
+    this.messageService.add(message);
   }
 
   saveCustomer() {
+    let normalizedPhone = null;
+
+    if (this._addFormGroup.value.phone) {
+      normalizedPhone = this.normalizePhoneNumber(this._addFormGroup.value.phone);
+    }
+
     const saveCustomer: SaveCustomerDTO = {
       name: this._addFormGroup.value.name || '',
       email: this._addFormGroup.value.email || '',
-      phone: this._addFormGroup.value.phone || null,
+      phone: normalizedPhone,
     };
 
     this.customerService.addCustomer(saveCustomer).subscribe({
       next: () => {
-        this.showSuccessToast();
+        this.visible = false;
+        this.showToast({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'O cliente cadastrado com sucesso',
+        });
       },
+      error: (error: HttpErrorResponse) => {
+        console.error(error);
+        this.showToast({
+          severity: 'error',
+          summary: 'Erro',
+          detail: error.error.details,
+        });
+      }
     });
   }
 
   private fetchCustomers() {
-    let plainPhone = null;
+    let normalizedPhone = null;
 
     if (this._filterFormGroup.value.phone) {
-      plainPhone = this._filterFormGroup.value.phone.replace(/\D+/g, '');
+      normalizedPhone = this.normalizePhoneNumber(this._filterFormGroup.value.phone);
     }
 
     const params: QueryParams = {
       page: this._currentPage,
       name: this._filterFormGroup.value.name || null,
       email: this._filterFormGroup.value.email || null,
-      phone: plainPhone,
+      phone: normalizedPhone,
       isActive: this._filterFormGroup.value.status,
     };
 
@@ -173,6 +189,10 @@ export class CustomersComponent implements OnInit {
         console.error(error);
       },
     });
+  }
+
+  private normalizePhoneNumber(phone: string) {
+    return phone.replace(/\D+/g, '');
   }
 
   private applyValidatorToCustomerPhone() {
