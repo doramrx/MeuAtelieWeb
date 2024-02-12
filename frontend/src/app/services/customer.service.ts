@@ -36,8 +36,18 @@ export class CustomerService {
     return this.http.get<CustomerPage>(this.BASE_URL, { params: httpParams });
   }
 
+  findById(id: any): Observable<CustomerDTO> {
+    const url = `${this.BASE_URL}/${id}`;
+    return this.http.get<CustomerDTO>(url);
+  }
+
   addCustomer(dto: SaveCustomerDTO): Observable<CustomerDTO> {
     return this.http.post<CustomerDTO>(this.BASE_URL, dto);
+  }
+
+  updateCustomer(id: any, dto: UpdateCustomerDTO): Observable<CustomerDTO> {
+    const url = `${this.BASE_URL}/${id}`;
+    return this.http.put<CustomerDTO>(url, dto);
   }
 }
 
@@ -52,6 +62,11 @@ interface CustomerDTO {
 export interface SaveCustomerDTO {
   name: string;
   email: string;
+  phone: string | null;
+}
+
+export interface UpdateCustomerDTO {
+  name: string;
   phone: string | null;
 }
 

@@ -2,6 +2,7 @@ import {
   CustomerPage,
   QueryParams,
   SaveCustomerDTO,
+  UpdateCustomerDTO,
 } from './../../services/customer.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
@@ -53,10 +54,12 @@ export class CustomersComponent implements OnInit {
   private _customerStatus: CustomerStatus[];
   private _filterFormGroup: FormGroup<FilterFormGroupFields>;
   private _addFormGroup: FormGroup<AddFormGroupFields>;
+  private _updateFormGroup: FormGroup<UpdateFormGroupFields>;
   private _customerPage?: CustomerPage;
   private _currentPage: number;
 
   public visible: boolean = false;
+  public customerId?: string;
 
   constructor() {
     this._filterFormGroup = new FormGroup<FilterFormGroupFields>({
@@ -66,8 +69,12 @@ export class CustomersComponent implements OnInit {
       phone: new FormControl(null),
     });
     this._addFormGroup = new FormGroup<AddFormGroupFields>({
-      name: new FormControl(null),
+      name: new FormControl(null, [Validators.required]),
       email: new FormControl(null, [Validators.required, Validators.email]),
+      phone: new FormControl(null),
+    });
+    this._updateFormGroup = new FormGroup<UpdateFormGroupFields>({
+      name: new FormControl(null, [Validators.required]),
       phone: new FormControl(null),
     });
     this._customerStatus = [
@@ -84,6 +91,10 @@ export class CustomersComponent implements OnInit {
 
   get addFormGroup() {
     return this._addFormGroup;
+  }
+
+  get updateFormGroup() {
+    return this._updateFormGroup;
   }
 
   get customerStatus() {
@@ -116,6 +127,10 @@ export class CustomersComponent implements OnInit {
     return [];
   }
 
+  findById(id: any) {
+    this.customerService.findById(id);
+  }
+
   onPageChange(paginatorState: PaginatorState) {
     this._currentPage = paginatorState.page || 0;
     this.fetchCustomers();
@@ -125,7 +140,11 @@ export class CustomersComponent implements OnInit {
     this.fetchCustomers();
   }
 
-  showDialog() {
+  showAddCustomerDialog() {
+    this.visible = true;
+  }
+
+  showUpdateCustomerDialog() {
     this.visible = true;
   }
 
@@ -152,7 +171,39 @@ export class CustomersComponent implements OnInit {
         this.showToast({
           severity: 'success',
           summary: 'Sucesso',
-          detail: 'O cliente cadastrado com sucesso',
+          detail: 'Cliente cadastrado com sucesso',
+        });
+      },
+      error: (error: HttpErrorResponse) => {
+        console.error(error);
+        this.showToast({
+          severity: 'error',
+          summary: 'Erro',
+          detail: error.error.details,
+        });
+      }
+    });
+  }
+
+  updateCustomer(id: string) {
+    let normalizedPhone = null;
+
+    if (this._updateFormGroup.value.phone) {
+      normalizedPhone = this.normalizePhoneNumber(this._updateFormGroup.value.phone);
+    }
+
+    const updateCustomer: UpdateCustomerDTO = {
+      name: this._updateFormGroup.value.name || '',
+      phone: normalizedPhone,
+    };
+
+    this.customerService.updateCustomer(id, updateCustomer).subscribe({
+      next: () => {
+        this.visible = false;
+        this.showToast({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Cliente atualizado com sucesso',
         });
       },
       error: (error: HttpErrorResponse) => {
@@ -234,5 +285,10 @@ interface FilterFormGroupFields {
 interface AddFormGroupFields {
   name: FormControl<string | null>;
   email: FormControl<string | null>;
+  phone: FormControl<string | null>;
+}
+
+interface UpdateFormGroupFields {
+  name: FormControl<string | null>;
   phone: FormControl<string | null>;
 }
