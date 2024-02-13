@@ -36,18 +36,20 @@ export class CustomerService {
     return this.http.get<CustomerPage>(this.BASE_URL, { params: httpParams });
   }
 
-  findById(id: any): Observable<CustomerDTO> {
-    const url = `${this.BASE_URL}/${id}`;
-    return this.http.get<CustomerDTO>(url);
+  findById(id: string): Observable<CustomerDTO> {
+    return this.http.get<CustomerDTO>(`${this.BASE_URL}/${id}`);
   }
 
   addCustomer(dto: SaveCustomerDTO): Observable<CustomerDTO> {
     return this.http.post<CustomerDTO>(this.BASE_URL, dto);
   }
 
-  updateCustomer(id: any, dto: UpdateCustomerDTO): Observable<CustomerDTO> {
-    const url = `${this.BASE_URL}/${id}`;
-    return this.http.put<CustomerDTO>(url, dto);
+  updateCustomer(id: string, dto: UpdateCustomerDTO): Observable<CustomerDTO> {
+    return this.http.put<CustomerDTO>(`${this.BASE_URL}/${id}`, dto);
+  }
+
+  deleteCustomer(id: string): Observable<any> {
+    return this.http.delete(`${this.BASE_URL}/${id}`);
   }
 }
 

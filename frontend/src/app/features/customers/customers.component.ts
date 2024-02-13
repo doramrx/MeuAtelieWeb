@@ -5,7 +5,7 @@ import {
   UpdateCustomerDTO,
 } from './../../services/customer.service';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, EventEmitter, OnInit, inject } from '@angular/core';
 import {
   FormControl,
   FormsModule,
@@ -58,8 +58,10 @@ export class CustomersComponent implements OnInit {
   private _customerPage?: CustomerPage;
   private _currentPage: number;
 
-  public visible: boolean = false;
+  public activeModal: AvailableModalsType | null;
   public customerId?: string;
+
+  private _deleteCustomerEvent: EventEmitter<void>;
 
   constructor() {
     this._filterFormGroup = new FormGroup<FilterFormGroupFields>({
@@ -74,6 +76,7 @@ export class CustomersComponent implements OnInit {
       phone: new FormControl(null),
     });
     this._updateFormGroup = new FormGroup<UpdateFormGroupFields>({
+      id: new FormControl(null),
       name: new FormControl(null, [Validators.required]),
       phone: new FormControl(null),
     });
@@ -83,6 +86,9 @@ export class CustomersComponent implements OnInit {
       { text: 'Inativos', key: false },
     ];
     this._currentPage = 0;
+    this.activeModal = null;
+
+    this._deleteCustomerEvent = new EventEmitter();
   }
 
   get filterFormGroup() {
@@ -102,7 +108,8 @@ export class CustomersComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.applyValidatorToCustomerPhone();
+    this.applyValidatorToCustomerPhone(this._addFormGroup);
+    this.applyValidatorToCustomerPhone(this._updateFormGroup);
     this.fetchCustomers();
   }
 
@@ -141,11 +148,27 @@ export class CustomersComponent implements OnInit {
   }
 
   showAddCustomerDialog() {
-    this.visible = true;
+    this.activeModal = 'ADD';
   }
 
-  showUpdateCustomerDialog() {
-    this.visible = true;
+  showUpdateCustomerDialog(id: string) {
+    this.activeModal = 'UPDATE';
+    this.fetchCustomer(id);
+  }
+
+  showDeleteCustomerDialog(id: string) {
+    this.activeModal = 'DELETE';
+
+    this._deleteCustomerEvent.subscribe(
+      () => {
+        this.deleteCustomer(id);
+      },
+      (error) => { }
+    );
+  }
+
+  notifyDeleteConfirmation() {
+    this._deleteCustomerEvent.emit();
   }
 
   showToast(message: Message) {
@@ -156,7 +179,9 @@ export class CustomersComponent implements OnInit {
     let normalizedPhone = null;
 
     if (this._addFormGroup.value.phone) {
-      normalizedPhone = this.normalizePhoneNumber(this._addFormGroup.value.phone);
+      normalizedPhone = this.normalizePhoneNumber(
+        this._addFormGroup.value.phone
+      );
     }
 
     const saveCustomer: SaveCustomerDTO = {
@@ -167,12 +192,13 @@ export class CustomersComponent implements OnInit {
 
     this.customerService.addCustomer(saveCustomer).subscribe({
       next: () => {
-        this.visible = false;
+        this.closeModal();
         this.showToast({
           severity: 'success',
           summary: 'Sucesso',
           detail: 'Cliente cadastrado com sucesso',
         });
+        this.fetchCustomers();
       },
       error: (error: HttpErrorResponse) => {
         console.error(error);
@@ -181,15 +207,26 @@ export class CustomersComponent implements OnInit {
           summary: 'Erro',
           detail: error.error.details,
         });
-      }
+      },
     });
   }
 
-  updateCustomer(id: string) {
+  updateCustomer() {
+    if (!this._updateFormGroup.value.id) {
+      this.showToast({
+        severity: 'error',
+        summary: 'Erro',
+        detail: 'Não foi possível atualizar os dados do cliente',
+      });
+      return;
+    }
+
     let normalizedPhone = null;
 
     if (this._updateFormGroup.value.phone) {
-      normalizedPhone = this.normalizePhoneNumber(this._updateFormGroup.value.phone);
+      normalizedPhone = this.normalizePhoneNumber(
+        this._updateFormGroup.value.phone
+      );
     }
 
     const updateCustomer: UpdateCustomerDTO = {
@@ -197,13 +234,72 @@ export class CustomersComponent implements OnInit {
       phone: normalizedPhone,
     };
 
-    this.customerService.updateCustomer(id, updateCustomer).subscribe({
-      next: () => {
-        this.visible = false;
-        this.showToast({
-          severity: 'success',
-          summary: 'Sucesso',
-          detail: 'Cliente atualizado com sucesso',
+    this.customerService
+      .updateCustomer(this._updateFormGroup.value.id, updateCustomer)
+      .subscribe({
+        next: () => {
+          this.closeModal();
+          this.showToast({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Cliente atualizado com sucesso',
+          });
+          this.fetchCustomers();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.showToast({
+            severity: 'error',
+            summary: 'Erro',
+            detail: error.error.details,
+          });
+        },
+      });
+  }
+
+  private deleteCustomer(id: string) {
+    this.customerService
+      .deleteCustomer(id)
+      .subscribe({
+        next: () => {
+          this.closeModal();
+          this.showToast({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Cliente inativado com sucesso',
+          });
+          this.fetchCustomers();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.showToast({
+            severity: 'error',
+            summary: 'Erro',
+            detail: error.error.details,
+          });
+        },
+      });
+  }
+
+  isModalVisible(type: AvailableModalsType) {
+    return this.activeModal !== null && this.activeModal === type
+      ? true
+      : false;
+  }
+
+  closeModal() {
+    this.activeModal = null;
+  }
+
+  existCustomers() {
+    return this._customerPage && this._customerPage.content.length > 0;
+  }
+
+  private fetchCustomer(id: string) {
+    this.customerService.findById(id).subscribe({
+      next: (customerDTO) => {
+        this._updateFormGroup.setValue({
+          id: customerDTO.id,
+          name: customerDTO.name,
+          phone: customerDTO.phone,
         });
       },
       error: (error: HttpErrorResponse) => {
@@ -213,7 +309,7 @@ export class CustomersComponent implements OnInit {
           summary: 'Erro',
           detail: error.error.details,
         });
-      }
+      },
     });
   }
 
@@ -221,7 +317,9 @@ export class CustomersComponent implements OnInit {
     let normalizedPhone = null;
 
     if (this._filterFormGroup.value.phone) {
-      normalizedPhone = this.normalizePhoneNumber(this._filterFormGroup.value.phone);
+      normalizedPhone = this.normalizePhoneNumber(
+        this._filterFormGroup.value.phone
+      );
     }
 
     const params: QueryParams = {
@@ -246,25 +344,25 @@ export class CustomersComponent implements OnInit {
     return phone.replace(/\D+/g, '');
   }
 
-  private applyValidatorToCustomerPhone() {
-    this._addFormGroup.get('phone')?.valueChanges.subscribe({
+  private applyValidatorToCustomerPhone(formGroup: FormGroup<AddFormGroupFields> | FormGroup<UpdateFormGroupFields>) {
+    formGroup.controls.phone.valueChanges.subscribe({
       next: (phone) => {
+        console.log(phone);
         if (phone) {
-          if (phone.length > 0) {
-            this._addFormGroup
-              .get('phone')
-              ?.setValidators(
-                Validators.pattern(/^\(\d{2}\) \d \d{4}-\d{4}$/g)
-              );
+          let normalizedPhone = this.normalizePhoneNumber(phone);
+          console.log(normalizedPhone);
+
+          if (normalizedPhone.length === 0) {
+            formGroup.controls.phone.clearValidators();
+            formGroup.controls.phone.setValue(null);
             return;
           }
-          this._addFormGroup.get('phone')?.clearValidators();
+
+          formGroup.controls.phone.setValidators(Validators.pattern(/^\(\d{2}\) \d \d{4}-\d{4}$/g));
         }
       },
       complete: () => {
-        this._addFormGroup
-          .get('phone')
-          ?.updateValueAndValidity({ emitEvent: false, onlySelf: true });
+        formGroup.controls.phone.updateValueAndValidity({ emitEvent: false, onlySelf: true });
       },
     });
   }
@@ -289,6 +387,15 @@ interface AddFormGroupFields {
 }
 
 interface UpdateFormGroupFields {
+  id: FormControl<string | null>;
   name: FormControl<string | null>;
   phone: FormControl<string | null>;
 }
+
+enum AvailableModals {
+  ADD,
+  UPDATE,
+  DELETE,
+}
+
+type AvailableModalsType = keyof typeof AvailableModals;

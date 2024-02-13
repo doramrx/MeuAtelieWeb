@@ -2,6 +2,7 @@
 
 <aside>
   <form class="flex flex-column gap-3" [formGroup]="filterFormGroup">
+    <button id="clean-filter" type="reset">Limpar</button>
     <label for="status">Status</label>
     <div *ngFor="let status of customerStatus" class="field-checkbox">
       <p-radioButton
@@ -47,7 +48,10 @@
   <button type="button" (click)="showAddCustomerDialog()">
     ADICIONAR CLIENTE
   </button>
-  <ul>
+  <p id="empty-list-message" *ngIf="!existCustomers()">
+    Nenhum cliente foi encontrado.
+  </p>
+  <ul *ngIf="existCustomers()">
     <li *ngFor="let customer of getCustomers()">
       <div>
         <p>Nome:</p>
@@ -65,10 +69,26 @@
         <p *ngIf="customer.phone === null">-</p>
       </div>
       <div>
-        <button type="button" (click)="showUpdateCustomerDialog()">
+        <p>Status:</p>
+        <p>{{ customer.isActive ? "Ativo" : "Inativo" }}</p>
+      </div>
+      <div>
+        <button
+          [disabled]="!customer.isActive"
+          type="button"
+          class="blue-button"
+          (click)="showUpdateCustomerDialog(customer.id)"
+        >
           Editar
         </button>
-        <button>Remover</button>
+        <button
+          [disabled]="!customer.isActive"
+          type="button"
+          class="red-button"
+          (click)="showDeleteCustomerDialog(customer.id)"
+        >
+          Inativar
+        </button>
       </div>
     </li>
   </ul>
@@ -83,7 +103,8 @@
 
 <p-dialog
   header="Novo Cliente"
-  [(visible)]="visible"
+  [visible]="isModalVisible('ADD')"
+  (visibleChange)="closeModal()"
   [modal]="true"
   [draggable]="false"
   [resizable]="false"
@@ -118,7 +139,8 @@
 
 <p-dialog
   header="Editar Cliente"
-  [(visible)]="visible"
+  [visible]="isModalVisible('UPDATE')"
+  (visibleChange)="closeModal()"
   [modal]="true"
   [draggable]="false"
   [resizable]="false"
@@ -138,12 +160,37 @@
     </div>
     <button
       class="form-button"
+      (click)="updateCustomer()"
       type="submit"
       [disabled]="updateFormGroup.invalid"
     >
       Salvar
     </button>
   </form>
+</p-dialog>
+
+<p-dialog
+  id="delete-dialog"
+  header="Deletar Cliente"
+  [visible]="isModalVisible('DELETE')"
+  (visibleChange)="closeModal()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <p>Você realmente deseja inativar este cliente?</p>
+  <div>
+    <button class="blue-button" (click)="closeModal()" type="button">
+      Não
+    </button>
+    <button
+      class="red-button"
+      (click)="notifyDeleteConfirmation()"
+      type="button"
+    >
+      Sim
+    </button>
+  </div>
 </p-dialog>
 
 <p-toast></p-toast>
