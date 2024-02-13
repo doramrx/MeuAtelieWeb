@@ -1,48 +1,6 @@
 <app-header [selectedMenuOption]="'CUSTOMERS'"></app-header>
 
-<aside>
-  <form class="flex flex-column gap-3" [formGroup]="filterFormGroup">
-    <button id="clean-filter" type="reset">Limpar</button>
-    <label for="status">Status</label>
-    <div *ngFor="let status of customerStatus" class="field-checkbox">
-      <p-radioButton
-        [inputId]="status.text"
-        [value]="status.key"
-        formControlName="status"
-      ></p-radioButton>
-      <label [for]="status.text" class="ml-1">{{ status.text }}</label>
-    </div>
-    <div class="form-input">
-      <label for="nome">Nome</label>
-      <input
-        pInputText
-        type="text"
-        placeholder="Buscar"
-        formControlName="name"
-      />
-    </div>
-    <div class="form-input">
-      <label for="email">Email</label>
-      <input
-        pInputText
-        type="email"
-        placeholder="Buscar"
-        formControlName="email"
-      />
-    </div>
-    <div>
-      <label for="phone">Telefone</label>
-      <p-inputMask
-        mask="(99) 9 9999-9999"
-        formControlName="phone"
-        placeholder="Buscar"
-      ></p-inputMask>
-    </div>
-    <button class="form-button" (click)="applyFilters()" type="submit">
-      FILTRAR
-    </button>
-  </form>
-</aside>
+<app-filter (onApplyFiltersEvent)="applyFilters($event)"></app-filter>
 
 <main>
   <button type="button" (click)="showAddCustomerDialog()">
@@ -111,12 +69,12 @@
 >
   <form class="flex flex-column gap-3" [formGroup]="addFormGroup">
     <div class="form-input">
-      <label for="nome">Nome</label>
-      <input pInputText type="text" formControlName="name" />
+      <label for="name">Nome</label>
+      <input id="name" type="text" formControlName="name" />
     </div>
     <div class="form-input">
       <label for="email">Email</label>
-      <input pInputText type="email" formControlName="email" />
+      <input type="email" formControlName="email" />
     </div>
     <div>
       <label for="phone">Telefone</label>
@@ -147,8 +105,8 @@
 >
   <form class="flex flex-column gap-3" [formGroup]="updateFormGroup">
     <div class="form-input">
-      <label for="nome">Nome</label>
-      <input pInputText type="text" formControlName="name" />
+      <label for="name">Nome</label>
+      <input type="text" formControlName="name" />
     </div>
     <div>
       <label for="phone">Telefone</label>

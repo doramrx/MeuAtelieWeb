@@ -1,0 +1,65 @@
+aside {
+  height: 100%;
+  width: 100%;
+  padding: 30px;
+  justify-content: center;
+  align-items: center;
+}
+
+aside form {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+aside form > label,
+aside form :not(div.field-checkbox) label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+aside #clean-filter {
+  border: none;
+  background-color: transparent;
+  font-weight: 500;
+  color: var(--secondary-grey);
+  cursor: pointer;
+  position: absolute;
+  top: 1px;
+  right: 0;
+  font-size: 1.5rem;
+}
+
+aside #clean-filter:hover {
+  color: var(--primary-salmon);
+}
+
+:host ::ng-deep .form-input input,
+:host ::ng-deep .p-inputtext,
+.form-input input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--input-color-v1);
+  outline: none;
+  box-shadow: none;
+  font-size: 1.3rem;
+}
+
+.filter-form-button {
+  width: 100px;
+  margin: 0 auto;
+}
+
+@media screen and (min-width: 570px) {
+
+  aside {
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 100px 30px;
+  }
+}

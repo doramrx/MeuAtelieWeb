@@ -1,0 +1,28 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  width: 100%;
+  padding: 8px;
+  background-color: transparent;
+  color: var(--primary-salmon);
+  border: 1px solid var(--primary-salmon);
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background-color 0.5s ease;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  border: 1px solid var(--primary-grey);
+  color: var(--primary-grey);
+}
+
+button:not(:disabled):hover {
+  color: var(--white);
+  background-color: var(--primary-salmon);
+  font-weight: bold;
+}

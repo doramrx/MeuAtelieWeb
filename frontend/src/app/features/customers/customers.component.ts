@@ -22,6 +22,7 @@ import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
 
 import { HeaderComponent } from '../../shared/components/header/header.component';
+import { AvailableFilters, FilterComponent } from './components/filter/filter.component';
 import { CustomerService } from '../../services/customer.service';
 import { PhonePipe } from '../../shared/pipes/phone.pipe';
 import { Message, MessageService } from 'primeng/api';
@@ -33,6 +34,7 @@ import { HttpErrorResponse } from '@angular/common/http';
   imports: [
     CommonModule,
     HeaderComponent,
+    FilterComponent,
     ReactiveFormsModule,
     RadioButtonModule,
     FormsModule,
@@ -51,6 +53,7 @@ export class CustomersComponent implements OnInit {
   private customerService: CustomerService = inject(CustomerService);
   private messageService: MessageService = inject(MessageService);
 
+  private _activeFilters: AvailableFilters;
   private _customerStatus: CustomerStatus[];
   private _filterFormGroup: FormGroup<FilterFormGroupFields>;
   private _addFormGroup: FormGroup<AddFormGroupFields>;
@@ -64,6 +67,12 @@ export class CustomersComponent implements OnInit {
   private _deleteCustomerEvent: EventEmitter<void>;
 
   constructor() {
+    this._activeFilters = {
+      name: null,
+      email: null,
+      phone: null,
+      status: null
+    };
     this._filterFormGroup = new FormGroup<FilterFormGroupFields>({
       status: new FormControl(null),
       name: new FormControl(null),
@@ -143,7 +152,8 @@ export class CustomersComponent implements OnInit {
     this.fetchCustomers();
   }
 
-  applyFilters() {
+  applyFilters(applyedFilter: AvailableFilters) {
+    this._activeFilters = applyedFilter;
     this.fetchCustomers();
   }
 
@@ -316,18 +326,18 @@ export class CustomersComponent implements OnInit {
   private fetchCustomers() {
     let normalizedPhone = null;
 
-    if (this._filterFormGroup.value.phone) {
-      normalizedPhone = this.normalizePhoneNumber(
-        this._filterFormGroup.value.phone
-      );
-    }
+    // if (this._filterFormGroup.value.phone) {
+    //   normalizedPhone = this.normalizePhoneNumber(
+    //     this._filterFormGroup.value.phone
+    //   );
+    // }
 
     const params: QueryParams = {
       page: this._currentPage,
-      name: this._filterFormGroup.value.name || null,
-      email: this._filterFormGroup.value.email || null,
-      phone: normalizedPhone,
-      isActive: this._filterFormGroup.value.status,
+      name: this._activeFilters.name,
+      email: this._activeFilters.email,
+      phone: this._activeFilters.phone,
+      isActive: this._activeFilters.status,
     };
 
     this.customerService.findAll(params).subscribe({
