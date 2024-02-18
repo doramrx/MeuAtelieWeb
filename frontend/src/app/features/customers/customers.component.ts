@@ -27,6 +27,8 @@ import { CustomerService } from '../../services/customer.service';
 import { PhonePipe } from '../../shared/pipes/phone.pipe';
 import { Message, MessageService } from 'primeng/api';
 import { HttpErrorResponse } from '@angular/common/http';
+import { normalizePhone } from '../../shared/utils/normalize-phone';
+import { InputComponent } from '../../shared/components/input/input.component';
 
 @Component({
   selector: 'app-customers',
@@ -44,6 +46,7 @@ import { HttpErrorResponse } from '@angular/common/http';
     PhonePipe,
     DialogModule,
     ToastModule,
+    InputComponent
   ],
   providers: [MessageService],
   templateUrl: './customers.component.html',
@@ -122,10 +125,6 @@ export class CustomersComponent implements OnInit {
     return [];
   }
 
-  findById(id: any) {
-    this.customerService.findById(id);
-  }
-
   onPageChange(paginatorState: PaginatorState) {
     this._currentPage = paginatorState.page || 0;
     this.fetchCustomers();
@@ -168,9 +167,7 @@ export class CustomersComponent implements OnInit {
     let normalizedPhone = null;
 
     if (this._addFormGroup.value.phone) {
-      normalizedPhone = this.normalizePhoneNumber(
-        this._addFormGroup.value.phone
-      );
+      normalizedPhone = normalizePhone(this._addFormGroup.value.phone);
     }
 
     const saveCustomer: SaveCustomerDTO = {
@@ -213,9 +210,7 @@ export class CustomersComponent implements OnInit {
     let normalizedPhone = null;
 
     if (this._updateFormGroup.value.phone) {
-      normalizedPhone = this.normalizePhoneNumber(
-        this._updateFormGroup.value.phone
-      );
+      normalizedPhone = normalizePhone(this._updateFormGroup.value.phone);
     }
 
     const updateCustomer: UpdateCustomerDTO = {
@@ -292,7 +287,6 @@ export class CustomersComponent implements OnInit {
         });
       },
       error: (error: HttpErrorResponse) => {
-        console.error(error);
         this.showToast({
           severity: 'error',
           summary: 'Erro',
@@ -323,16 +317,12 @@ export class CustomersComponent implements OnInit {
     });
   }
 
-  private normalizePhoneNumber(phone: string) {
-    return phone.replace(/\D+/g, '');
-  }
-
   private applyValidatorToCustomerPhone(formGroup: FormGroup<AddFormGroupFields> | FormGroup<UpdateFormGroupFields>) {
     formGroup.controls.phone.valueChanges.subscribe({
       next: (phone) => {
         console.log(phone);
         if (phone) {
-          let normalizedPhone = this.normalizePhoneNumber(phone);
+          let normalizedPhone = normalizePhone(phone);
           console.log(normalizedPhone);
 
           if (normalizedPhone.length === 0) {

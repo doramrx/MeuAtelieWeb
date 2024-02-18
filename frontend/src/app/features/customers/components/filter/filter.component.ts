@@ -4,6 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { InputMaskModule } from 'primeng/inputmask';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { normalizePhone } from '../../../../shared/utils/normalize-phone';
 
 @Component({
   selector: 'app-filter',
@@ -56,9 +57,7 @@ export class FilterComponent {
     let normalizedPhone = null;
 
     if (this._filterFormGroup.value.phone) {
-      normalizedPhone = this.normalizePhoneNumber(
-        this._filterFormGroup.value.phone
-      );
+      normalizedPhone = normalizePhone(this._filterFormGroup.value.phone);
     }
 
     const status =
@@ -81,10 +80,6 @@ export class FilterComponent {
       email: null,
       status: null,
     });
-  }
-
-  private normalizePhoneNumber(phone: string) {
-    return phone.replace(/\D+/g, '');
   }
 }
 

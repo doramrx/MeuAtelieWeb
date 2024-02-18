@@ -1,6 +1,4 @@
-/* :host ::ng-deep .form-input input,
-:host ::ng-deep .p-inputtext,
-.form-input input {
+:host ::ng-deep .p-inputtext {
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
@@ -10,7 +8,7 @@
   outline: none;
   box-shadow: none;
   font-size: 1.3rem;
-} */
+}
 
 .form-button {
   width: 100px;

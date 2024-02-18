@@ -1,2 +1,8 @@
-<label for="name">Nome</label>
-<input id="name" type="text" placeholder="Buscar" formControlName="name" />
+<div class="input-block" [formGroup]="formGroup">
+  <label [for]="inputId">{{ inputLabel }}</label>
+  <input
+    [id]="inputId"
+    [type]="inputType"
+    [formControlName]="inputFormControlName"
+  />
+</div>

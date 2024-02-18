@@ -71,14 +71,20 @@
   [resizable]="false"
 >
   <form class="flex flex-column gap-3" [formGroup]="addFormGroup">
-    <div class="form-input">
-      <label for="name">Nome</label>
-      <input id="name" type="text" formControlName="name" />
-    </div>
-    <div class="form-input">
-      <label for="email">Email</label>
-      <input type="email" formControlName="email" />
-    </div>
+    <app-input
+      [inputId]="'new-customer-dialog-name'"
+      [inputType]="'text'"
+      [inputFormControlName]="'name'"
+      [formGroup]="addFormGroup"
+      [inputLabel]="'Nome'"
+    />
+    <app-input
+      [inputId]="'new-customer-dialog-email'"
+      [inputType]="'text'"
+      [inputFormControlName]="'email'"
+      [formGroup]="addFormGroup"
+      [inputLabel]="'Email'"
+    />
     <div>
       <label for="phone">Telefone</label>
       <p-inputMask
