@@ -4,7 +4,7 @@
   justify-content: center;
 }
 
-button {
+.primary-button {
   width: 100%;
   padding: 8px;
   background-color: transparent;
@@ -21,8 +21,38 @@ button:disabled {
   color: var(--primary-grey);
 }
 
-button:not(:disabled):hover {
+.primary-button:not(:disabled):hover {
   color: var(--white);
   background-color: var(--primary-salmon);
   font-weight: bold;
+}
+
+.red-button {
+  border: 1px solid var(--primary-red);
+  border-radius: 8px;
+  background-color: transparent;
+  padding: 6px 10px;
+  color: var(--primary-red);
+  transition: background-color 0.5s ease;
+  cursor: pointer;
+}
+
+.blue-button {
+  border: 1px solid var(--primary-blue);
+  border-radius: 8px;
+  background-color: transparent;
+  padding: 6px 10px;
+  color: var(--primary-blue);
+  transition: background-color 0.5s ease;
+  cursor: pointer;
+}
+
+.red-button:not(:disabled):hover {
+  background-color: var(--primary-red);
+  color: var(--white);
+}
+
+.blue-button:not(:disabled):hover {
+  background-color: var(--primary-blue);
+  color: var(--white);
 }

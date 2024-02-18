@@ -1,1 +1,8 @@
-<button [type]="type" (click)="onClick()">{{ buttonText }}</button>
+<button
+  [classList]="buttonClass"
+  [type]="type"
+  (click)="onClick()"
+  [disabled]="disabled"
+>
+  {{ buttonText }}
+</button>
