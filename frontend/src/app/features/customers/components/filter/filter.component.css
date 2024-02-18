@@ -53,6 +53,37 @@ aside #clean-filter:hover {
   margin: 0 auto;
 }
 
+:host ::ng-deep .field-checkbox {
+  margin-bottom: 0;
+}
+
+:host ::ng-deep .p-radiobutton .p-radiobutton-box {
+  width: 18px;
+  height: 18px;
+}
+
+:host ::ng-deep .p-radiobutton .p-focus {
+  box-shadow: none;
+}
+
+:host ::ng-deep .p-radiobutton-checked .p-radiobutton-box .p-radiobutton-icon {
+  background-color: var(--primary-salmon);
+}
+
+:host ::ng-deep .p-radiobutton-checked .p-radiobutton-box {
+  border-color: var(--primary-salmon);
+  background-color: var(--primary-salmon);
+}
+
+:host ::ng-deep .p-radiobutton .p-radiobutton-box:not(.p-disabled):not(.p-highlight):hover {
+  border-color: var(--primary-salmon);
+}
+
+:host ::ng-deep .p-radiobutton .p-radiobutton-box .p-radiobutton-icon {
+  width: 14px;
+  height: 14px;
+}
+
 @media screen and (min-width: 570px) {
 
   aside {

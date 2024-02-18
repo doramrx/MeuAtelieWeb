@@ -47,8 +47,9 @@
     </div>
 
     <app-button
+      [buttonClass]="'primary-button'"
       [buttonText]="'FILTRAR'"
-      [onClick]="notifyApplyFilter.bind(this)"
+      (onClick)="notifyApplyFilter()"
       [classList]="'filter-form-button'"
       [type]="'submit'"
     />
