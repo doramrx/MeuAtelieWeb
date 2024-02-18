@@ -1,6 +1,8 @@
 <aside>
   <form class="flex flex-column gap-3" [formGroup]="filterFormGroup">
-    <button id="clean-filter" type="reset">Limpar</button>
+    <button id="clean-filter" type="reset" (click)="notifyCleanFilters()">
+      Limpar
+    </button>
     <label for="status">Status</label>
 
     <div *ngFor="let status of customerStatus" class="field-checkbox">

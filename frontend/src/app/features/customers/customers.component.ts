@@ -54,8 +54,6 @@ export class CustomersComponent implements OnInit {
   private messageService: MessageService = inject(MessageService);
 
   private _activeFilters: AvailableFilters;
-  private _customerStatus: CustomerStatus[];
-  private _filterFormGroup: FormGroup<FilterFormGroupFields>;
   private _addFormGroup: FormGroup<AddFormGroupFields>;
   private _updateFormGroup: FormGroup<UpdateFormGroupFields>;
   private _customerPage?: CustomerPage;
@@ -73,12 +71,6 @@ export class CustomersComponent implements OnInit {
       phone: null,
       status: null
     };
-    this._filterFormGroup = new FormGroup<FilterFormGroupFields>({
-      status: new FormControl(null),
-      name: new FormControl(null),
-      email: new FormControl(null),
-      phone: new FormControl(null),
-    });
     this._addFormGroup = new FormGroup<AddFormGroupFields>({
       name: new FormControl(null, [Validators.required]),
       email: new FormControl(null, [Validators.required, Validators.email]),
@@ -89,19 +81,10 @@ export class CustomersComponent implements OnInit {
       name: new FormControl(null, [Validators.required]),
       phone: new FormControl(null),
     });
-    this._customerStatus = [
-      { text: 'Todos', key: null },
-      { text: 'Ativos', key: true },
-      { text: 'Inativos', key: false },
-    ];
     this._currentPage = 0;
     this.activeModal = null;
 
     this._deleteCustomerEvent = new EventEmitter();
-  }
-
-  get filterFormGroup() {
-    return this._filterFormGroup;
   }
 
   get addFormGroup() {
@@ -110,10 +93,6 @@ export class CustomersComponent implements OnInit {
 
   get updateFormGroup() {
     return this._updateFormGroup;
-  }
-
-  get customerStatus() {
-    return this._customerStatus;
   }
 
   ngOnInit(): void {
@@ -324,14 +303,6 @@ export class CustomersComponent implements OnInit {
   }
 
   private fetchCustomers() {
-    let normalizedPhone = null;
-
-    // if (this._filterFormGroup.value.phone) {
-    //   normalizedPhone = this.normalizePhoneNumber(
-    //     this._filterFormGroup.value.phone
-    //   );
-    // }
-
     const params: QueryParams = {
       page: this._currentPage,
       name: this._activeFilters.name,
@@ -339,6 +310,8 @@ export class CustomersComponent implements OnInit {
       phone: this._activeFilters.phone,
       isActive: this._activeFilters.status,
     };
+
+    console.log(this._activeFilters);
 
     this.customerService.findAll(params).subscribe({
       next: (customerPage) => {
@@ -376,18 +349,6 @@ export class CustomersComponent implements OnInit {
       },
     });
   }
-}
-
-interface CustomerStatus {
-  text: string;
-  key: boolean | null;
-}
-
-interface FilterFormGroupFields {
-  status: FormControl<boolean | null>;
-  name: FormControl<string | null>;
-  email: FormControl<string | null>;
-  phone: FormControl<string | null>;
 }
 
 interface AddFormGroupFields {

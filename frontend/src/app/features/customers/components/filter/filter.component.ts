@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { InputMaskModule } from 'primeng/inputmask';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -13,10 +13,10 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
     ReactiveFormsModule,
     InputMaskModule,
     RadioButtonModule,
-    ButtonComponent
+    ButtonComponent,
   ],
   templateUrl: './filter.component.html',
-  styleUrl: './filter.component.css'
+  styleUrl: './filter.component.css',
 })
 export class FilterComponent {
   private _filterFormGroup: FormGroup<FilterFormGroupFields>;
@@ -24,9 +24,12 @@ export class FilterComponent {
 
   @Output()
   public onApplyFiltersEvent: EventEmitter<AvailableFilters>;
+  @Output()
+  public onCleanFiltersEvent: EventEmitter<AvailableFilters>;
 
   constructor() {
     this.onApplyFiltersEvent = new EventEmitter();
+    this.onCleanFiltersEvent = new EventEmitter();
 
     this._filterFormGroup = new FormGroup<FilterFormGroupFields>({
       status: new FormControl(null),
@@ -50,27 +53,39 @@ export class FilterComponent {
   }
 
   notifyApplyFilter() {
-
-    console.log(this._filterFormGroup.value);
-
     let normalizedPhone = null;
 
     if (this._filterFormGroup.value.phone) {
-      normalizedPhone = this.normalizePhoneNumber(this._filterFormGroup.value.phone);
+      normalizedPhone = this.normalizePhoneNumber(
+        this._filterFormGroup.value.phone
+      );
     }
+
+    const status =
+      typeof this._filterFormGroup.value.status === 'undefined'
+        ? null
+        : this._filterFormGroup.value.status;
 
     this.onApplyFiltersEvent.emit({
       name: this._filterFormGroup.value.name || null,
       phone: normalizedPhone,
       email: this._filterFormGroup.value.email || null,
-      status: this._filterFormGroup.value.status || null
-    })
+      status,
+    });
+  }
+
+  notifyCleanFilters() {
+    this.onCleanFiltersEvent.emit({
+      name: null,
+      phone: null,
+      email: null,
+      status: null,
+    });
   }
 
   private normalizePhoneNumber(phone: string) {
     return phone.replace(/\D+/g, '');
   }
-
 }
 
 export interface AvailableFilters {

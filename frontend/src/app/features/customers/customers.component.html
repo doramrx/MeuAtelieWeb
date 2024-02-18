@@ -1,6 +1,9 @@
 <app-header [selectedMenuOption]="'CUSTOMERS'"></app-header>
 
-<app-filter (onApplyFiltersEvent)="applyFilters($event)"></app-filter>
+<app-filter
+  (onApplyFiltersEvent)="applyFilters($event)"
+  (onCleanFiltersEvent)="applyFilters($event)"
+/>
 
 <main>
   <button type="button" (click)="showAddCustomerDialog()">
