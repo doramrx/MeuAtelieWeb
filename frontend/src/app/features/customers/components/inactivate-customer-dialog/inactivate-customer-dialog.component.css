@@ -1,0 +1,15 @@
+:host ::ng-deep #delete-dialog .p-dialog-content p {
+  font-weight: medium;
+  font-size: 1.6rem;
+}
+
+:host ::ng-deep #delete-dialog .p-dialog-content div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+:host ::ng-deep #delete-dialog .p-dialog-content div button {
+  padding: 10px 16px;
+}

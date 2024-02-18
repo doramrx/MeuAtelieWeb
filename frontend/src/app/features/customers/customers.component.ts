@@ -5,13 +5,10 @@ import {
   UpdateCustomerDTO,
 } from './../../services/customer.service';
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit, inject } from '@angular/core';
 import {
-  FormControl,
-  FormsModule,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
+  FormsModule, ReactiveFormsModule
 } from '@angular/forms';
 
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -20,15 +17,18 @@ import { ButtonModule } from 'primeng/button';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
+import { Message, MessageService } from 'primeng/api';
 
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { AvailableFilters, FilterComponent } from './components/filter/filter.component';
 import { CustomerService } from '../../services/customer.service';
 import { PhonePipe } from '../../shared/pipes/phone.pipe';
-import { Message, MessageService } from 'primeng/api';
-import { HttpErrorResponse } from '@angular/common/http';
-import { normalizePhone } from '../../shared/utils/normalize-phone';
+
 import { InputComponent } from '../../shared/components/input/input.component';
+import { ButtonComponent } from '../../shared/components/button/button.component';
+import { AddCustomerData, AddCustomerDialogComponent } from './components/add-customer-dialog/add-customer-dialog.component';
+import { UpdateCustomerData, UpdateCustomerDialogComponent } from './components/update-customer-dialog/update-customer-dialog.component';
+import { InactivateCustomerDialogComponent } from './components/inactivate-customer-dialog/inactivate-customer-dialog.component';
 
 @Component({
   selector: 'app-customers',
@@ -46,7 +46,11 @@ import { InputComponent } from '../../shared/components/input/input.component';
     PhonePipe,
     DialogModule,
     ToastModule,
-    InputComponent
+    InputComponent,
+    ButtonComponent,
+    AddCustomerDialogComponent,
+    UpdateCustomerDialogComponent,
+    InactivateCustomerDialogComponent
   ],
   providers: [MessageService],
   templateUrl: './customers.component.html',
@@ -57,15 +61,11 @@ export class CustomersComponent implements OnInit {
   private messageService: MessageService = inject(MessageService);
 
   private _activeFilters: AvailableFilters;
-  private _addFormGroup: FormGroup<AddFormGroupFields>;
-  private _updateFormGroup: FormGroup<UpdateFormGroupFields>;
   private _customerPage?: CustomerPage;
   private _currentPage: number;
 
   public activeModal: AvailableModalsType | null;
   public customerId?: string;
-
-  private _deleteCustomerEvent: EventEmitter<void>;
 
   constructor() {
     this._activeFilters = {
@@ -74,33 +74,11 @@ export class CustomersComponent implements OnInit {
       phone: null,
       status: null
     };
-    this._addFormGroup = new FormGroup<AddFormGroupFields>({
-      name: new FormControl(null, [Validators.required]),
-      email: new FormControl(null, [Validators.required, Validators.email]),
-      phone: new FormControl(null),
-    });
-    this._updateFormGroup = new FormGroup<UpdateFormGroupFields>({
-      id: new FormControl(null),
-      name: new FormControl(null, [Validators.required]),
-      phone: new FormControl(null),
-    });
     this._currentPage = 0;
     this.activeModal = null;
-
-    this._deleteCustomerEvent = new EventEmitter();
-  }
-
-  get addFormGroup() {
-    return this._addFormGroup;
-  }
-
-  get updateFormGroup() {
-    return this._updateFormGroup;
   }
 
   ngOnInit(): void {
-    this.applyValidatorToCustomerPhone(this._addFormGroup);
-    this.applyValidatorToCustomerPhone(this._updateFormGroup);
     this.fetchCustomers();
   }
 
@@ -141,39 +119,23 @@ export class CustomersComponent implements OnInit {
 
   showUpdateCustomerDialog(id: string) {
     this.activeModal = 'UPDATE';
-    this.fetchCustomer(id);
+    this.customerId = id;
   }
 
   showDeleteCustomerDialog(id: string) {
     this.activeModal = 'DELETE';
-
-    this._deleteCustomerEvent.subscribe(
-      () => {
-        this.deleteCustomer(id);
-      },
-      (error) => { }
-    );
-  }
-
-  notifyDeleteConfirmation() {
-    this._deleteCustomerEvent.emit();
+    this.customerId = id;
   }
 
   showToast(message: Message) {
     this.messageService.add(message);
   }
 
-  saveCustomer() {
-    let normalizedPhone = null;
-
-    if (this._addFormGroup.value.phone) {
-      normalizedPhone = normalizePhone(this._addFormGroup.value.phone);
-    }
-
+  saveCustomer(customerData: AddCustomerData) {
     const saveCustomer: SaveCustomerDTO = {
-      name: this._addFormGroup.value.name || '',
-      email: this._addFormGroup.value.email || '',
-      phone: normalizedPhone,
+      name: customerData.name,
+      email: customerData.email,
+      phone: customerData.phone,
     };
 
     this.customerService.addCustomer(saveCustomer).subscribe({
@@ -197,8 +159,8 @@ export class CustomersComponent implements OnInit {
     });
   }
 
-  updateCustomer() {
-    if (!this._updateFormGroup.value.id) {
+  updateCustomer(customerData: UpdateCustomerData) {
+    if (!customerData.id) {
       this.showToast({
         severity: 'error',
         summary: 'Erro',
@@ -207,19 +169,13 @@ export class CustomersComponent implements OnInit {
       return;
     }
 
-    let normalizedPhone = null;
-
-    if (this._updateFormGroup.value.phone) {
-      normalizedPhone = normalizePhone(this._updateFormGroup.value.phone);
-    }
-
     const updateCustomer: UpdateCustomerDTO = {
-      name: this._updateFormGroup.value.name || '',
-      phone: normalizedPhone,
+      name: customerData.name || '',
+      phone: customerData.phone,
     };
 
     this.customerService
-      .updateCustomer(this._updateFormGroup.value.id, updateCustomer)
+      .updateCustomer(customerData.id, updateCustomer)
       .subscribe({
         next: () => {
           this.closeModal();
@@ -227,29 +183,6 @@ export class CustomersComponent implements OnInit {
             severity: 'success',
             summary: 'Sucesso',
             detail: 'Cliente atualizado com sucesso',
-          });
-          this.fetchCustomers();
-        },
-        error: (error: HttpErrorResponse) => {
-          this.showToast({
-            severity: 'error',
-            summary: 'Erro',
-            detail: error.error.details,
-          });
-        },
-      });
-  }
-
-  private deleteCustomer(id: string) {
-    this.customerService
-      .deleteCustomer(id)
-      .subscribe({
-        next: () => {
-          this.closeModal();
-          this.showToast({
-            severity: 'success',
-            summary: 'Sucesso',
-            detail: 'Cliente inativado com sucesso',
           });
           this.fetchCustomers();
         },
@@ -277,14 +210,18 @@ export class CustomersComponent implements OnInit {
     return this._customerPage && this._customerPage.content.length > 0;
   }
 
-  private fetchCustomer(id: string) {
-    this.customerService.findById(id).subscribe({
-      next: (customerDTO) => {
-        this._updateFormGroup.setValue({
-          id: customerDTO.id,
-          name: customerDTO.name,
-          phone: customerDTO.phone,
-        });
+  private fetchCustomers() {
+    const params: QueryParams = {
+      page: this._currentPage,
+      name: this._activeFilters.name,
+      email: this._activeFilters.email,
+      phone: this._activeFilters.phone,
+      isActive: this._activeFilters.status,
+    };
+
+    this.customerService.findAll(params).subscribe({
+      next: (customerPage) => {
+        this._customerPage = customerPage;
       },
       error: (error: HttpErrorResponse) => {
         this.showToast({
@@ -296,61 +233,38 @@ export class CustomersComponent implements OnInit {
     });
   }
 
-  private fetchCustomers() {
-    const params: QueryParams = {
-      page: this._currentPage,
-      name: this._activeFilters.name,
-      email: this._activeFilters.email,
-      phone: this._activeFilters.phone,
-      isActive: this._activeFilters.status,
-    };
+  deleteCustomer() {
+    if (!this.customerId) {
+      this.showToast({
+        severity: 'error',
+        summary: 'Erro',
+        detail: 'Não foi possível inativar o cliente',
+      });
+      return;
+    }
 
-    console.log(this._activeFilters);
-
-    this.customerService.findAll(params).subscribe({
-      next: (customerPage) => {
-        this._customerPage = customerPage;
-      },
-      error: (error) => {
-        console.error(error);
-      },
-    });
+    this.customerService
+      .deleteCustomer(this.customerId)
+      .subscribe({
+        next: () => {
+          this.closeModal();
+          this.showToast({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Cliente inativado com sucesso',
+          });
+          this.fetchCustomers();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.showToast({
+            severity: 'error',
+            summary: 'Erro',
+            detail: error.error.details,
+          });
+        },
+      });
   }
 
-  private applyValidatorToCustomerPhone(formGroup: FormGroup<AddFormGroupFields> | FormGroup<UpdateFormGroupFields>) {
-    formGroup.controls.phone.valueChanges.subscribe({
-      next: (phone) => {
-        console.log(phone);
-        if (phone) {
-          let normalizedPhone = normalizePhone(phone);
-          console.log(normalizedPhone);
-
-          if (normalizedPhone.length === 0) {
-            formGroup.controls.phone.clearValidators();
-            formGroup.controls.phone.setValue(null);
-            return;
-          }
-
-          formGroup.controls.phone.setValidators(Validators.pattern(/^\(\d{2}\) \d \d{4}-\d{4}$/g));
-        }
-      },
-      complete: () => {
-        formGroup.controls.phone.updateValueAndValidity({ emitEvent: false, onlySelf: true });
-      },
-    });
-  }
-}
-
-interface AddFormGroupFields {
-  name: FormControl<string | null>;
-  email: FormControl<string | null>;
-  phone: FormControl<string | null>;
-}
-
-interface UpdateFormGroupFields {
-  id: FormControl<string | null>;
-  name: FormControl<string | null>;
-  phone: FormControl<string | null>;
 }
 
 enum AvailableModals {

@@ -6,9 +6,13 @@
 />
 
 <main>
-  <button type="button" (click)="showAddCustomerDialog()">
-    ADICIONAR CLIENTE
-  </button>
+  <app-button
+    [buttonClass]="'primary-button'"
+    [className]="'add-customer-button'"
+    [buttonText]="'ADICIONAR CLIENTE'"
+    (onClick)="showAddCustomerDialog()"
+    [type]="'button'"
+  />
   <p id="empty-list-message" *ngIf="!existCustomers()">
     Nenhum cliente foi encontrado.
   </p>
@@ -34,22 +38,20 @@
         <p>{{ customer.isActive ? "Ativo" : "Inativo" }}</p>
       </div>
       <div>
-        <button
+        <app-button
+          [buttonText]="'Editar'"
+          (onClick)="showUpdateCustomerDialog(customer.id)"
+          [type]="'button'"
+          [buttonClass]="'blue-button'"
           [disabled]="!customer.isActive"
-          type="button"
-          class="blue-button"
-          (click)="showUpdateCustomerDialog(customer.id)"
-        >
-          Editar
-        </button>
-        <button
+        />
+        <app-button
+          [buttonText]="'Inativar'"
+          (onClick)="showDeleteCustomerDialog(customer.id)"
+          [type]="'button'"
+          [buttonClass]="'red-button'"
           [disabled]="!customer.isActive"
-          type="button"
-          class="red-button"
-          (click)="showDeleteCustomerDialog(customer.id)"
-        >
-          Inativar
-        </button>
+        />
       </div>
     </li>
   </ul>
@@ -62,102 +64,24 @@
   </div>
 </main>
 
-<p-dialog
-  header="Novo Cliente"
-  [visible]="isModalVisible('ADD')"
-  (visibleChange)="closeModal()"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
->
-  <form class="flex flex-column gap-3" [formGroup]="addFormGroup">
-    <app-input
-      [inputId]="'new-customer-dialog-name'"
-      [inputType]="'text'"
-      [inputFormControlName]="'name'"
-      [formGroup]="addFormGroup"
-      [inputLabel]="'Nome'"
-    />
-    <app-input
-      [inputId]="'new-customer-dialog-email'"
-      [inputType]="'text'"
-      [inputFormControlName]="'email'"
-      [formGroup]="addFormGroup"
-      [inputLabel]="'Email'"
-    />
-    <div>
-      <label for="phone">Telefone</label>
-      <p-inputMask
-        mask="(99) 9 9999-9999"
-        formControlName="phone"
-        [autoClear]="false"
-      ></p-inputMask>
-    </div>
-    <button
-      class="form-button"
-      (click)="saveCustomer()"
-      type="submit"
-      [disabled]="addFormGroup.invalid"
-    >
-      Salvar
-    </button>
-  </form>
-</p-dialog>
+<app-add-customer-dialog
+  [isDialogVisible]="isModalVisible('ADD')"
+  (onDialogVisibilityChange)="closeModal()"
+  (onSaveCustomer)="saveCustomer($event)"
+/>
 
-<p-dialog
-  header="Editar Cliente"
-  [visible]="isModalVisible('UPDATE')"
-  (visibleChange)="closeModal()"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
->
-  <form class="flex flex-column gap-3" [formGroup]="updateFormGroup">
-    <div class="form-input">
-      <label for="name">Nome</label>
-      <input type="text" formControlName="name" />
-    </div>
-    <div>
-      <label for="phone">Telefone</label>
-      <p-inputMask
-        mask="(99) 9 9999-9999"
-        formControlName="phone"
-        [autoClear]="false"
-      ></p-inputMask>
-    </div>
-    <button
-      class="form-button"
-      (click)="updateCustomer()"
-      type="submit"
-      [disabled]="updateFormGroup.invalid"
-    >
-      Salvar
-    </button>
-  </form>
-</p-dialog>
+<app-update-customer-dialog
+  [customerId]="customerId"
+  [isDialogVisible]="isModalVisible('UPDATE')"
+  (onDialogVisibilityChange)="closeModal()"
+  (onUpdateCustomer)="updateCustomer($event)"
+  (onFetchCustomerError)="showToast($event)"
+/>
 
-<p-dialog
-  id="delete-dialog"
-  header="Deletar Cliente"
-  [visible]="isModalVisible('DELETE')"
-  (visibleChange)="closeModal()"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
->
-  <p>Você realmente deseja inativar este cliente?</p>
-  <div>
-    <button class="blue-button" (click)="closeModal()" type="button">
-      Não
-    </button>
-    <button
-      class="red-button"
-      (click)="notifyDeleteConfirmation()"
-      type="button"
-    >
-      Sim
-    </button>
-  </div>
-</p-dialog>
+<app-inactivate-customer-dialog
+  [isDialogVisible]="isModalVisible('DELETE')"
+  (onDialogVisibilityChange)="closeModal()"
+  (onDeleteConfirmationEvent)="deleteCustomer()"
+/>
 
 <p-toast></p-toast>

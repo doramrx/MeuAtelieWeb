@@ -1,0 +1,41 @@
+<p-dialog
+  header="Novo Cliente"
+  [visible]="isDialogVisible"
+  (visibleChange)="onCloseModal()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form class="flex flex-column gap-3" [formGroup]="addFormGroup">
+    <app-input
+      [inputId]="'new-customer-dialog-name'"
+      [inputType]="'text'"
+      [inputFormControlName]="'name'"
+      [formGroup]="addFormGroup"
+      [inputLabel]="'Nome'"
+    />
+    <app-input
+      [inputId]="'new-customer-dialog-email'"
+      [inputType]="'text'"
+      [inputFormControlName]="'email'"
+      [formGroup]="addFormGroup"
+      [inputLabel]="'Email'"
+    />
+    <div>
+      <label for="phone">Telefone</label>
+      <p-inputMask
+        mask="(99) 9 9999-9999"
+        formControlName="phone"
+        [autoClear]="false"
+      ></p-inputMask>
+    </div>
+    <app-button
+      [buttonClass]="'primary-button'"
+      [classList]="'form-button'"
+      [buttonText]="'Salvar'"
+      (onClick)="onSaveCustomer()"
+      [type]="'submit'"
+      [disabled]="addFormGroup.invalid"
+    />
+  </form>
+</p-dialog>

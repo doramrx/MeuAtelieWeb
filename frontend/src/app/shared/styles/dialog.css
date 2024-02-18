@@ -1,0 +1,28 @@
+:host ::ng-deep .p-dialog {
+  width: 90vw;
+  max-width: 420px;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-header,
+:host ::ng-deep .p-dialog .p-dialog-content {
+  padding: 20px !important;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-header .p-dialog-title {
+  font-size: 2rem;
+  color: var(--primary-salmon);
+}
+
+:host ::ng-deep .p-dialog .p-dialog-content form div label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: medium;
+  font-size: 1.6rem;
+}
+
+@media screen and (min-width: 570px) {
+
+  :host ::ng-deep .p-dialog .p-dialog-content {
+    padding: 26px !important;
+  }
+}

@@ -12,52 +12,16 @@
 
 .form-button {
   width: 100px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 8px;
-  background-color: transparent;
-  color: var(--primary-salmon);
-  border: 1px solid var(--primary-salmon);
-  cursor: pointer;
-  border-radius: 10px;
-  transition: background-color 0.5s ease;
-}
-
-.form-button:disabled {
-  cursor: not-allowed;
-  border: 1px solid var(--primary-grey);
-  color: var(--primary-grey);
-}
-
-.form-button:not(:disabled):hover {
-  color: var(--white);
-  background-color: var(--primary-salmon);
-  font-weight: bold;
+  margin: 0 auto;
 }
 
 main {
   padding: 20px;
 }
 
-main > button {
+main > .add-customer-button {
   width: 190px;
   margin-left: auto;
-  padding: 10px;
-  background-color: transparent;
-  color: var(--primary-salmon);
-  border: 1px solid var(--primary-salmon);
-  cursor: pointer;
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: background-color 0.5s ease;
-}
-
-main > button:hover {
-  color: var(--white);
-  background-color: var(--primary-salmon);
-  font-weight: bold;
 }
 
 main #empty-list-message {
@@ -104,48 +68,8 @@ main ul li div:last-child {
   gap: 12px;
 }
 
-button.red-button {
-  border: 1px solid var(--primary-red);
-  border-radius: 8px;
-  background-color: transparent;
-  padding: 6px 10px;
-  color: var(--primary-red);
-  transition: background-color 0.5s ease;
-  cursor: pointer;
-}
-
-button.blue-button {
-  border: 1px solid var(--primary-blue);
-  border-radius: 8px;
-  background-color: transparent;
-  padding: 6px 10px;
-  color: var(--primary-blue);
-  transition: background-color 0.5s ease;
-  cursor: pointer;
-}
-
-button.red-button:not(:disabled):hover {
-  background-color: var(--primary-red);
-  color: var(--white)
-}
-
-button.blue-button:not(:disabled):hover {
-  background-color: var(--primary-blue);
-  color: var(--white);
-}
-
-button:disabled {
-  cursor: not-allowed;
-  border: 1px solid var(--primary-grey);
-  color: var(--primary-grey);
-}
-
 main .paginator-container {
   margin-top: 22px;
-}
-
-:host ::ng-deep .field-checkbox {
-  margin-bottom: 0;
 }
 
 :host ::ng-deep .p-paginator .p-paginator-pages button {
@@ -155,73 +79,6 @@ main .paginator-container {
 :host ::ng-deep .p-paginator .p-paginator-icon {
   width: 16px;
   height: 16px;
-}
-
-:host ::ng-deep .p-radiobutton .p-radiobutton-box {
-  width: 18px;
-  height: 18px;
-}
-
-:host ::ng-deep .p-radiobutton .p-focus {
-  box-shadow: none;
-}
-
-:host ::ng-deep .p-radiobutton-checked .p-radiobutton-box .p-radiobutton-icon {
-  background-color: var(--primary-salmon);
-}
-
-:host ::ng-deep .p-radiobutton-checked .p-radiobutton-box {
-  border-color: var(--primary-salmon);
-  background-color: var(--primary-salmon);
-}
-
-:host ::ng-deep .p-radiobutton .p-radiobutton-box:not(.p-disabled):not(.p-highlight):hover {
-  border-color: var(--primary-salmon);
-}
-
-:host ::ng-deep .p-radiobutton .p-radiobutton-box .p-radiobutton-icon {
-  width: 14px;
-  height: 14px;
-}
-
-:host ::ng-deep .p-dialog {
-  width: 90vw;
-  max-width: 420px;
-}
-
-:host ::ng-deep .p-dialog .p-dialog-header,
-:host ::ng-deep .p-dialog .p-dialog-content {
-  padding: 20px !important;
-}
-
-:host ::ng-deep .p-dialog .p-dialog-header .p-dialog-title {
-  font-size: 2rem;
-  color: var(--primary-salmon);
-}
-
-:host ::ng-deep .p-dialog .p-dialog-content form div label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: medium;
-  font-size: 1.6rem;
-}
-
-:host ::ng-deep #delete-dialog .p-dialog-content p {
-  font-weight: medium;
-  font-size: 1.6rem;
-}
-
-:host ::ng-deep #delete-dialog .p-dialog-content div {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-:host ::ng-deep #delete-dialog .p-dialog-content div button {
-  width: fit-content;
-  padding: 10px 16px;
-  margin: 0;
 }
 
 :host ::ng-deep .p-toast .p-toast-message-content .p-toast-message-icon {
@@ -260,10 +117,6 @@ main .paginator-container {
   main {
     margin-left: 250px;
     padding: 40px 30px;
-  }
-
-  :host ::ng-deep .p-dialog .p-dialog-content {
-    padding: 26px !important;
   }
 }
 
