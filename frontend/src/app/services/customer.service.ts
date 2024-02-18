@@ -62,8 +62,8 @@ interface CustomerDTO {
 }
 
 export interface SaveCustomerDTO {
-  name: string;
-  email: string;
+  name: string | null;
+  email: string | null;
   phone: string | null;
 }
 
