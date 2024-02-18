@@ -73,7 +73,7 @@ Quando o docker terminar de subir todos os projetos, a API estará disponível p
 
 <a name="Endpoints"></a>
 ## :paperclip: Endpoints
-<details open>
+<details>
   <summary>
     <strong>Cliente</strong>
   </summary>
@@ -230,19 +230,9 @@ Quando o docker terminar de subir todos os projetos, a API estará disponível p
   DELETE http://localhost:8080/customers/3d34c216-0e60-4a7e-89e6-f0fe8050d883
 ```
 
-##### Exemplo de resposta:
-```json
-{
-    "id": "3d34c216-0e60-4a7e-89e6-f0fe8050d883",
-    "name": "Maria Aparecida de Andrade",
-    "email": "maria.aparecida@gmail.com",
-    "phone": "47922222222",
-    "isActive": false
-}
-```
 </details>
 
-<details open>
+<details>
   <summary>
     <strong>Ajuste</strong>
   </summary>
@@ -390,18 +380,9 @@ Quando o docker terminar de subir todos os projetos, a API estará disponível p
   DELETE http://localhost:8080/adjusts/3d34c216-0e60-4a7e-89e6-f0fe8050d883
 ```
 
-##### Exemplo de resposta:
-```json
-{
-    "id": "3d34c216-0e60-4a7e-89e6-f0fe8050d883",
-    "name": "Ajuste de comprimento",
-    "cost": 25.0
-    "isActive": false
-}
-```
 </details>
 
-<details open>
+<details>
   <summary>
     <strong>Medida</strong>
   </summary>
@@ -525,7 +506,7 @@ Quando o docker terminar de subir todos os projetos, a API estará disponível p
 }
 ```
 
-#### Inativa um ajuste
+#### Inativa uma medida
 
 ```http
   DELETE http://localhost:8080/measures/{id}
@@ -540,17 +521,9 @@ Quando o docker terminar de subir todos os projetos, a API estará disponível p
   DELETE http://localhost:8080/measures/3d34c216-0e60-4a7e-89e6-f0fe8050d883
 ```
 
-##### Exemplo de resposta:
-```json
-{
-    "id": "3d34c216-0e60-4a7e-89e6-f0fe8050d883",
-    "name": "Cintura",
-    "isActive": false
-}
-```
 </details>
 
-<details open>
+<details>
   <summary>
     <strong>Pedido</strong>
   </summary>
@@ -948,53 +921,9 @@ Quando o docker terminar de subir todos os projetos, a API estará disponível p
   DELETE http://localhost:8080/orders/3d34c216-0e60-4a7e-89e6-f0fe8050d883
 ```
 
-##### Exemplo de resposta:
-```json
-{
-    "id": "c8907625-d06f-4d81-8b5e-66e33f443fb1",
-    "orderNumber": 29,
-    "createdAt": "2024-03-27T16:30:00",
-    "updatedAt": null,
-    "finishedAt": null,
-    "customer": {
-        "id": "55f490d7-02db-4e01-ae11-e8c28007f25a",
-        "name": "Bob Johnson",
-        "email": "bob@example.com",
-        "phone": "55566677788",
-        "isActive": true
-    },
-    "orderItems": [
-        {
-            "id": "d3d00277-fed2-4237-9266-f77e2b392411",
-            "type": "TAILORED",
-            "title": "Vestido Teste",
-            "description": "Vestido Teste",
-            "cost": 350.0,
-            "createdAt": "2024-03-27T16:30:00",
-            "dueDate": "2024-04-27T16:30:00",
-            "deliveredAt": null,
-            "isActive": false,
-            "customerMeasures": null
-        },
-        {
-            "id": "e2f17352-d1fe-43ba-9761-22612127ea86",
-            "type": "ADJUST",
-            "title": "Blusa Teste",
-            "description": "Blusa Teste",
-            "cost": 15.75,
-            "createdAt": "2024-03-27T16:30:00",
-            "dueDate": "2024-04-27T16:30:00",
-            "deliveredAt": null,
-            "isActive": false,
-            "customerAdjusts": null
-        }
-    ],
-    "isActive": false
-}
-```
 </details>
 
-<details open>
+<details>
   <summary>
     <strong>Item Pedido</strong>
   </summary>
@@ -1366,30 +1295,4 @@ Quando o docker terminar de subir todos os projetos, a API estará disponível p
   DELETE http://localhost:8080/orders/a34aa124-4375-41a5-b417-fb884d485af2/items/f94bdbfb-2e47-4fb4-8854-d60d25c10a33/deliver
 ```
 
-##### Exemplo de resposta:
-```json
-{
-    "id": "f94bdbfb-2e47-4fb4-8854-d60d25c10a33",
-    "type": "TAILORED",
-    "title": "Vestido Teste",
-    "description": "Vestido Teste",
-    "cost": 350.0,
-    "createdAt": "2024-03-27T16:30:00",
-    "dueDate": "2024-04-27T16:30:00",
-    "deliveredAt": "2024-04-27T16:30:00",
-    "isActive": true,
-    "customerMeasures": [
-        {
-            "id": "30f9f2a6-605a-4892-ba48-2718c39e15c6",
-            "measure": {
-                "id": "ef6a3397-bafb-4979-8e31-1468c8124188",
-                "name": "Largura dos ombros",
-                "isActive": true
-            },
-            "measurementValue": 38.0,
-            "isActive": true
-        }
-    ]
-}
-```
 </details>
