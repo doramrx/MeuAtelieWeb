@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,21 +28,14 @@ public class CustomerController {
 
     @GetMapping
     public ResponseEntity<Page<CustomerDTO>> findAll(
-            @PageableDefault(size = 5)
-            Pageable pageable,
-            @RequestParam(name = "name", required = false)
-            String name,
-            @RequestParam(name = "email", required = false)
-            String email,
-            @RequestParam(name = "phone", required = false)
-            String phone,
-            @RequestParam(name = "isActive", required = false)
-            Boolean isActive
-    ) {
+            @PageableDefault(size = 5, sort = { "name" }, direction = Sort.Direction.ASC) Pageable pageable,
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "phone", required = false) String phone,
+            @RequestParam(name = "isActive", required = false) Boolean isActive) {
         return ResponseEntity.ok().body(
                 service.findAll(pageable, name, email, phone, isActive)
-                        .map(customerConverter::toCustomerDTO)
-        );
+                        .map(customerConverter::toCustomerDTO));
     }
 
     @GetMapping("/{id}")
@@ -54,8 +48,7 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<CustomerDTO> addCustomer(
             @RequestBody @Valid SaveCustomerDTO saveCustomerDTO,
-            UriComponentsBuilder uriComponentsBuilder
-    ) {
+            UriComponentsBuilder uriComponentsBuilder) {
         CustomerDTO savedCustomer = customerConverter.toCustomerDTO(service.addCustomer(saveCustomerDTO));
 
         URI uri = uriComponentsBuilder
@@ -68,15 +61,10 @@ public class CustomerController {
 
     @PutMapping("/{id}")
     public ResponseEntity<CustomerDTO> updateCustomer(
-            @PathVariable
-            UUID id,
-            @RequestBody
-            @Valid
-            UpdateCustomerDTO updateCustomerDTO
-    ) {
+            @PathVariable UUID id,
+            @RequestBody @Valid UpdateCustomerDTO updateCustomerDTO) {
         CustomerDTO updatedCustomer = customerConverter.toCustomerDTO(
-                service.updateCustomer(id, updateCustomerDTO)
-        );
+                service.updateCustomer(id, updateCustomerDTO));
 
         return ResponseEntity.ok().body(updatedCustomer);
     }
