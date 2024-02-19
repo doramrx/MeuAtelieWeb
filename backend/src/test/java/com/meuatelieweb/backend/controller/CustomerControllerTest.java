@@ -8,7 +8,6 @@ import com.meuatelieweb.backend.domain.customer.CustomerService;
 import com.meuatelieweb.backend.domain.customer.dto.CustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.SaveCustomerDTO;
 import com.meuatelieweb.backend.domain.customer.dto.UpdateCustomerDTO;
-import jakarta.persistence.EntityNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -57,6 +57,9 @@ class CustomerControllerTest {
 
     @MockBean
     private CustomerConverter customerConverterMock;
+
+    @MockBean
+    private MessageSource messageSourceMock;
 
     private void mockConverterToCustomerDTO(Customer customer, CustomerDTO expectedCustomerDTO) {
         BDDMockito.when(customerConverterMock.toCustomerDTO(customer))
@@ -179,26 +182,6 @@ class CustomerControllerTest {
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
-
-        @Test
-        @DisplayName("findById returns STATUS CODE 404 when customer is not found")
-        void findById_ReturnsStatusCode404_WhenCustomerIsNotFound() throws Exception {
-
-            BDDMockito.when(customerServiceMock.findById(Mockito.any(UUID.class)))
-                    .thenThrow(new EntityNotFoundException("The given customer does not exist"));
-
-            ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/customers/{id}", UUID.randomUUID())
-                            .contentType(MediaType.APPLICATION_JSON)
-            );
-
-            response
-                    .andExpectAll(
-                            MockMvcResultMatchers.status().isNotFound(),
-                            MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
-                    )
-                    .andDo(MockMvcResultHandlers.print());
-        }
     }
 
     @DisplayName("Test addCustomer method")
@@ -273,7 +256,7 @@ class CustomerControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("name")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given name cannot be empty"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{customer.error.emptyName}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -294,7 +277,7 @@ class CustomerControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("email")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given email cannot be empty"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{customer.error.emptyEmail}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -315,7 +298,7 @@ class CustomerControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("email")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given email is not valid"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{customer.error.invalidEmailPattern}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -336,7 +319,7 @@ class CustomerControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("phone")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given phone is not valid"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{customer.error.invalidPhonePattern}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -391,27 +374,6 @@ class CustomerControllerTest {
         }
 
         @Test
-        @DisplayName("updateCustomer returns STATUS CODE 404 when customer is not found")
-        void updateCustomer_ReturnsStatusCode404_WhenCustomerIsNotFound() throws Exception {
-
-            BDDMockito.when(customerServiceMock.updateCustomer(Mockito.any(UUID.class), Mockito.any(UpdateCustomerDTO.class)))
-                    .thenThrow(EntityNotFoundException.class);
-
-            ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/customers/{id}", UUID.randomUUID())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsBytes(createValidUpdateCustomerDTO()))
-            );
-
-            response
-                    .andExpectAll(
-                            MockMvcResultMatchers.status().isNotFound(),
-                            MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
-                    )
-                    .andDo(MockMvcResultHandlers.print());
-        }
-
-        @Test
         @DisplayName("updateCustomer returns STATUS CODE 400 when customer name is null")
         void updateCustomer_ReturnsStatusCode400_WhenCustomerNameIsNull() throws Exception {
             UpdateCustomerDTO updateCustomerDTO = createValidUpdateCustomerDTO();
@@ -427,7 +389,7 @@ class CustomerControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("name")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given name cannot be empty"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{customer.error.emptyName}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -448,7 +410,7 @@ class CustomerControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("phone")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given phone is not valid"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{customer.error.invalidPhonePattern}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }

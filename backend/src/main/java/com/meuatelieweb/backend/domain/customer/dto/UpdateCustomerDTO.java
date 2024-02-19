@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UpdateCustomerDTO {
 
-    @NotBlank(message = "The given name cannot be empty")
+    @NotBlank(message = "{customer.error.emptyName}")
     private String name;
 
-    @Pattern(regexp = "\\d{11}", message = "The given phone is not valid")
+    @Pattern(regexp = "\\d{11}", message = "{customer.error.invalidPhonePattern}")
     private String phone;
 }

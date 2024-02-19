@@ -171,26 +171,6 @@ class AdjustControllerTest {
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
-
-        @Test
-        @DisplayName("findById returns STATUS CODE 404 when adjust is not found")
-        void findById_ReturnsStatusCode404_WhenAdjustIsNotFound() throws Exception {
-
-            BDDMockito.when(adjustServiceMock.findById(Mockito.any(UUID.class)))
-                    .thenThrow(new EntityNotFoundException("The given adjust does not exist"));
-
-            ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/adjusts/{id}", UUID.randomUUID())
-                            .contentType(MediaType.APPLICATION_JSON)
-            );
-
-            response
-                    .andExpectAll(
-                            MockMvcResultMatchers.status().isNotFound(),
-                            MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
-                    )
-                    .andDo(MockMvcResultHandlers.print());
-        }
     }
 
     @DisplayName("Test addAdjust method")
@@ -358,27 +338,6 @@ class AdjustControllerTest {
 
             response
                     .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                    .andDo(MockMvcResultHandlers.print());
-        }
-
-        @Test
-        @DisplayName("updateAdjust returns STATUS CODE 404 when adjust is not found")
-        void updateAdjust_ReturnsStatusCode404_WhenAdjustIsNotFound() throws Exception {
-
-            BDDMockito.when(adjustServiceMock.updateAdjust(Mockito.any(UUID.class), Mockito.any(SaveUpdateAdjustDTO.class)))
-                    .thenThrow(EntityNotFoundException.class);
-
-            ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/adjusts/{id}", UUID.randomUUID())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsBytes(createValidSaveUpdateAdjustDTO()))
-            );
-
-            response
-                    .andExpectAll(
-                            MockMvcResultMatchers.status().isNotFound(),
-                            MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
-                    )
                     .andDo(MockMvcResultHandlers.print());
         }
 

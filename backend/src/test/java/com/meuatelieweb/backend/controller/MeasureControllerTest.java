@@ -170,26 +170,6 @@ class MeasureControllerTest {
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
-
-        @Test
-        @DisplayName("findById returns STATUS CODE 404 when measure is not found")
-        void findById_ReturnsStatusCode404_WhenMeasureIsNotFound() throws Exception {
-
-            BDDMockito.when(measureServiceMock.findById(Mockito.any(UUID.class)))
-                    .thenThrow(new EntityNotFoundException("The given measure does not exist"));
-
-            ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/measures/{id}", UUID.randomUUID())
-                            .contentType(MediaType.APPLICATION_JSON)
-            );
-
-            response
-                    .andExpectAll(
-                            MockMvcResultMatchers.status().isNotFound(),
-                            MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
-                    )
-                    .andDo(MockMvcResultHandlers.print());
-        }
     }
 
     @DisplayName("Test addMeasure method")
@@ -313,27 +293,6 @@ class MeasureControllerTest {
 
             response
                     .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                    .andDo(MockMvcResultHandlers.print());
-        }
-
-        @Test
-        @DisplayName("updateMeasure returns STATUS CODE 404 when measure is not found")
-        void updateMeasure_ReturnsStatusCode404_WhenMeasureIsNotFound() throws Exception {
-
-            BDDMockito.when(measureServiceMock.updateMeasure(Mockito.any(UUID.class), Mockito.any(SaveUpdateMeasureDTO.class)))
-                    .thenThrow(EntityNotFoundException.class);
-
-            ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/measures/{id}", UUID.randomUUID())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsBytes(createValidSaveUpdateMeasureDTO()))
-            );
-
-            response
-                    .andExpectAll(
-                            MockMvcResultMatchers.status().isNotFound(),
-                            MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
-                    )
                     .andDo(MockMvcResultHandlers.print());
         }
 

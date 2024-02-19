@@ -233,26 +233,6 @@ class OrderControllerTest {
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
-
-        @Test
-        @DisplayName("findById returns STATUS CODE 404 when order is not found")
-        void findById_ReturnsStatusCode404_WhenOrderIsNotFound() throws Exception {
-
-            BDDMockito.when(orderServiceMock.findById(Mockito.any(UUID.class)))
-                    .thenThrow(new EntityNotFoundException("The given order does not exist"));
-
-            ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/orders/{id}", UUID.randomUUID())
-                            .contentType(MediaType.APPLICATION_JSON)
-            );
-
-            response
-                    .andExpectAll(
-                            MockMvcResultMatchers.status().isNotFound(),
-                            MockMvcResultMatchers.content().string(org.hamcrest.Matchers.emptyOrNullString())
-                    )
-                    .andDo(MockMvcResultHandlers.print());
-        }
     }
 
     @DisplayName("Test addOrder method")

@@ -12,6 +12,7 @@ import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,6 +39,9 @@ class CustomerServiceTest {
 
     @Mock
     private CustomerRepository customerRepositoryMock;
+
+    @Mock
+    private MessageSource messageSourceMock;
 
     @DisplayName("Test findAll method")
     @Nested
@@ -110,10 +115,14 @@ class CustomerServiceTest {
         @Test
         @DisplayName("findById throws EntityNotFoundException when customer is not found")
         void findById_ThrowsEntityNotFoundException_WhenCustomerIsNotFound() {
+            String messageKey = "customer.error.doesNotExist";
+
             this.mockRepositoryFindById(null);
 
-            assertThrows(EntityNotFoundException.class,
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                     () -> customerService.findById(UUID.randomUUID()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
@@ -155,8 +164,12 @@ class CustomerServiceTest {
         void findByIdAndIsActiveTrue_ThrowsEntityNotFoundException_WhenCustomerIsNotFound() {
             this.mockRepositoryFindByIdAndIsActiveTrue(null);
 
+            String messageKey = "customer.error.inactiveCustomer";
+
             assertThrows(EntityNotFoundException.class,
                     () -> customerService.findByIdAndIsActiveTrue(UUID.randomUUID()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
@@ -199,49 +212,69 @@ class CustomerServiceTest {
         @Test
         @DisplayName("addCustomer throws IllegalArgumentException when customer name is null")
         void addCustomer_ThrowsIllegalArgumentException_WhenCustomerNameIsNull() {
+            String messageKey = "customer.error.emptyName";
+
             SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
             saveCustomerDTO.setName(null);
 
             assertThrows(IllegalArgumentException.class,
                     () -> customerService.addCustomer(saveCustomerDTO));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("addCustomer throws IllegalArgumentException when customer email is null")
         void addCustomer_ThrowsIllegalArgumentException_WhenCustomerEmailIsNull() {
+            String messageKey = "customer.error.emptyEmail";
+
             SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
             saveCustomerDTO.setEmail(null);
 
             assertThrows(IllegalArgumentException.class,
                     () -> customerService.addCustomer(saveCustomerDTO));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("addCustomer throws DuplicateKeyException when customer email already exists")
         void addCustomer_ThrowsDuplicateKeyException_WhenCustomerEmailAlreadyExists() {
+            String messageKey = "customer.error.emailAlreadyInUse";
+
             BDDMockito.when(customerRepositoryMock.existsByEmail(anyString())).thenReturn(true);
 
             assertThrows(DuplicateKeyException.class,
                     () -> customerService.addCustomer(createValidSaveCustomerDTO()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("addCustomer throws IllegalArgumentException when customer phone is not valid")
         void addCustomer_ThrowsIllegalArgumentException_WhenCustomerPhoneIsNotValid() {
+            String messageKey = "customer.error.invalidPhonePattern";
+
             SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
             saveCustomerDTO.setPhone("abc123");
 
             assertThrows(IllegalArgumentException.class,
                     () -> customerService.addCustomer(saveCustomerDTO));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("addCustomer throws DuplicateKeyException when customer phone already exists")
         void addCustomer_ThrowsDuplicateKeyException_WhenCustomerPhoneAlreadyExists() {
+            String messageKey = "customer.error.phoneAlreadyInUse";
+
             BDDMockito.when(customerRepositoryMock.existsByPhone(anyString())).thenReturn(true);
 
             assertThrows(DuplicateKeyException.class,
                     () -> customerService.addCustomer(createValidSaveCustomerDTO()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
     }
 
@@ -290,16 +323,20 @@ class CustomerServiceTest {
         @Test
         @DisplayName("updateCustomer throws EntityNotFoundException when customer does not exist")
         void updateCustomer_ThrowsEntityNotFoundException_WhenCustomerDoesNotExist() {
+            String messageKey = "customer.error.customerDoesNotExistOrIsInactive";
 
             this.mockRepositoryFindByIdAndIsActiveTrue(null);
 
             assertThrows(EntityNotFoundException.class,
                     () -> customerService.updateCustomer(UUID.randomUUID(), createValidUpdateCustomerDTO()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("updateCustomer throws DuplicateKeyException when phone already exists")
         void updateCustomer_ThrowsDuplicateKeyException_WhenPhoneAlreadyExists() {
+            String messageKey = "customer.error.phoneAlreadyInUse";
 
             this.mockRepositoryFindByIdAndIsActiveTrue(createValidCustomer());
 
@@ -308,11 +345,14 @@ class CustomerServiceTest {
 
             assertThrows(DuplicateKeyException.class,
                     () -> customerService.updateCustomer(UUID.randomUUID(), createValidUpdateCustomerDTO()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("updateCustomer throws IllegalArgumentException when phone is not valid")
         void updateCustomer_ThrowsIllegalArgumentException_WhenPhoneIsNotValid() {
+            String messageKey = "customer.error.invalidPhonePattern";
 
             this.mockRepositoryFindByIdAndIsActiveTrue(createValidCustomer());
 
@@ -321,6 +361,8 @@ class CustomerServiceTest {
 
             assertThrows(IllegalArgumentException.class,
                     () -> customerService.updateCustomer(UUID.randomUUID(), updateCustomerDTO));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
     }
 
@@ -345,11 +387,14 @@ class CustomerServiceTest {
         @Test
         @DisplayName("deleteCustomer throws EntityNotFoundException when customer does not exist or is already inactive")
         void deleteCustomer_ThrowsEntityNotFoundException_WhenCustomerDoesNotExistOrIsAlreadyInactive() {
+            String messageKey = "customer.error.customerDoesNotExistOrIsInactive";
 
             this.mockRepositoryExistsByIdAndIsActiveTrue(false);
 
             assertThrows(EntityNotFoundException.class,
                     () -> customerService.deleteCustomer(UUID.randomUUID()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
@@ -360,5 +405,11 @@ class CustomerServiceTest {
                     () -> customerService.deleteCustomer(null));
         }
 
+    }
+
+    private void mockGetMessage(String key) {
+        when(messageSourceMock.getMessage(
+                eq(key), eq(null), eq(Locale.getDefault()))
+        ).thenReturn("");
     }
 }

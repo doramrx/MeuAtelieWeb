@@ -14,13 +14,13 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SaveCustomerDTO {
 
-    @NotBlank(message = "The given name cannot be empty")
+    @NotBlank(message = "{customer.error.emptyName}")
     private String name;
 
-    @NotBlank(message = "The given email cannot be empty")
-    @Email(message = "The given email is not valid")
+    @NotBlank(message = "{customer.error.emptyEmail}")
+    @Email(message = "{customer.error.invalidEmailPattern}")
     private String email;
 
-    @Pattern(regexp = "\\d{11}", message = "The given phone is not valid")
+    @Pattern(regexp = "\\d{11}", message = "{customer.error.invalidPhonePattern}")
     private String phone;
 }
