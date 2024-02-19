@@ -13,4 +13,4 @@ WORKDIR /backend
 
 COPY --from=build-stage /build/target/backend-0.0.1-SNAPSHOT.jar /backend
 
-ENTRYPOINT ["java", "-jar", "backend-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar","-Duser.country=BR", "-Duser.language=pt", "backend-0.0.1-SNAPSHOT.jar"]
