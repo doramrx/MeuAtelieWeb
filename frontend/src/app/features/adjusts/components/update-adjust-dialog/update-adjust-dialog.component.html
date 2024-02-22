@@ -1,0 +1,33 @@
+<p-dialog
+  header="Editar Ajuste"
+  [visible]="isDialogVisible"
+  (visibleChange)="onCloseModal()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form class="flex flex-column gap-3" [formGroup]="updateFormGroup">
+    <app-input
+      [inputId]="'edit-adjust-dialog-name'"
+      [inputType]="'text'"
+      [inputFormControlName]="'name'"
+      [formGroup]="updateFormGroup"
+      [inputLabel]="'Nome'"
+    />
+    <app-input
+      [inputId]="'edit-adjust-dialog-cost'"
+      [inputType]="'number'"
+      [inputFormControlName]="'cost'"
+      [formGroup]="updateFormGroup"
+      [inputLabel]="'Custo'"
+    />
+    <app-button
+      [buttonClass]="'primary-button'"
+      [classList]="'form-button'"
+      [buttonText]="'Salvar'"
+      (onClick)="onUpdateAdjust()"
+      [type]="'submit'"
+      [disabled]="updateFormGroup.invalid"
+    />
+  </form>
+</p-dialog>
