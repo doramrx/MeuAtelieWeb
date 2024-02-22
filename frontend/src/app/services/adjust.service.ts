@@ -40,6 +40,10 @@ export class AdjustService {
     return this.http.put<AdjustDTO>(`${this.BASE_URL}/${id}`, dto);
   }
 
+  deleteAdjust(id: string): Observable<any> {
+    return this.http.delete(`${this.BASE_URL}/${id}`);
+  }
+
 }
 
 interface AdjustDTO {
