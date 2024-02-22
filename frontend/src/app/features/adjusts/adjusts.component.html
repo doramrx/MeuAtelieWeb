@@ -42,6 +42,7 @@
         />
         <app-button
           [buttonText]="'Inativar'"
+          (onClick)="showDeleteAdjustDialog(adjust.id)"
           [type]="'button'"
           [buttonClass]="'red-button'"
           [disabled]="!adjust.isActive"
@@ -70,6 +71,12 @@
   (onDialogVisibilityChange)="closeModal()"
   (onUpdateAdjust)="updateAdjust($event)"
   (onFetchAdjustError)="showToast($event)"
+/>
+
+<app-inactivate-adjust-dialog
+  [isDialogVisible]="isModalVisible('DELETE')"
+  (onDialogVisibilityChange)="closeModal()"
+  (onDeleteConfirmationEvent)="deleteAdjust()"
 />
 
 <p-toast></p-toast>

@@ -12,6 +12,7 @@ import { CostPipe } from '../../shared/pipes/cost.pipe';
 import { ToastModule } from 'primeng/toast';
 import { AddAdjustData, AddAdjustDialogComponent } from './components/add-adjust-dialog/add-adjust-dialog.component';
 import { UpdateAdjustDialogComponent, UpdateAdjustData } from './components/update-adjust-dialog/update-adjust-dialog.component';
+import { InactivateAdjustDialogComponent } from './components/inactivate-adjust-dialog/inactivate-adjust-dialog.component';
 
 @Component({
   selector: 'app-adjusts',
@@ -26,6 +27,7 @@ import { UpdateAdjustDialogComponent, UpdateAdjustData } from './components/upda
     ToastModule,
     AddAdjustDialogComponent,
     UpdateAdjustDialogComponent,
+    InactivateAdjustDialogComponent,
   ],
   providers: [MessageService],
   templateUrl: './adjusts.component.html',
@@ -194,6 +196,43 @@ export class AdjustsComponent implements OnInit {
         });
       },
     });
+  }
+
+  showDeleteAdjustDialog(id: string) {
+    this.activeModal = 'DELETE';
+    this.adjustId = id;
+  }
+
+  deleteAdjust() {
+    if (!this.adjustId) {
+      this.showToast({
+        severity: 'error',
+        summary: 'Erro',
+        detail: 'Não foi possível inativar o ajuste',
+      });
+      return;
+    }
+
+    this.adjustService
+      .deleteAdjust(this.adjustId)
+      .subscribe({
+        next: () => {
+          this.closeModal();
+          this.showToast({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Ajuste inativado com sucesso',
+          });
+          this.fetchAdjusts();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.showToast({
+            severity: 'error',
+            summary: 'Erro',
+            detail: error.error.details,
+          });
+        },
+      });
   }
 }
 
