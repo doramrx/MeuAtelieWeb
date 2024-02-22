@@ -1,17 +1,163 @@
+import { AdjustPage, AdjustService, SaveAdjustDTO, QueryParams } from '../../services/adjust.service';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { HeaderComponent } from '../../shared/components/header/header.component';
+import { ButtonComponent } from '../../shared/components/button/button.component';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+
+import { HttpErrorResponse } from '@angular/common/http';
+import { Message, MessageService } from 'primeng/api';
+import { AvailableFilters, FilterComponent } from './components/filter/filter.component';
+import { CostPipe } from '../../shared/pipes/cost.pipe';
+import { ToastModule } from 'primeng/toast';
+import { AddAdjustData, AddAdjustDialogComponent } from './components/add-adjust-dialog/add-adjust-dialog.component';
 
 @Component({
   selector: 'app-adjusts',
   standalone: true,
   imports: [
     CommonModule,
-    HeaderComponent
+    HeaderComponent,
+    FilterComponent,
+    ButtonComponent,
+    PaginatorModule,
+    CostPipe,
+    ToastModule,
+    AddAdjustDialogComponent,
   ],
+  providers: [MessageService],
   templateUrl: './adjusts.component.html',
   styleUrl: './adjusts.component.css'
 })
-export class AdjustsComponent {
+export class AdjustsComponent implements OnInit {
+  private adjustService: AdjustService = inject(AdjustService);
+  private messageService: MessageService = inject(MessageService);
 
+  private _activeFilters: AvailableFilters;
+  private _adjustPage?: AdjustPage;
+  private _currentPage: number;
+
+  public activeModal: AvailableModalsType | null;
+
+  constructor() {
+    this._activeFilters = {
+      name: null,
+      status: null
+    };
+    this._currentPage = 0;
+    this.activeModal = null;
+  }
+
+  ngOnInit(): void {
+    this.fetchAdjusts();
+  }
+
+  existAdjusts() {
+    return this._adjustPage && this._adjustPage.content.length > 0;
+  }
+
+  getAdjusts() {
+    if (this._adjustPage) {
+      return this._adjustPage.content;
+    }
+    return [];
+  }
+
+  onPageChange(paginatorState: PaginatorState) {
+    this._currentPage = paginatorState.page || 0;
+    this.fetchAdjusts();
+  }
+
+  getPageSize() {
+    if (this._adjustPage) {
+      return this._adjustPage.pageable.pageSize;
+    }
+    return 0;
+  }
+
+  getTotalRecords() {
+    if (this._adjustPage) {
+      return this._adjustPage.totalElements;
+    }
+    return 0;
+  }
+
+  showToast(message: Message) {
+    this.messageService.add(message);
+  }
+
+  applyFilters(applyedFilter: AvailableFilters) {
+    this._activeFilters = applyedFilter;
+    this.fetchAdjusts();
+  }
+
+  private fetchAdjusts() {
+    const params: QueryParams = {
+      page: this._currentPage,
+      name: this._activeFilters.name,
+      isActive: this._activeFilters.status,
+    };
+
+    this.adjustService.findAll(params).subscribe({
+      next: (adjustPage) => {
+        this._adjustPage = adjustPage;
+      },
+      error: (error: HttpErrorResponse) => {
+        this.showToast({
+          severity: 'error',
+          summary: 'Erro',
+          detail: error.error.details,
+        });
+      },
+    });
+  }
+
+  isModalVisible(type: AvailableModalsType) {
+    return this.activeModal !== null && this.activeModal === type
+      ? true
+      : false;
+  }
+
+  closeModal() {
+    this.activeModal = null;
+  }
+
+  showAddAdjustDialog() {
+    this.activeModal = 'ADD';
+  }
+
+  saveAdjust(adjustData: AddAdjustData) {
+    const saveAdjust: SaveAdjustDTO = {
+      name: adjustData.name,
+      cost: adjustData.cost,
+    };
+
+    this.adjustService.addAdjust(saveAdjust).subscribe({
+      next: () => {
+        this.closeModal();
+        this.showToast({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Ajuste cadastrado com sucesso',
+        });
+        this.fetchAdjusts();
+      },
+      error: (error: HttpErrorResponse) => {
+        console.error(error);
+        this.showToast({
+          severity: 'error',
+          summary: 'Erro',
+          detail: error.error.details,
+        });
+      },
+    });
+  }
 }
+
+enum AvailableModals {
+  ADD,
+  UPDATE,
+  DELETE,
+}
+
+type AvailableModalsType = keyof typeof AvailableModals;

@@ -1,0 +1,138 @@
+:host ::ng-deep .p-inputtext {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--input-color-v1);
+  outline: none;
+  box-shadow: none;
+  font-size: 1.3rem;
+}
+
+.form-button {
+  width: 100px;
+  margin: 0 auto;
+}
+
+main {
+  padding: 20px;
+}
+
+main > .add-button {
+  width: 190px;
+  margin-left: auto;
+}
+
+main #empty-list-message {
+  margin-top: 25px;
+  color: var(--secondary-grey);
+  text-align: center;
+  font-style: italic;
+}
+
+main ul {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+main ul li {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--border-card-color-v1);
+  border-radius: 10px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+  padding: 14px 16px;
+  align-items: center;
+  gap: 6px;
+}
+
+main ul li div {
+  flex: 2;
+  display: flex;
+  gap: 8px;
+  font-weight: 500;
+}
+
+main ul li div p:last-child {
+  font-weight: 300;
+}
+
+main ul li div:last-child {
+  flex: 1;
+  margin-top: 5px;
+  display: flex;
+  gap: 12px;
+}
+
+main .paginator-container {
+  margin-top: 22px;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-pages button {
+  font-size: 1.5rem;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-icon {
+  width: 16px;
+  height: 16px;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-message-icon {
+  margin-left: 6px;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-message-text .p-toast-summary {
+  font-size: 1.45rem;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-message-text .p-toast-detail {
+  font-size: 1.3rem;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-icon-close {
+  align-self: flex-start;
+  margin-top: 2px;
+  margin-right: 8px;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-icon-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+@media screen and (min-width: 570px) {
+
+  main {
+    margin-left: 250px;
+    padding: 40px 30px;
+  }
+}
+
+@media screen and (min-width: 900px) {
+
+  main ul li {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  main ul li div:not(:last-child) {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  main ul li div:last-child {
+    justify-content: end;
+  }
+}

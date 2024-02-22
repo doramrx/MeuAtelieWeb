@@ -1,1 +1,56 @@
 <app-header [selectedMenuOption]="'ADJUSTS'"></app-header>
+
+<app-filter
+  (onApplyFiltersEvent)="applyFilters($event)"
+  (onCleanFiltersEvent)="applyFilters($event)"
+/>
+
+<main>
+  <app-button
+    [buttonClass]="'primary-button'"
+    [className]="'add-button'"
+    [buttonText]="'ADICIONAR AJUSTE'"
+    (onClick)="showAddAdjustDialog()"
+    [type]="'button'"
+  />
+  <p id="empty-list-message" *ngIf="!existAdjusts()">
+    Nenhum ajuste foi encontrado.
+  </p>
+  <ul *ngIf="existAdjusts()">
+    <li *ngFor="let adjust of getAdjusts()">
+      <div>
+        <p>Nome:</p>
+        <p>{{ adjust.name }}</p>
+      </div>
+      <div>
+        <p>Custo:</p>
+        <p *ngIf="adjust.cost !== null">
+          {{ adjust.cost | costFormatter }}
+        </p>
+      </div>
+      <div>
+        <p>Status:</p>
+        <p>{{ adjust.isActive ? "Ativo" : "Inativo" }}</p>
+      </div>
+      <div>
+        <button>editar</button>
+        <button>inativar</button>
+      </div>
+    </li>
+  </ul>
+  <div class="paginator-container">
+    <p-paginator
+      (onPageChange)="onPageChange($event)"
+      [rows]="getPageSize()"
+      [totalRecords]="getTotalRecords()"
+    ></p-paginator>
+  </div>
+</main>
+
+<app-add-adjust-dialog
+  [isDialogVisible]="isModalVisible('ADD')"
+  (onDialogVisibilityChange)="closeModal()"
+  (onSaveAdjust)="saveAdjust($event)"
+/>
+
+<p-toast></p-toast>
