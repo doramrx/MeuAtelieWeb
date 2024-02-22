@@ -19,7 +19,7 @@ main {
   padding: 20px;
 }
 
-main > .add-customer-button {
+main > .add-button {
   width: 190px;
   margin-left: auto;
 }
@@ -135,6 +135,4 @@ main .paginator-container {
   main ul li div:last-child {
     justify-content: end;
   }
-
-
 }
