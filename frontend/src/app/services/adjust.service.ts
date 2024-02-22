@@ -28,8 +28,16 @@ export class AdjustService {
     return this.http.get<AdjustPage>(this.BASE_URL, { params: httpParams });
   }
 
+  findById(id: string): Observable<AdjustDTO> {
+    return this.http.get<AdjustDTO>(`${this.BASE_URL}/${id}`);
+  }
+
   addAdjust(dto: SaveAdjustDTO): Observable<AdjustDTO> {
     return this.http.post<AdjustDTO>(this.BASE_URL, dto);
+  }
+
+  updateAdjust(id: string, dto: UpdateAdjustDTO): Observable<AdjustDTO> {
+    return this.http.put<AdjustDTO>(`${this.BASE_URL}/${id}`, dto);
   }
 
 }
@@ -44,6 +52,11 @@ interface AdjustDTO {
 export interface SaveAdjustDTO {
   name: string | null;
   cost: number | null;
+}
+
+export interface UpdateAdjustDTO {
+  name: string;
+  cost: number;
 }
 
 export interface AdjustPage {
