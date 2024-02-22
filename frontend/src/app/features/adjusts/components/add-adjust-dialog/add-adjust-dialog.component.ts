@@ -7,7 +7,6 @@ import {
 } from '@angular/forms';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { InputMaskModule } from 'primeng/inputmask';
 import { DialogModule } from 'primeng/dialog';
 
 @Component({
@@ -18,7 +17,6 @@ import { DialogModule } from 'primeng/dialog';
     DialogModule,
     InputComponent,
     ButtonComponent,
-    InputMaskModule,
   ],
   templateUrl: './add-adjust-dialog.component.html',
   styleUrls: [
