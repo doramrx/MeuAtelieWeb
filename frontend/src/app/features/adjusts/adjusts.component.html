@@ -33,8 +33,19 @@
         <p>{{ adjust.isActive ? "Ativo" : "Inativo" }}</p>
       </div>
       <div>
-        <button>editar</button>
-        <button>inativar</button>
+        <app-button
+          [buttonText]="'Editar'"
+          (onClick)="showUpdateAdjustDialog(adjust.id)"
+          [type]="'button'"
+          [buttonClass]="'blue-button'"
+          [disabled]="!adjust.isActive"
+        />
+        <app-button
+          [buttonText]="'Inativar'"
+          [type]="'button'"
+          [buttonClass]="'red-button'"
+          [disabled]="!adjust.isActive"
+        />
       </div>
     </li>
   </ul>
@@ -51,6 +62,14 @@
   [isDialogVisible]="isModalVisible('ADD')"
   (onDialogVisibilityChange)="closeModal()"
   (onSaveAdjust)="saveAdjust($event)"
+/>
+
+<app-update-adjust-dialog
+  [adjustId]="adjustId"
+  [isDialogVisible]="isModalVisible('UPDATE')"
+  (onDialogVisibilityChange)="closeModal()"
+  (onUpdateAdjust)="updateAdjust($event)"
+  (onFetchAdjustError)="showToast($event)"
 />
 
 <p-toast></p-toast>

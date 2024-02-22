@@ -1,4 +1,4 @@
-import { AdjustPage, AdjustService, SaveAdjustDTO, QueryParams } from '../../services/adjust.service';
+import { AdjustPage, AdjustService, SaveAdjustDTO, QueryParams, UpdateAdjustDTO } from '../../services/adjust.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { HeaderComponent } from '../../shared/components/header/header.component';
@@ -11,6 +11,7 @@ import { AvailableFilters, FilterComponent } from './components/filter/filter.co
 import { CostPipe } from '../../shared/pipes/cost.pipe';
 import { ToastModule } from 'primeng/toast';
 import { AddAdjustData, AddAdjustDialogComponent } from './components/add-adjust-dialog/add-adjust-dialog.component';
+import { UpdateAdjustDialogComponent, UpdateAdjustData } from './components/update-adjust-dialog/update-adjust-dialog.component';
 
 @Component({
   selector: 'app-adjusts',
@@ -24,6 +25,7 @@ import { AddAdjustData, AddAdjustDialogComponent } from './components/add-adjust
     CostPipe,
     ToastModule,
     AddAdjustDialogComponent,
+    UpdateAdjustDialogComponent,
   ],
   providers: [MessageService],
   templateUrl: './adjusts.component.html',
@@ -38,6 +40,7 @@ export class AdjustsComponent implements OnInit {
   private _currentPage: number;
 
   public activeModal: AvailableModalsType | null;
+  public adjustId?: string;
 
   constructor() {
     this._activeFilters = {
@@ -144,6 +147,46 @@ export class AdjustsComponent implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error(error);
+        this.showToast({
+          severity: 'error',
+          summary: 'Erro',
+          detail: error.error.details,
+        });
+      },
+    });
+  }
+
+  showUpdateAdjustDialog(id: string) {
+    this.activeModal = 'UPDATE';
+    this.adjustId = id;
+  }
+
+  updateAdjust(adjustData: UpdateAdjustData) {
+    if (!adjustData.id) {
+      this.showToast({
+        severity: 'error',
+        summary: 'Erro',
+        detail: 'Não foi possível atualizar os dados do ajuste',
+      });
+      return;
+    }
+
+    const updateAdjust: UpdateAdjustDTO = {
+      name: adjustData.name || '',
+      cost: adjustData.cost || 0,
+    };
+
+    this.adjustService.updateAdjust(adjustData.id, updateAdjust).subscribe({
+      next: () => {
+        this.closeModal();
+        this.showToast({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Ajuste atualizado com sucesso',
+        });
+        this.fetchAdjusts();
+      },
+      error: (error: HttpErrorResponse) => {
         this.showToast({
           severity: 'error',
           summary: 'Erro',
