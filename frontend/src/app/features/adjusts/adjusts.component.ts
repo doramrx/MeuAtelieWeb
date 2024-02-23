@@ -1,5 +1,5 @@
 import { AdjustPage, AdjustService, SaveAdjustDTO, QueryParams, UpdateAdjustDTO } from '../../services/adjust.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -8,7 +8,6 @@ import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Message, MessageService } from 'primeng/api';
 import { AvailableFilters, FilterComponent } from './components/filter/filter.component';
-import { CostPipe } from '../../shared/pipes/cost.pipe';
 import { ToastModule } from 'primeng/toast';
 import { AddAdjustData, AddAdjustDialogComponent } from './components/add-adjust-dialog/add-adjust-dialog.component';
 import { UpdateAdjustDialogComponent, UpdateAdjustData } from './components/update-adjust-dialog/update-adjust-dialog.component';
@@ -19,11 +18,11 @@ import { InactivateAdjustDialogComponent } from './components/inactivate-adjust-
   standalone: true,
   imports: [
     CommonModule,
+    CurrencyPipe,
     HeaderComponent,
     FilterComponent,
     ButtonComponent,
     PaginatorModule,
-    CostPipe,
     ToastModule,
     AddAdjustDialogComponent,
     UpdateAdjustDialogComponent,

@@ -25,7 +25,7 @@
       <div>
         <p>Custo:</p>
         <p *ngIf="adjust.cost !== null">
-          {{ adjust.cost | costFormatter }}
+          {{ adjust.cost | currency : "BRL" : "symbol" : "1.2-2" }}
         </p>
       </div>
       <div>
