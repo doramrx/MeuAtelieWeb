@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SaveCustomerDTO {
 
-    @NotBlank(message = "{customer.error.emptyName}")
+    @NotBlank(message = "{shared.error.emptyName}")
     private String name;
 
     @NotBlank(message = "{customer.error.emptyEmail}")

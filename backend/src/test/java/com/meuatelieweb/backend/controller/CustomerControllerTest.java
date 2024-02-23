@@ -256,7 +256,7 @@ class CustomerControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("name")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{customer.error.emptyName}"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{shared.error.emptyName}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -389,7 +389,7 @@ class CustomerControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("name")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{customer.error.emptyName}"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{shared.error.emptyName}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }

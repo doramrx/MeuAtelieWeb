@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SaveUpdateAdjustDTO {
 
-    @NotBlank(message = "The given name cannot be empty")
+    @NotBlank(message = "{shared.error.emptyName}")
     private String name;
 
-    @Positive(message = "The given cost cannot be lesser than 0.01")
-    @Digits(integer = 4, fraction = 2, message = "The cost must have up to 4 digits in total, with 2 decimals")
+    @Positive(message = "{shared.error.invalidCost}")
+    @Digits(integer = 4, fraction = 2, message = "{shared.error.invalidFormatCost}")
     private Double cost;
 }

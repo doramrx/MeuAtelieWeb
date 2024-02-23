@@ -212,7 +212,7 @@ class CustomerServiceTest {
         @Test
         @DisplayName("addCustomer throws IllegalArgumentException when customer name is null")
         void addCustomer_ThrowsIllegalArgumentException_WhenCustomerNameIsNull() {
-            String messageKey = "customer.error.emptyName";
+            String messageKey = "shared.error.emptyName";
 
             SaveCustomerDTO saveCustomerDTO = createValidSaveCustomerDTO();
             saveCustomerDTO.setName(null);
