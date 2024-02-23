@@ -14,13 +14,18 @@
       [formGroup]="addFormGroup"
       [inputLabel]="'Nome'"
     />
-    <app-input
-      [inputId]="'new-adjust-dialog-cost'"
-      [inputType]="'number'"
-      [inputFormControlName]="'cost'"
-      [formGroup]="addFormGroup"
-      [inputLabel]="'Custo'"
-    />
+    <div>
+      <label for="cost">Custo</label>
+      <p-inputNumber
+        inputId="currency-br"
+        mode="currency"
+        currency="BRL"
+        locale="pt-BR"
+        formControlName="cost"
+        [formGroup]="addFormGroup"
+        label="'Custo'"
+      />
+    </div>
     <app-button
       [buttonClass]="'primary-button'"
       [classList]="'form-button'"

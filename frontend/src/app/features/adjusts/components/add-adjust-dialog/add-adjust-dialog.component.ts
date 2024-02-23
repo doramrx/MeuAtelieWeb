@@ -8,6 +8,7 @@ import {
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { DialogModule } from 'primeng/dialog';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 @Component({
   selector: 'app-add-adjust-dialog',
@@ -17,11 +18,13 @@ import { DialogModule } from 'primeng/dialog';
     DialogModule,
     InputComponent,
     ButtonComponent,
+    InputNumberModule,
   ],
   templateUrl: './add-adjust-dialog.component.html',
   styleUrls: [
     './add-adjust-dialog.component.css',
     '/src/app/shared/styles/dialog.css',
+    '/src/app/shared/styles/input-number.css',
   ]
 })
 export class AddAdjustDialogComponent {

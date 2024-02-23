@@ -6,6 +6,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DialogModule } from 'primeng/dialog';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 @Component({
   selector: 'app-update-adjust-dialog',
@@ -15,11 +16,13 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
     DialogModule,
     InputComponent,
     ButtonComponent,
+    InputNumberModule,
   ],
   templateUrl: './update-adjust-dialog.component.html',
   styleUrls: [
     './update-adjust-dialog.component.css',
     '/src/app/shared/styles/dialog.css',
+    '/src/app/shared/styles/input-number.css',
   ]
 })
 export class UpdateAdjustDialogComponent implements OnChanges {
