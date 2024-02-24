@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UpdateCustomerDTO {
 
-    @NotBlank(message = "{customer.error.emptyName}")
+    @NotBlank(message = "{shared.error.emptyName}")
     private String name;
 
     @Pattern(regexp = "\\d{11}", message = "{customer.error.invalidPhonePattern}")

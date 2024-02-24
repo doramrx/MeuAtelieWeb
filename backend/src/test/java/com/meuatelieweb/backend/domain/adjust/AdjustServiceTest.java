@@ -11,16 +11,14 @@ import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.meuatelieweb.backend.util.AdjustCreator.createValidAdjust;
 import static com.meuatelieweb.backend.util.AdjustCreator.createValidSaveUpdateAdjustDTO;
@@ -38,6 +36,9 @@ class AdjustServiceTest {
 
     @Mock
     private AdjustRepository adjustRepositoryMock;
+
+    @Mock
+    private MessageSource messageSourceMock;
 
     @DisplayName("Test findAll method")
     @Nested
@@ -109,10 +110,14 @@ class AdjustServiceTest {
         @Test
         @DisplayName("findById throws EntityNotFoundException when adjust is not found")
         void findById_ThrowsEntityNotFoundException_WhenAdjustIsNotFound() {
+            String messageKey = "adjust.error.doesNotExist";
+
             this.mockRepositoryFindById(null);
 
             assertThrows(EntityNotFoundException.class,
                     () -> adjustService.findById(UUID.randomUUID()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
@@ -154,40 +159,56 @@ class AdjustServiceTest {
         @Test
         @DisplayName("addAdjust throws IllegalArgumentException when adjust name is null")
         void addAdjust_ThrowsIllegalArgumentException_WhenAdjustNameIsNull() {
+            String messageKey = "shared.error.emptyName";
+
             SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
             saveUpdateAdjustDTO.setName(null);
 
             assertThrows(IllegalArgumentException.class,
                     () -> adjustService.addAdjust(saveUpdateAdjustDTO));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("addAdjust throws DuplicateKeyException when adjust name already exists")
         void addAdjust_ThrowsDuplicateKeyException_WhenAdjustNameAlreadyExists() {
+            String messageKey = "adjust.error.nameAlreadyInUse";
+
             BDDMockito.when(adjustRepositoryMock.existsByName(anyString())).thenReturn(true);
 
             assertThrows(DuplicateKeyException.class,
                     () -> adjustService.addAdjust(createValidSaveUpdateAdjustDTO()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("addAdjust throws IllegalArgumentException when adjust cost is null")
         void addAdjust_ThrowsIllegalArgumentException_WhenAdjustCostIsNull() {
+            String messageKey = "shared.error.emptyCost";
+
             SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
             saveUpdateAdjustDTO.setCost(null);
 
             assertThrows(IllegalArgumentException.class,
                     () -> adjustService.addAdjust(saveUpdateAdjustDTO));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("addAdjust throws IllegalArgumentException when adjust cost is lesser than 0.01 cent")
         void addAdjust_ThrowsIllegalArgumentException_WhenAdjustCostIsLesserThan1Cent() {
+            String messageKey = "shared.error.invalidCost";
+
             SaveUpdateAdjustDTO saveUpdateAdjustDTO = createValidSaveUpdateAdjustDTO();
             saveUpdateAdjustDTO.setCost(0.0);
 
             assertThrows(IllegalArgumentException.class,
                     () -> adjustService.addAdjust(saveUpdateAdjustDTO));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
     }
 
@@ -234,18 +255,22 @@ class AdjustServiceTest {
         }
 
         @Test
-        @DisplayName("updateAdjust throws EntityNotFoundException when adjust does not exist")
+        @DisplayName("updateAdjust throws EntityNotFoundException when adjust does not exist or is already inactive")
         void updateAdjust_ThrowsEntityNotFoundException_WhenAdjustDoesNotExist() {
+            String messageKey = "adjust.error.adjustDoesNotExistOrIsInactive";
 
             this.mockRepositoryFindByIdAndIsActiveTrue(null);
 
             assertThrows(EntityNotFoundException.class,
                     () -> adjustService.updateAdjust(UUID.randomUUID(), createValidSaveUpdateAdjustDTO()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("updateAdjust throws DuplicateKeyException when adjust name already exists")
         void updateAdjust_ThrowsDuplicateKeyException_WhenAdjustNameAlreadyExists() {
+            String messageKey = "adjust.error.nameAlreadyInUse";
 
             this.mockRepositoryFindByIdAndIsActiveTrue(createValidAdjust());
 
@@ -254,11 +279,14 @@ class AdjustServiceTest {
 
             assertThrows(DuplicateKeyException.class,
                     () -> adjustService.updateAdjust(UUID.randomUUID(), createValidSaveUpdateAdjustDTO()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("updateAdjust throws IllegalArgumentException when adjust cost is null")
         void updateAdjust_ThrowsIllegalArgumentException_WhenAdjustCostIsNull() {
+            String messageKey = "shared.error.emptyCost";
 
             this.mockRepositoryFindByIdAndIsActiveTrue(createValidAdjust());
 
@@ -267,11 +295,14 @@ class AdjustServiceTest {
 
             assertThrows(IllegalArgumentException.class,
                     () -> adjustService.updateAdjust(UUID.randomUUID(), saveUpdateAdjustDTO));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("updateAdjust throws IllegalArgumentException when adjust cost is lesser than 0.01 cent")
         void updateAdjust_ThrowsIllegalArgumentException_WhenAdjustCostIsLesserThan1Cent() {
+            String messageKey = "shared.error.invalidCost";
 
             this.mockRepositoryFindByIdAndIsActiveTrue(createValidAdjust());
 
@@ -280,6 +311,8 @@ class AdjustServiceTest {
 
             assertThrows(IllegalArgumentException.class,
                     () -> adjustService.updateAdjust(UUID.randomUUID(), saveUpdateAdjustDTO));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
     }
 
@@ -304,11 +337,14 @@ class AdjustServiceTest {
         @Test
         @DisplayName("deleteAdjust throws EntityNotFoundException when adjust does not exist or is already inactive")
         void deleteAdjust_ThrowsEntityNotFoundException_WhenAdjustDoesNotExistOrIsAlreadyInactive() {
+            String messageKey = "adjust.error.adjustDoesNotExistOrIsInactive";
 
             this.mockRepositoryExistsByIdAndIsActiveTrue(false);
 
             assertThrows(EntityNotFoundException.class,
                     () -> adjustService.deleteAdjust(UUID.randomUUID()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
@@ -340,28 +376,28 @@ class AdjustServiceTest {
         @Test
         @DisplayName("getAdjusts throws EntityNotFoundException when adjusts are not found")
         void getAdjusts_ThrowsEntityNotFoundException_WhenAdjustsAreNotFound() {
-            String expectedMessage = "The given adjust does not exist or is already inactive";
+            String messageKey = "adjust.error.adjustDoesNotExistOrIsInactive";
             this.mockRepositoryFindByIdInAndIsActiveTrue(null);
 
-            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+            assertThrows(EntityNotFoundException.class,
                     () -> adjustService.getAdjusts(Set.of(UUID.randomUUID())));
 
-            assertEquals(expectedMessage, exception.getMessage());
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("getAdjusts throws IllegalArgumentException when some of the given id adjusts are invalid")
         void getAdjusts_ThrowsIllegalArgumentException_WhenSomeOfTheGivenIdAdjustsAreInvalid() {
-            String expectedMessage = "Some of the given id adjusts are invalid";
+            String messageKey = "adjust.error.invalidIds";
 
             Set<Adjust> adjusts = Set.of(createValidAdjust());
 
             this.mockRepositoryFindByIdInAndIsActiveTrue(adjusts);
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            assertThrows(IllegalArgumentException.class,
                     () -> adjustService.getAdjusts(Set.of(UUID.randomUUID(), UUID.randomUUID())));
 
-            assertEquals(expectedMessage, exception.getMessage());
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
@@ -377,5 +413,11 @@ class AdjustServiceTest {
             verify(adjustsSpy, times(1)).size();
             verify(adjustRepositoryMock, times(1)).findByIdInAndIsActiveTrue(anySet());
         }
+    }
+
+    private void mockGetMessage(String key) {
+        when(messageSourceMock.getMessage(
+                eq(key), eq(null), eq(Locale.getDefault()))
+        ).thenReturn("");
     }
 }

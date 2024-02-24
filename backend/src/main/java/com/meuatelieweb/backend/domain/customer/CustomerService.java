@@ -65,7 +65,7 @@ public class CustomerService {
     private void validateSavingCustomerDTO(SaveCustomerDTO saveCustomerDTO) {
         if (saveCustomerDTO.getName() == null) {
             throw new IllegalArgumentException(
-                    this.getMessage("customer.error.emptyName")
+                    this.getMessage("shared.error.emptyName")
             );
         }
 

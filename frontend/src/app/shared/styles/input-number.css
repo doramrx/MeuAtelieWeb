@@ -1,0 +1,21 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+:host ::ng-deep p-inputnumber,
+:host ::ng-deep p-inputnumber span {
+  width: 100%;
+}
+
+:host ::ng-deep input#currency-br {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--input-color-v1);
+  outline: none;
+  box-shadow: none;
+  font-size: 1.3rem;
+}

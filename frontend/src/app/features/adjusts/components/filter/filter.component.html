@@ -1,0 +1,36 @@
+<aside>
+  <form class="flex flex-column gap-3" [formGroup]="filterFormGroup">
+    <button id="clean-filter" type="reset" (click)="notifyCleanFilters()">
+      Limpar
+    </button>
+
+    <label for="status">Status</label>
+    <div *ngFor="let status of adjustStatus" class="field-checkbox">
+      <p-radioButton
+        [inputId]="status.text"
+        [value]="status.key"
+        formControlName="status"
+      ></p-radioButton>
+      <label [for]="status.text" class="ml-1">{{ status.text }}</label>
+    </div>
+
+    <div class="form-input">
+      <label for="name">Nome</label>
+      <input
+        pInputText
+        id="name"
+        type="text"
+        placeholder="Buscar"
+        formControlName="name"
+      />
+    </div>
+
+    <app-button
+      [buttonClass]="'primary-button'"
+      [buttonText]="'FILTRAR'"
+      (onClick)="notifyApplyFilter()"
+      [classList]="'filter-form-button'"
+      [type]="'submit'"
+    />
+  </form>
+</aside>

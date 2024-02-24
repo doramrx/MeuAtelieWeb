@@ -1,4 +1,4 @@
-<app-header [selectedMenuOption]="'CUSTOMERS'"></app-header>
+<app-header [selectedMenuOption]="'ADJUSTS'"></app-header>
 
 <app-filter
   (onApplyFiltersEvent)="applyFilters($event)"
@@ -9,48 +9,43 @@
   <app-button
     [buttonClass]="'primary-button'"
     [className]="'add-button'"
-    [buttonText]="'ADICIONAR CLIENTE'"
-    (onClick)="showAddCustomerDialog()"
+    [buttonText]="'ADICIONAR AJUSTE'"
+    (onClick)="showAddAdjustDialog()"
     [type]="'button'"
   />
-  <p id="empty-list-message" *ngIf="!existCustomers()">
-    Nenhum cliente foi encontrado.
+  <p id="empty-list-message" *ngIf="!existAdjusts()">
+    Nenhum ajuste foi encontrado.
   </p>
-  <ul *ngIf="existCustomers()">
-    <li *ngFor="let customer of getCustomers()">
+  <ul *ngIf="existAdjusts()">
+    <li *ngFor="let adjust of getAdjusts()">
       <div>
         <p>Nome:</p>
-        <p>{{ customer.name }}</p>
+        <p>{{ adjust.name }}</p>
       </div>
       <div>
-        <p>Email:</p>
-        <p>{{ customer.email }}</p>
-      </div>
-      <div>
-        <p>Telefone:</p>
-        <p *ngIf="customer.phone !== null">
-          {{ customer.phone | phoneFormatter }}
+        <p>Custo:</p>
+        <p *ngIf="adjust.cost !== null">
+          {{ adjust.cost | currency : "BRL" : "symbol" : "1.2-2" }}
         </p>
-        <p *ngIf="customer.phone === null">-</p>
       </div>
       <div>
         <p>Status:</p>
-        <p>{{ customer.isActive ? "Ativo" : "Inativo" }}</p>
+        <p>{{ adjust.isActive ? "Ativo" : "Inativo" }}</p>
       </div>
       <div>
         <app-button
           [buttonText]="'Editar'"
-          (onClick)="showUpdateCustomerDialog(customer.id)"
+          (onClick)="showUpdateAdjustDialog(adjust.id)"
           [type]="'button'"
           [buttonClass]="'blue-button'"
-          [disabled]="!customer.isActive"
+          [disabled]="!adjust.isActive"
         />
         <app-button
           [buttonText]="'Inativar'"
-          (onClick)="showDeleteCustomerDialog(customer.id)"
+          (onClick)="showDeleteAdjustDialog(adjust.id)"
           [type]="'button'"
           [buttonClass]="'red-button'"
-          [disabled]="!customer.isActive"
+          [disabled]="!adjust.isActive"
         />
       </div>
     </li>
@@ -64,24 +59,24 @@
   </div>
 </main>
 
-<app-add-customer-dialog
+<app-add-adjust-dialog
   [isDialogVisible]="isModalVisible('ADD')"
   (onDialogVisibilityChange)="closeModal()"
-  (onSaveCustomer)="saveCustomer($event)"
+  (onSaveAdjust)="saveAdjust($event)"
 />
 
-<app-update-customer-dialog
-  [customerId]="customerId"
+<app-update-adjust-dialog
+  [adjustId]="adjustId"
   [isDialogVisible]="isModalVisible('UPDATE')"
   (onDialogVisibilityChange)="closeModal()"
-  (onUpdateCustomer)="updateCustomer($event)"
-  (onFetchCustomerError)="showToast($event)"
+  (onUpdateAdjust)="updateAdjust($event)"
+  (onFetchAdjustError)="showToast($event)"
 />
 
-<app-inactivate-customer-dialog
+<app-inactivate-adjust-dialog
   [isDialogVisible]="isModalVisible('DELETE')"
   (onDialogVisibilityChange)="closeModal()"
-  (onDeleteConfirmationEvent)="deleteCustomer()"
+  (onDeleteConfirmationEvent)="deleteAdjust()"
 />
 
 <p-toast></p-toast>

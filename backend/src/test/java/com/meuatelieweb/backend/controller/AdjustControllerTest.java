@@ -7,7 +7,6 @@ import com.meuatelieweb.backend.domain.adjust.AdjustConverter;
 import com.meuatelieweb.backend.domain.adjust.AdjustService;
 import com.meuatelieweb.backend.domain.adjust.dto.AdjustDTO;
 import com.meuatelieweb.backend.domain.adjust.dto.SaveUpdateAdjustDTO;
-import jakarta.persistence.EntityNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -56,6 +56,9 @@ class AdjustControllerTest {
 
     @MockBean
     private AdjustService adjustServiceMock;
+
+    @MockBean
+    private MessageSource messageSourceMock;
 
     private void mockConverterToAdjustDTO(Adjust adjust, AdjustDTO adjustDTO) {
         BDDMockito.when(adjustConverterMock.toAdjustDTO(adjust))
@@ -245,7 +248,7 @@ class AdjustControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("name")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given name cannot be empty"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{shared.error.emptyName}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -266,7 +269,7 @@ class AdjustControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("cost")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given cost cannot be lesser than 0.01"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{shared.error.invalidCost}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -287,7 +290,7 @@ class AdjustControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("cost")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given cost cannot be lesser than 0.01"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{shared.error.invalidCost}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -357,7 +360,7 @@ class AdjustControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("name")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given name cannot be empty"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{shared.error.emptyName}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -378,7 +381,7 @@ class AdjustControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("cost")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given cost cannot be lesser than 0.01"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{shared.error.invalidCost}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -399,7 +402,7 @@ class AdjustControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("cost")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given cost cannot be lesser than 0.01"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{shared.error.invalidCost}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }

@@ -1,0 +1,38 @@
+<p-dialog
+  header="Novo Ajuste"
+  [visible]="isDialogVisible"
+  (visibleChange)="onCloseModal()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form class="flex flex-column gap-3" [formGroup]="addFormGroup">
+    <app-input
+      [inputId]="'new-adjust-dialog-name'"
+      [inputType]="'text'"
+      [inputFormControlName]="'name'"
+      [formGroup]="addFormGroup"
+      [inputLabel]="'Nome'"
+    />
+    <div>
+      <label for="cost">Custo</label>
+      <p-inputNumber
+        inputId="currency-br"
+        mode="currency"
+        currency="BRL"
+        locale="pt-BR"
+        formControlName="cost"
+        [formGroup]="addFormGroup"
+        label="'Custo'"
+      />
+    </div>
+    <app-button
+      [buttonClass]="'primary-button'"
+      [classList]="'form-button'"
+      [buttonText]="'Salvar'"
+      (onClick)="onSaveAdjust()"
+      [type]="'submit'"
+      [disabled]="addFormGroup.invalid"
+    />
+  </form>
+</p-dialog>
