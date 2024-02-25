@@ -1,62 +1,58 @@
-import { AdjustService } from './../../../../services/adjust.service';
+import { MeasureService } from '../../../../services/measure.service';
 
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { Message } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
-import { InputNumberModule } from 'primeng/inputnumber';
+import { Message } from 'primeng/api';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 @Component({
-  selector: 'app-update-adjust-dialog',
+  selector: 'app-update-measure-dialog',
   standalone: true,
   imports: [
     ReactiveFormsModule,
     DialogModule,
     InputComponent,
     ButtonComponent,
-    InputNumberModule,
   ],
-  templateUrl: './update-adjust-dialog.component.html',
+  templateUrl: './update-measure-dialog.component.html',
   styleUrls: [
-    './update-adjust-dialog.component.css',
+    './update-measure-dialog.component.css',
     '/src/app/shared/styles/dialog.css',
-    '/src/app/shared/styles/input-number.css',
   ]
 })
-export class UpdateAdjustDialogComponent implements OnChanges {
-  private adjustService: AdjustService = inject(AdjustService);
+export class UpdateMeasureDialogComponent implements OnChanges {
+  private measureService: MeasureService = inject(MeasureService);
   private _updateFormGroup: FormGroup<UpdateFormGroupFields>;
 
   @Input()
   public isDialogVisible: boolean;
 
   @Input()
-  public adjustId?: string;
+  public measureId?: string;
 
   @Output("onDialogVisibilityChange")
   public onDialogVisibilityChangeEvent = new EventEmitter();
 
-  @Output('onUpdateAdjust')
-  public onUpdateAdjustEvent: EventEmitter<UpdateAdjustData>;
+  @Output('onUpdateMeasure')
+  public onUpdateMeasureEvent: EventEmitter<UpdateMeasureData>;
 
-  @Output('onFetchAdjustError')
-  public onFetchAdjustErrorEvent: EventEmitter<Message>;
+  @Output('onFetchMeasureError')
+  public onFetchMeasureErrorEvent: EventEmitter<Message>;
 
   constructor() {
     this._updateFormGroup = new FormGroup<UpdateFormGroupFields>({
       id: new FormControl(null),
       name: new FormControl(null, [Validators.required]),
-      cost: new FormControl(null, [Validators.required]),
     });
 
-    this.onUpdateAdjustEvent = new EventEmitter();
+    this.onUpdateMeasureEvent = new EventEmitter();
     this.onDialogVisibilityChangeEvent = new EventEmitter();
-    this.onFetchAdjustErrorEvent = new EventEmitter();
+    this.onFetchMeasureErrorEvent = new EventEmitter();
 
     this.isDialogVisible = false;
   }
@@ -66,24 +62,23 @@ export class UpdateAdjustDialogComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    const adjustIdSimpleChange = changes['adjustId'];
+    const measureIdSimpleChange = changes['measureId'];
 
-    if (adjustIdSimpleChange && adjustIdSimpleChange.currentValue) {
-      this.fetchAdjust(adjustIdSimpleChange.currentValue);
+    if (measureIdSimpleChange && measureIdSimpleChange.currentValue) {
+      this.fetchMeasure(measureIdSimpleChange.currentValue);
     }
   }
 
-  private fetchAdjust(id: string) {
-    this.adjustService.findById(id).subscribe({
-      next: (adjustDTO) => {
+  private fetchMeasure(id: string) {
+    this.measureService.findById(id).subscribe({
+      next: (measureDTO) => {
         this._updateFormGroup.setValue({
-          id: adjustDTO.id,
-          name: adjustDTO.name,
-          cost: adjustDTO.cost,
+          id: measureDTO.id,
+          name: measureDTO.name,
         });
       },
       error: (error: HttpErrorResponse) => {
-        this.onFetchAdjustErrorEvent.emit({
+        this.onFetchMeasureErrorEvent.emit({
           severity: 'error',
           summary: 'Erro',
           detail: error.error.details,
@@ -96,23 +91,20 @@ export class UpdateAdjustDialogComponent implements OnChanges {
     this.onDialogVisibilityChangeEvent.emit();
   }
 
-  onUpdateAdjust() {
-    this.onUpdateAdjustEvent.emit({
+  onUpdateMeasure() {
+    this.onUpdateMeasureEvent.emit({
       id: this._updateFormGroup.value.id || null,
       name: this._updateFormGroup.value.name || null,
-      cost: this.updateFormGroup.value.cost || null,
     });
   }
 }
 
-export interface UpdateAdjustData {
+export interface UpdateMeasureData {
   id: string | null;
   name: string | null;
-  cost: number | null;
 }
 
 interface UpdateFormGroupFields {
   id: FormControl<string | null>;
   name: FormControl<string | null>;
-  cost: FormControl<number | null>;
 }

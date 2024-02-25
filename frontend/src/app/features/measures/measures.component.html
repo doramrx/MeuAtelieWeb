@@ -27,7 +27,13 @@
         <p>{{ measure.isActive ? "Ativo" : "Inativo" }}</p>
       </div>
       <div>
-        <button type="button">Editar</button>
+        <app-button
+          [buttonText]="'Editar'"
+          (onClick)="showUpdateMeasureDialog(measure.id)"
+          [type]="'button'"
+          [buttonClass]="'blue-button'"
+          [disabled]="!measure.isActive"
+        />
         <button type="button">Inativar</button>
       </div>
     </li>
@@ -45,6 +51,14 @@
   [isDialogVisible]="isModalVisible('ADD')"
   (onDialogVisibilityChange)="closeModal()"
   (onSaveMeasure)="saveMeasure($event)"
+/>
+
+<app-update-measure-dialog
+  [measureId]="measureId"
+  [isDialogVisible]="isModalVisible('UPDATE')"
+  (onDialogVisibilityChange)="closeModal()"
+  (onUpdateMeasure)="updateMeasure($event)"
+  (onFetchMeasureError)="showToast($event)"
 />
 
 <p-toast />

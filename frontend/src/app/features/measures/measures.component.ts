@@ -2,7 +2,8 @@ import {
   MeasureService,
   MeasurePage,
   QueryParams,
-  SaveMeasureDTO
+  SaveMeasureDTO,
+  UpdateMeasureDTO
 } from '../../services/measure.service';
 
 import { CommonModule } from '@angular/common';
@@ -18,6 +19,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 
 import { AvailableFilters, FilterComponent } from './components/filter/filter.component';
 import { AddMeasureData, AddMeasureDialogComponent } from './components/add-measure-dialog/add-measure-dialog.component';
+import { UpdateMeasureData, UpdateMeasureDialogComponent } from './components/update-measure-dialog/update-measure-dialog.component';
 
 @Component({
   selector: 'app-measures',
@@ -29,7 +31,8 @@ import { AddMeasureData, AddMeasureDialogComponent } from './components/add-meas
     ToastModule,
     FilterComponent,
     ButtonComponent,
-    AddMeasureDialogComponent
+    AddMeasureDialogComponent,
+    UpdateMeasureDialogComponent
   ],
   providers: [MessageService],
   templateUrl: './measures.component.html',
@@ -44,6 +47,7 @@ export class MeasuresComponent implements OnInit {
   private _currentPage: number;
 
   public activeModal: AvailableModalsType | null;
+  public measureId?: string;
 
   constructor() {
     this._activeFilters = {
@@ -145,6 +149,45 @@ export class MeasuresComponent implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error(error);
+        this.showToast({
+          severity: 'error',
+          summary: 'Erro',
+          detail: error.error.details,
+        });
+      },
+    });
+  }
+
+  showUpdateMeasureDialog(id: string) {
+    this.activeModal = 'UPDATE';
+    this.measureId = id;
+  }
+
+  updateMeasure(measureData: UpdateMeasureData) {
+    if (!measureData.id) {
+      this.showToast({
+        severity: 'error',
+        summary: 'Erro',
+        detail: 'Não foi possível atualizar os dados da medida',
+      });
+      return;
+    }
+
+    const updateMeasure: UpdateMeasureDTO = {
+      name: measureData.name || '',
+    };
+
+    this.measureService.updateMeasure(measureData.id, updateMeasure).subscribe({
+      next: () => {
+        this.closeModal();
+        this.showToast({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Medida atualizada com sucesso',
+        });
+        this.fetchMeasures();
+      },
+      error: (error: HttpErrorResponse) => {
         this.showToast({
           severity: 'error',
           summary: 'Erro',
