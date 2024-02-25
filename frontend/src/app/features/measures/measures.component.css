@@ -1,0 +1,85 @@
+main {
+  padding: 20px;
+}
+
+main #empty-list-message {
+  margin-top: 25px;
+  color: var(--secondary-grey);
+  text-align: center;
+  font-style: italic;
+}
+
+main ul {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+main ul li {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--border-card-color-v1);
+  border-radius: 10px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+  padding: 14px 16px;
+  align-items: center;
+  gap: 6px;
+}
+
+main ul li div {
+  flex: 2;
+  display: flex;
+  gap: 8px;
+  font-weight: 500;
+}
+
+main ul li div p:last-child {
+  font-weight: 300;
+}
+
+main ul li div:last-child {
+  flex: 1;
+  margin-top: 5px;
+  display: flex;
+  gap: 12px;
+}
+
+main .paginator-container {
+  margin-top: 22px;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-pages button {
+  font-size: 1.5rem;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-icon {
+  width: 16px;
+  height: 16px;
+}
+
+@media screen and (min-width: 570px) {
+
+  main {
+    margin-left: 250px;
+    padding: 40px 30px;
+  }
+}
+
+@media screen and (min-width: 900px) {
+
+  main ul li {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  main ul li div:not(:last-child) {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  main ul li div:last-child {
+    justify-content: end;
+  }
+}

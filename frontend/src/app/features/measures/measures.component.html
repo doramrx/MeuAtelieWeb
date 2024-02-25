@@ -1,1 +1,30 @@
 <app-header [selectedMenuOption]="'MEASURES'"></app-header>
+
+<main>
+  <p id="empty-list-message" *ngIf="!existMeasures()">
+    Nenhuma medida foi encontrada.
+  </p>
+  <ul *ngIf="existMeasures()">
+    <li *ngFor="let measure of getMeasures()">
+      <div>
+        <p>Nome:</p>
+        <p>{{ measure.name }}</p>
+      </div>
+      <div>
+        <p>Status:</p>
+        <p>{{ measure.isActive ? "Ativo" : "Inativo" }}</p>
+      </div>
+      <div>
+        <button type="button">Editar</button>
+        <button type="button">Inativar</button>
+      </div>
+    </li>
+  </ul>
+  <div class="paginator-container">
+    <p-paginator
+      (onPageChange)="onPageChange($event)"
+      [rows]="getPageSize()"
+      [totalRecords]="getTotalRecords()"
+    ></p-paginator>
+  </div>
+</main>
