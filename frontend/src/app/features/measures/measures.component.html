@@ -6,6 +6,13 @@
 />
 
 <main>
+  <app-button
+    [buttonClass]="'primary-button'"
+    [className]="'add-button'"
+    [buttonText]="'ADICIONAR MEDIDA'"
+    (onClick)="showAddMeasureDialog()"
+    [type]="'button'"
+  />
   <p id="empty-list-message" *ngIf="!existMeasures()">
     Nenhuma medida foi encontrada.
   </p>
@@ -33,3 +40,11 @@
     ></p-paginator>
   </div>
 </main>
+
+<app-add-measure-dialog
+  [isDialogVisible]="isModalVisible('ADD')"
+  (onDialogVisibilityChange)="closeModal()"
+  (onSaveMeasure)="saveMeasure($event)"
+/>
+
+<p-toast />

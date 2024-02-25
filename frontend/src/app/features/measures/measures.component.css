@@ -1,5 +1,27 @@
+:host ::ng-deep .p-inputtext {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--input-color-v1);
+  outline: none;
+  box-shadow: none;
+  font-size: 1.3rem;
+}
+
+.form-button {
+  width: 100px;
+  margin: 0 auto;
+}
+
 main {
   padding: 20px;
+}
+
+main > .add-button {
+  width: 190px;
+  margin-left: auto;
 }
 
 main #empty-list-message {
@@ -57,6 +79,37 @@ main .paginator-container {
 :host ::ng-deep .p-paginator .p-paginator-icon {
   width: 16px;
   height: 16px;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-message-icon {
+  margin-left: 6px;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-message-text .p-toast-summary {
+  font-size: 1.45rem;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-message-text .p-toast-detail {
+  font-size: 1.3rem;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-icon-close {
+  align-self: flex-start;
+  margin-top: 2px;
+  margin-right: 8px;
+}
+
+:host ::ng-deep .p-toast .p-toast-message-content .p-toast-icon-close svg {
+  width: 14px;
+  height: 14px;
 }
 
 @media screen and (min-width: 570px) {
