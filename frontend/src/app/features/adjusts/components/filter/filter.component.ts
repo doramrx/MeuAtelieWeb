@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
+
 import { InputMaskModule } from 'primeng/inputmask';
+import { RadioButtonModule } from 'primeng/radiobutton';
+
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-filter',

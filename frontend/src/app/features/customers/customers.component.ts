@@ -1,31 +1,24 @@
 import {
+  CustomerService,
   CustomerPage,
   QueryParams,
   SaveCustomerDTO,
   UpdateCustomerDTO,
 } from './../../services/customer.service';
+
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
-import {
-  FormsModule, ReactiveFormsModule
-} from '@angular/forms';
 
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { InputMaskModule } from 'primeng/inputmask';
-import { ButtonModule } from 'primeng/button';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
-import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
 import { Message, MessageService } from 'primeng/api';
 
 import { HeaderComponent } from '../../shared/components/header/header.component';
-import { AvailableFilters, FilterComponent } from './components/filter/filter.component';
-import { CustomerService } from '../../services/customer.service';
 import { PhonePipe } from '../../shared/pipes/phone.pipe';
-
-import { InputComponent } from '../../shared/components/input/input.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+
+import { AvailableFilters, FilterComponent } from './components/filter/filter.component';
 import { AddCustomerData, AddCustomerDialogComponent } from './components/add-customer-dialog/add-customer-dialog.component';
 import { UpdateCustomerData, UpdateCustomerDialogComponent } from './components/update-customer-dialog/update-customer-dialog.component';
 import { InactivateCustomerDialogComponent } from './components/inactivate-customer-dialog/inactivate-customer-dialog.component';
@@ -37,16 +30,9 @@ import { InactivateCustomerDialogComponent } from './components/inactivate-custo
     CommonModule,
     HeaderComponent,
     FilterComponent,
-    ReactiveFormsModule,
-    RadioButtonModule,
-    FormsModule,
-    InputMaskModule,
-    ButtonModule,
     PaginatorModule,
     PhonePipe,
-    DialogModule,
     ToastModule,
-    InputComponent,
     ButtonComponent,
     AddCustomerDialogComponent,
     UpdateCustomerDialogComponent,
@@ -82,18 +68,8 @@ export class CustomersComponent implements OnInit {
     this.fetchCustomers();
   }
 
-  getTotalRecords() {
-    if (this._customerPage) {
-      return this._customerPage.totalElements;
-    }
-    return 0;
-  }
-
-  getPageSize() {
-    if (this._customerPage) {
-      return this._customerPage.pageable.pageSize;
-    }
-    return 0;
+  existCustomers() {
+    return this._customerPage && this._customerPage.content.length > 0;
   }
 
   getCustomers() {
@@ -108,27 +84,64 @@ export class CustomersComponent implements OnInit {
     this.fetchCustomers();
   }
 
+  getPageSize() {
+    if (this._customerPage) {
+      return this._customerPage.pageable.pageSize;
+    }
+    return 0;
+  }
+
+  getTotalRecords() {
+    if (this._customerPage) {
+      return this._customerPage.totalElements;
+    }
+    return 0;
+  }
+
+  showToast(message: Message) {
+    this.messageService.add(message);
+  }
+
   applyFilters(applyedFilter: AvailableFilters) {
     this._activeFilters = applyedFilter;
     this.fetchCustomers();
   }
 
+  private fetchCustomers() {
+    const params: QueryParams = {
+      page: this._currentPage,
+      name: this._activeFilters.name,
+      email: this._activeFilters.email,
+      phone: this._activeFilters.phone,
+      isActive: this._activeFilters.status,
+    };
+
+    this.customerService.findAll(params).subscribe({
+      next: (customerPage) => {
+        this._customerPage = customerPage;
+      },
+      error: (error: HttpErrorResponse) => {
+        this.showToast({
+          severity: 'error',
+          summary: 'Erro',
+          detail: error.error.details,
+        });
+      },
+    });
+  }
+
+  isModalVisible(type: AvailableModalsType) {
+    return this.activeModal !== null && this.activeModal === type
+      ? true
+      : false;
+  }
+
+  closeModal() {
+    this.activeModal = null;
+  }
+
   showAddCustomerDialog() {
     this.activeModal = 'ADD';
-  }
-
-  showUpdateCustomerDialog(id: string) {
-    this.activeModal = 'UPDATE';
-    this.customerId = id;
-  }
-
-  showDeleteCustomerDialog(id: string) {
-    this.activeModal = 'DELETE';
-    this.customerId = id;
-  }
-
-  showToast(message: Message) {
-    this.messageService.add(message);
   }
 
   saveCustomer(customerData: AddCustomerData) {
@@ -157,6 +170,11 @@ export class CustomersComponent implements OnInit {
         });
       },
     });
+  }
+
+  showUpdateCustomerDialog(id: string) {
+    this.activeModal = 'UPDATE';
+    this.customerId = id;
   }
 
   updateCustomer(customerData: UpdateCustomerData) {
@@ -196,41 +214,9 @@ export class CustomersComponent implements OnInit {
       });
   }
 
-  isModalVisible(type: AvailableModalsType) {
-    return this.activeModal !== null && this.activeModal === type
-      ? true
-      : false;
-  }
-
-  closeModal() {
-    this.activeModal = null;
-  }
-
-  existCustomers() {
-    return this._customerPage && this._customerPage.content.length > 0;
-  }
-
-  private fetchCustomers() {
-    const params: QueryParams = {
-      page: this._currentPage,
-      name: this._activeFilters.name,
-      email: this._activeFilters.email,
-      phone: this._activeFilters.phone,
-      isActive: this._activeFilters.status,
-    };
-
-    this.customerService.findAll(params).subscribe({
-      next: (customerPage) => {
-        this._customerPage = customerPage;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.showToast({
-          severity: 'error',
-          summary: 'Erro',
-          detail: error.error.details,
-        });
-      },
-    });
+  showDeleteCustomerDialog(id: string) {
+    this.activeModal = 'DELETE';
+    this.customerId = id;
   }
 
   deleteCustomer() {
@@ -264,7 +250,6 @@ export class CustomersComponent implements OnInit {
         },
       });
   }
-
 }
 
 enum AvailableModals {

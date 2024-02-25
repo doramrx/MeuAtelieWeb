@@ -1,8 +1,10 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+
 import { InputMaskModule } from 'primeng/inputmask';
 import { RadioButtonModule } from 'primeng/radiobutton';
+
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { normalizePhone } from '../../../../shared/utils/normalize-phone';
 
