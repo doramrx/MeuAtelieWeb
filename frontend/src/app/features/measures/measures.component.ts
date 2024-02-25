@@ -12,6 +12,8 @@ import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 
 import { HeaderComponent } from '../../shared/components/header/header.component';
 
+import { AvailableFilters, FilterComponent } from './components/filter/filter.component';
+
 @Component({
   selector: 'app-measures',
   standalone: true,
@@ -19,6 +21,7 @@ import { HeaderComponent } from '../../shared/components/header/header.component
     CommonModule,
     HeaderComponent,
     PaginatorModule,
+    FilterComponent,
   ],
   templateUrl: './measures.component.html',
   styleUrl: './measures.component.css'
@@ -26,10 +29,15 @@ import { HeaderComponent } from '../../shared/components/header/header.component
 export class MeasuresComponent implements OnInit {
   private measureService: MeasureService = inject(MeasureService);
 
+  private _activeFilters: AvailableFilters;
   private _measurePage?: MeasurePage
   private _currentPage: number;
 
   constructor() {
+    this._activeFilters = {
+      name: null,
+      status: null
+    };
     this._currentPage = 0;
   }
 
@@ -67,11 +75,16 @@ export class MeasuresComponent implements OnInit {
     return 0;
   }
 
+  applyFilters(applyedFilter: AvailableFilters) {
+    this._activeFilters = applyedFilter;
+    this.fetchMeasures();
+  }
+
   private fetchMeasures() {
     const params: QueryParams = {
       page: this._currentPage,
-      name: null,
-      isActive: null,
+      name: this._activeFilters.name,
+      isActive: this._activeFilters.status,
     };
 
     this.measureService.findAll(params).subscribe({

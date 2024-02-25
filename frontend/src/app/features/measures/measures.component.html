@@ -1,5 +1,10 @@
 <app-header [selectedMenuOption]="'MEASURES'"></app-header>
 
+<app-filter
+  (onApplyFiltersEvent)="applyFilters($event)"
+  (onCleanFiltersEvent)="applyFilters($event)"
+/>
+
 <main>
   <p id="empty-list-message" *ngIf="!existMeasures()">
     Nenhuma medida foi encontrada.
