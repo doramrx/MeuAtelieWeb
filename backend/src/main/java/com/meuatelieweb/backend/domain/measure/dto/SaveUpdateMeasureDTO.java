@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class SaveUpdateMeasureDTO {
-    @NotBlank(message = "The given name cannot be empty")
+    @NotBlank(message = "{shared.error.emptyName}")
     private String name;
 }

@@ -1,27 +1,16 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  SimpleChanges,
-  inject,
-} from '@angular/core';
+import { CustomerService } from '../../../../services/customer.service';
+
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, OnInit, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+
 import { DialogModule } from 'primeng/dialog';
+import { Message } from 'primeng/api';
+import { InputMaskModule } from 'primeng/inputmask';
+
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import {
-  FormControl,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { InputMaskModule } from 'primeng/inputmask';
 import { normalizePhone } from '../../../../shared/utils/normalize-phone';
-import { CustomerService } from '../../../../services/customer.service';
-import { HttpErrorResponse } from '@angular/common/http';
-import { Message } from 'primeng/api';
 
 @Component({
   selector: 'app-update-customer-dialog',

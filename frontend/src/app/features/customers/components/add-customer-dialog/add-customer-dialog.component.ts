@@ -6,11 +6,10 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 
-import { normalizePhone } from '../../../../shared/utils/normalize-phone';
-
 import { DialogModule } from 'primeng/dialog';
 import { InputMaskModule } from 'primeng/inputmask';
 
+import { normalizePhone } from '../../../../shared/utils/normalize-phone';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 

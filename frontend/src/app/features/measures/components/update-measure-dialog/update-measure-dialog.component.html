@@ -1,0 +1,26 @@
+<p-dialog
+  header="Editar Medida"
+  [visible]="isDialogVisible"
+  (visibleChange)="onCloseModal()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form class="flex flex-column gap-3" [formGroup]="updateFormGroup">
+    <app-input
+      [inputId]="'edit-measure-dialog-name'"
+      [inputType]="'text'"
+      [inputFormControlName]="'name'"
+      [formGroup]="updateFormGroup"
+      [inputLabel]="'Nome'"
+    />
+    <app-button
+      [buttonClass]="'primary-button'"
+      [classList]="'form-button'"
+      [buttonText]="'Salvar'"
+      (onClick)="onUpdateMeasure()"
+      [type]="'submit'"
+      [disabled]="updateFormGroup.invalid"
+    />
+  </form>
+</p-dialog>

@@ -1,6 +1,5 @@
 package com.meuatelieweb.backend.domain.measure;
 
-import com.meuatelieweb.backend.domain.adjust.Adjust;
 import com.meuatelieweb.backend.domain.measure.dto.SaveUpdateMeasureDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
@@ -9,18 +8,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-import static com.meuatelieweb.backend.util.AdjustCreator.createValidAdjust;
 import static com.meuatelieweb.backend.util.MeasureCreator.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -36,6 +32,9 @@ class MeasureServiceTest {
 
     @Mock
     private MeasureRepository measureRepositoryMock;
+
+    @Mock
+    private MessageSource messageSourceMock;
 
     @DisplayName("Test findAll method")
     @Nested
@@ -106,11 +105,15 @@ class MeasureServiceTest {
         @Test
         @DisplayName("findById throws EntityNotFoundException when measure is not found")
         void findById_ThrowsEntityNotFoundException_WhenMeasureIsNotFound() {
+            String messageKey = "measure.error.doesNotExist";
+
             BDDMockito.when(measureRepositoryMock.findById(any(UUID.class)))
                     .thenReturn(Optional.empty());
 
             assertThrows(EntityNotFoundException.class,
                     () -> measureService.findById(UUID.randomUUID()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
@@ -151,20 +154,28 @@ class MeasureServiceTest {
         @Test
         @DisplayName("addMeasure throws IllegalArgumentException when measure name is null")
         void addMeasure_ThrowsIllegalArgumentException_WhenMeasureNameIsNull() {
+            String messageKey = "shared.error.emptyName";
+
             SaveUpdateMeasureDTO saveUpdateMeasureDTO = createValidSaveUpdateMeasureDTO();
             saveUpdateMeasureDTO.setName(null);
 
             assertThrows(IllegalArgumentException.class,
                     () -> measureService.addMeasure(saveUpdateMeasureDTO));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("addMeasure throws DuplicateKeyException when measure name already exists")
         void addMeasure_ThrowsDuplicateKeyException_WhenMeasureNameAlreadyExists() {
+            String messageKey = "measure.error.nameAlreadyInUse";
+
             BDDMockito.when(measureRepositoryMock.existsByName(anyString())).thenReturn(true);
 
             assertThrows(DuplicateKeyException.class,
                     () -> measureService.addMeasure(createValidSaveUpdateMeasureDTO()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
     }
 
@@ -228,6 +239,7 @@ class MeasureServiceTest {
         @Test
         @DisplayName("updateMeasure throws DuplicateKeyException when measure name already exists")
         void updateMeasure_ThrowsDuplicateKeyException_WhenMeasureNameAlreadyExists() {
+            String messageKey = "measure.error.nameAlreadyInUse";
 
             this.mockRepositoryFindByIdAndIsActiveTrue(createValidMeasure());
 
@@ -236,6 +248,8 @@ class MeasureServiceTest {
 
             assertThrows(DuplicateKeyException.class,
                     () -> measureService.updateMeasure(UUID.randomUUID(), createValidSaveUpdateMeasureDTO()));
+
+           verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
     }
 
@@ -260,11 +274,14 @@ class MeasureServiceTest {
         @Test
         @DisplayName("deleteMeasure throws EntityNotFoundException when measure does not exist or is already inactive")
         void deleteMeasure_ThrowsEntityNotFoundException_WhenMeasureDoesNotExistOrIsAlreadyInactive() {
+            String messageKey = "measure.error.measureDoesNotExistOrIsInactive";
 
             this.mockRepositoryExistsByIdAndIsActiveTrue(false);
 
             assertThrows(EntityNotFoundException.class,
                     () -> measureService.deleteMeasure(UUID.randomUUID()));
+
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
@@ -296,28 +313,28 @@ class MeasureServiceTest {
         @Test
         @DisplayName("getMeasures throws EntityNotFoundException when measures are not found")
         void getMeasures_ThrowsEntityNotFoundException_WhenMeasuresAreNotFound() {
-            String expectedMessage = "The given measure does not exist or is already inactive";
+            String messageKey = "measure.error.measureDoesNotExistOrIsInactive";
             this.mockRepositoryFindByIdInAndIsActiveTrue(null);
 
-            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+            assertThrows(EntityNotFoundException.class,
                     () -> measureService.getMeasures(Set.of(UUID.randomUUID())));
 
-            assertEquals(expectedMessage, exception.getMessage());
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
         @DisplayName("getMeasures throws IllegalArgumentException when some of the given id measures are invalid")
         void getMeasures_ThrowsIllegalArgumentException_WhenSomeOfTheGivenIdMeasuresAreInvalid() {
-            String expectedMessage = "Some of the given id measures are invalid";
+            String messageKey = "measure.error.invalidIds";
 
             Set<Measure> measures = Set.of(createValidMeasure());
 
             this.mockRepositoryFindByIdInAndIsActiveTrue(measures);
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            assertThrows(IllegalArgumentException.class,
                     () -> measureService.getMeasures(Set.of(UUID.randomUUID(), UUID.randomUUID())));
 
-            assertEquals(expectedMessage, exception.getMessage());
+            verify(messageSourceMock, times(1)).getMessage(messageKey, null, Locale.getDefault());
         }
 
         @Test
@@ -333,5 +350,11 @@ class MeasureServiceTest {
             verify(measuresSpy, times(1)).size();
             verify(measureRepositoryMock, times(1)).findByIdInAndIsActiveTrue(anySet());
         }
+    }
+
+    private void mockGetMessage(String key) {
+        when(messageSourceMock.getMessage(
+                eq(key), eq(null), eq(Locale.getDefault()))
+        ).thenReturn("");
     }
 }

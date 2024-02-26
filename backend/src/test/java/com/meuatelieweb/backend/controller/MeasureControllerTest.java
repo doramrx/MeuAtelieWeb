@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -56,6 +57,9 @@ class MeasureControllerTest {
 
     @MockBean
     private MeasureService measureServiceMock;
+
+    @MockBean
+    private MessageSource messageSourceMock;
 
     private void mockConverterToMeasureDTO(Measure measure, MeasureDTO measureDTO) {
         BDDMockito.when(measureConverterMock.toMeasureDTO(measure))
@@ -243,7 +247,7 @@ class MeasureControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("name")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given name cannot be empty"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{shared.error.emptyName}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }
@@ -312,7 +316,7 @@ class MeasureControllerTest {
                     .andExpectAll(
                             MockMvcResultMatchers.status().isBadRequest(),
                             MockMvcResultMatchers.jsonPath("$.invalidFields[0].field", CoreMatchers.is("name")),
-                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("The given name cannot be empty"))
+                            MockMvcResultMatchers.jsonPath("$.invalidFields[0].message", CoreMatchers.is("{shared.error.emptyName}"))
                     )
                     .andDo(MockMvcResultHandlers.print());
         }

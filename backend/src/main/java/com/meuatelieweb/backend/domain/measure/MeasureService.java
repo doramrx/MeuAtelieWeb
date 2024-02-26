@@ -5,6 +5,7 @@ import com.meuatelieweb.backend.domain.measure.dto.SaveUpdateMeasureDTO;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,6 +23,8 @@ public class MeasureService {
     @Autowired
     private MeasureRepository repository;
 
+    @Autowired
+    private MessageSource messageSource;
 
     public Page<Measure> findAll(Pageable pageable, String name, Boolean isActive) {
         Specification<Measure> specification = MeasureSpecification.applyFilter(name, isActive);
@@ -30,7 +34,9 @@ public class MeasureService {
 
     public Measure findById(UUID id) {
         return repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("The given measure does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        this.getMessage("measure.error.doesNotExist")
+                ));
     }
 
     @Transactional
@@ -48,11 +54,15 @@ public class MeasureService {
 
     private void validateSavingMeasureDTO(SaveUpdateMeasureDTO saveMeasureDTO) {
         if (saveMeasureDTO.getName() == null) {
-            throw new IllegalArgumentException("The given name cannot be empty");
+            throw new IllegalArgumentException(
+                    this.getMessage("shared.error.emptyName")
+            );
         }
 
         if (repository.existsByName(saveMeasureDTO.getName())) {
-            throw new DuplicateKeyException("The given measure name already exists");
+            throw new DuplicateKeyException(
+                    this.getMessage("measure.error.nameAlreadyInUse")
+            );
         }
     }
 
@@ -64,11 +74,15 @@ public class MeasureService {
             SaveUpdateMeasureDTO updateMeasureDTO
     ) {
         Measure measure = repository.findByIdAndIsActiveTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("The given measure does not exist or is already inactive"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        this.getMessage("measure.error.measureDoesNotExistOrIsInactive")
+                ));
 
         if (updateMeasureDTO.getName() != null) {
             if (repository.existsByNameAndIdNot(updateMeasureDTO.getName(), measure.getId())) {
-                throw new DuplicateKeyException("The given measure name is already being used");
+                throw new DuplicateKeyException(
+                        this.getMessage("measure.error.nameAlreadyInUse")
+                );
             }
             measure.setName(updateMeasureDTO.getName());
         }
@@ -78,19 +92,29 @@ public class MeasureService {
     @Transactional
     public void deleteMeasure(UUID id) {
         if (!repository.existsByIdAndIsActiveTrue(id)) {
-            throw new EntityNotFoundException("The given measure does not exist or is already inactive");
+            throw new EntityNotFoundException(
+                    this.getMessage("measure.error.measureDoesNotExistOrIsInactive")
+            );
         }
         repository.inactivateMeasureById(id);
     }
 
     public Set<Measure> getMeasures(@NonNull Set<UUID> measuresIds) {
         Set<Measure> measures = repository.findByIdInAndIsActiveTrue(measuresIds)
-                .orElseThrow(() -> new EntityNotFoundException("The given measure does not exist or is already inactive"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        this.getMessage("measure.error.measureDoesNotExistOrIsInactive")
+                ));
 
         if (measures.size() != measuresIds.size()) {
-            throw new IllegalArgumentException("Some of the given id measures are invalid");
+            throw new IllegalArgumentException(
+                    this.getMessage("measure.error.invalidIds")
+            );
         }
 
         return measures;
+    }
+
+    private String getMessage(String key) {
+        return messageSource.getMessage(key, null, Locale.getDefault());
     }
 }

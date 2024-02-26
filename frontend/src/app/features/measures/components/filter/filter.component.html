@@ -4,8 +4,7 @@
       Limpar
     </button>
     <label for="status">Status</label>
-
-    <div *ngFor="let status of customerStatus" class="field-checkbox">
+    <div *ngFor="let status of measureStatus" class="field-checkbox">
       <p-radioButton
         [inputId]="status.text"
         [value]="status.key"
@@ -23,27 +22,6 @@
         placeholder="Buscar"
         formControlName="name"
       />
-    </div>
-
-    <div class="form-input">
-      <label for="email">Email</label>
-      <input
-        pInputText
-        id="email"
-        type="email"
-        placeholder="Buscar"
-        formControlName="email"
-      />
-    </div>
-
-    <div>
-      <label for="phone">Telefone</label>
-      <p-inputMask
-        [inputId]="'phone'"
-        mask="(99) 9 9999-9999"
-        formControlName="phone"
-        placeholder="Buscar"
-      ></p-inputMask>
     </div>
 
     <app-button
