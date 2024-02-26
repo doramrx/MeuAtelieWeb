@@ -10,6 +10,7 @@
   --primary-red: #CD0505;
   --primary-grey: #C3C3C3;
   --secondary-grey: #888888;
+  --scrollbar-color: #ececec;
 }
 
 * {
@@ -25,6 +26,19 @@ html {
 
 body {
   font-size: 1.6rem;
+}
+
+body::-webkit-scrollbar {
+  width: 10px;
+}
+
+body::-webkit-scrollbar-track {
+  background: var(--white);
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-color);
+  border-radius: 20px;
 }
 
 a {
