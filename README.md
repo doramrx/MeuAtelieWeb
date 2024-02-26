@@ -46,12 +46,13 @@ A proposta dessa versão web é expandir o uso do sistema do dispositivo mobile 
 
 [Link do protótipo no Figma](https://www.figma.com/file/l0Q6gyK6yuIDq9pN06W836/MeuAtelieWeb?type=design&node-id=0%3A1&mode=design&t=P0ffH15TKVIp86d4-1)
 
-![lista](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/992bae59-37a9-4efb-a34b-468a37cc7b60)
-![filtrar](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/8026b38c-307b-4482-837c-e935aabd4fd8)
-![editar](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/618bedb2-6994-41b7-b203-2c636c3c3848)
-![deletar](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/a42507bb-2ec7-4b6a-b6b1-f6d538717278)
-![adicionar](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/bec7cc22-974d-4453-8674-072d3351c823)
-![sucesso](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/2fc66626-1090-4728-b22f-5f44138a9f39)
+![lista](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/67439126-e1e1-463b-af41-39e7bbb94bf6)
+![filtrar](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/e6ef9ae6-13ae-41c4-a13f-65fdf87c023e)
+![adicionar](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/08f8a73c-abbb-40d8-9947-1f19df3a9619)
+![sucesso](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/2ce3f6e3-99c1-4b4c-a7b9-0804ed99077d)
+![editar](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/cbf849ff-8d59-45a2-afa9-6a9b53281446)
+![deletar](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/c3a27626-19eb-4f91-8fe4-74a42b6fc6aa)
+![inativo](https://github.com/doramrx/MeuAtelieWeb/assets/87739902/5ad6b8dd-338a-4b75-875e-fb8889def621)
 
 <a name="Modelagem"></a>
 ### :game_die: Modelagem
