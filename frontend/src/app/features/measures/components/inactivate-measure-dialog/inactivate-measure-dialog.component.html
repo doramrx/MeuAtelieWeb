@@ -1,0 +1,25 @@
+<p-dialog
+  id="delete-dialog"
+  header="Inativar Medida"
+  [visible]="isDialogVisible"
+  (visibleChange)="onCloseModal()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <p>Você realmente deseja inativar esta medida?</p>
+  <div>
+    <app-button
+      [buttonText]="'Não'"
+      (onClick)="onCloseModal()"
+      [type]="'button'"
+      [buttonClass]="'blue-button'"
+    />
+    <app-button
+      [buttonText]="'Sim'"
+      (onClick)="onDeleteConfirmation()"
+      [type]="'button'"
+      [buttonClass]="'red-button'"
+    />
+  </div>
+</p-dialog>

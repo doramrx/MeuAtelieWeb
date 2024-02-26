@@ -34,7 +34,13 @@
           [buttonClass]="'blue-button'"
           [disabled]="!measure.isActive"
         />
-        <button type="button">Inativar</button>
+        <app-button
+          [buttonText]="'Inativar'"
+          (onClick)="showDeleteMeasureDialog(measure.id)"
+          [type]="'button'"
+          [buttonClass]="'red-button'"
+          [disabled]="!measure.isActive"
+        />
       </div>
     </li>
   </ul>
@@ -59,6 +65,12 @@
   (onDialogVisibilityChange)="closeModal()"
   (onUpdateMeasure)="updateMeasure($event)"
   (onFetchMeasureError)="showToast($event)"
+/>
+
+<app-inactivate-measure-dialog
+  [isDialogVisible]="isModalVisible('DELETE')"
+  (onDialogVisibilityChange)="closeModal()"
+  (onDeleteConfirmationEvent)="deleteMeasure()"
 />
 
 <p-toast />

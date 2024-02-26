@@ -20,6 +20,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { AvailableFilters, FilterComponent } from './components/filter/filter.component';
 import { AddMeasureData, AddMeasureDialogComponent } from './components/add-measure-dialog/add-measure-dialog.component';
 import { UpdateMeasureData, UpdateMeasureDialogComponent } from './components/update-measure-dialog/update-measure-dialog.component';
+import { InactivateMeasureDialogComponent } from './components/inactivate-measure-dialog/inactivate-measure-dialog.component';
 
 @Component({
   selector: 'app-measures',
@@ -32,7 +33,8 @@ import { UpdateMeasureData, UpdateMeasureDialogComponent } from './components/up
     FilterComponent,
     ButtonComponent,
     AddMeasureDialogComponent,
-    UpdateMeasureDialogComponent
+    UpdateMeasureDialogComponent,
+    InactivateMeasureDialogComponent
   ],
   providers: [MessageService],
   templateUrl: './measures.component.html',
@@ -197,6 +199,42 @@ export class MeasuresComponent implements OnInit {
     });
   }
 
+  showDeleteMeasureDialog(id: string) {
+    this.activeModal = 'DELETE';
+    this.measureId = id;
+  }
+
+  deleteMeasure() {
+    if (!this.measureId) {
+      this.showToast({
+        severity: 'error',
+        summary: 'Erro',
+        detail: 'Não foi possível inativar a medida',
+      });
+      return;
+    }
+
+    this.measureService
+      .deleteMeasure(this.measureId)
+      .subscribe({
+        next: () => {
+          this.closeModal();
+          this.showToast({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Medida inativada com sucesso',
+          });
+          this.fetchMeasures();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.showToast({
+            severity: 'error',
+            summary: 'Erro',
+            detail: error.error.details,
+          });
+        },
+      });
+  }
 }
 
 enum AvailableModals {
