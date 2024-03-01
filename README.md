@@ -31,6 +31,7 @@ A proposta dessa versão web é expandir o uso do sistema do dispositivo mobile 
 * [PostgreSQL](https://www.postgresql.org/)
 * [Docker](https://www.docker.com/)
 * [Docker compose](https://docs.docker.com/compose/)
+* [Google Cloud Platform (GCP)](https://cloud.google.com/) 
 
 ### 🖥️ Frontend
 * [Typescript](https://www.typescriptlang.org/)
